@@ -102,3 +102,9 @@ body {
     font-weight: normal;
     margin: 0 5px;
 }
+
+/* Couleur personnalisée pour le type INT (Violet) */
+.bg-int {
+    background-color: #6f42c1 !important; /* Code couleur violet */
+    color: white !important;
+}

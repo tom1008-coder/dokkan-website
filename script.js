@@ -149,11 +149,16 @@ if (searchInput) {
 function getTypeColor(type) {
     if (!type) return 'bg-secondary';
     const t = type.toUpperCase();
+    
     if (t === 'PUI' || t === 'STR') return 'bg-danger';
     if (t === 'AGI' || t === 'AGL') return 'bg-primary';
     if (t === 'TEQ' || t === 'TEC') return 'bg-success';
-    if (t === 'INT') return 'bg-info text-dark';       
+    
+    // C'est ici qu'on utilise ta nouvelle classe CSS violette
+    if (t === 'INT') return 'bg-int';       
+    
     if (t === 'PHY' || t === 'END') return 'bg-warning text-dark';
+    
     return 'bg-secondary';
 }
 

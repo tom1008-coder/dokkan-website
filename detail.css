@@ -1,4 +1,4 @@
-/* --- CONFIGURATION GÉNÉRALE --- */
+    /* --- CONFIGURATION GÉNÉRALE --- */
 body { 
     background-color: #0d0e1b; 
     color: white; 
@@ -208,3 +208,8 @@ body {
     color: white !important;
 }
 
+/* Couleur personnalisée pour le type INT (Violet) */
+.bg-int {
+    background-color: #6f42c1 !important; /* Code couleur violet */
+    color: white !important;
+}
