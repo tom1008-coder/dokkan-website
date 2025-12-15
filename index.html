@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokkan Battle Dex</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="index_style.css">
+
+    </head>
+<body>
+
+    <div class="container mt-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-warning">DOKKAN BATTLE DEX</h1>
+            <p class="text-secondary">Base de données des personnages</p>
+        </div>
+        
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-6">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-warning border-0">🔍</span>
+                    <input type="text" 
+                           id="search-input" 
+                           class="form-control border-0" 
+                           placeholder="Chercher un perso (ex: Goku, Vegeta)...">
+                </div>
+            </div>
+        </div>
+
+        <div class="dokkan-header">
+            Les dernières cartes <span class="separator">/</span> 
+            éveils sorties
+        </div>
+
+        <div id="card-container" class="row">
+            <p class="text-center text-secondary">Chargement des données...</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <script src="config.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

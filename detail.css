@@ -1,0 +1,210 @@
+/* --- CONFIGURATION GÉNÉRALE --- */
+body { 
+    background-color: #0d0e1b; 
+    color: white; 
+    font-family: 'Segoe UI', sans-serif; 
+}
+
+/* --- BOÎTES DE STATISTIQUES --- */
+.stat-box { 
+    background: #161825; 
+    padding: 15px; 
+    border-radius: 10px; 
+    margin-bottom: 10px; 
+    border: 1px solid #2d3047; 
+}
+.stat-value { font-size: 1.5rem; font-weight: bold; }
+
+/* --- TITRES DE SECTIONS --- */
+.section-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+/* --- BOUTONS EXTERNES (Wiki/Youtube) --- */
+.btn-dokkan {
+    background-color: #2d3047; 
+    color: #ffcc00; 
+    border: 1px solid #ffcc00;
+    font-weight: bold;
+    padding: 6px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+}
+.btn-dokkan:hover {
+    background-color: #ffcc00; 
+    color: #000; 
+    transform: translateY(-2px); 
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+}
+.icon-link::before { content: "🔗 "; margin-right: 5px; }
+.icon-yt::before { content: "▶ "; margin-right: 5px; }
+
+/* --- SWITCH BOOTSTRAP --- */
+.form-check-input:checked {
+    background-color: #ff6600;
+    border-color: #ff6600;
+}
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 102, 0, 0.25);
+    border-color: #ffaa00;
+}
+
+/* --- BADGES LIENS & CATÉGORIES --- */
+
+/* Liens (Orange Style Dokkan) */
+.badge-link {
+    /* Dégradé pour effet de volume (au lieu d'une couleur plate) */
+    background: linear-gradient(180deg, #ff9900 0%, #ff5500 100%);
+    color: white;
+    
+    /* Bordure subtile pour définir la forme */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    padding: 6px 12px;
+    border-radius: 50px; /* Forme de pilule parfaite */
+    font-size: 0.8rem;
+    font-weight: 700; /* Plus gras */
+    text-transform: uppercase; /* Plus impactant */
+    letter-spacing: 0.5px;
+    display: inline-block;
+    cursor: help;
+    
+    /* Ombres pour la profondeur */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); /* Lisibilité du texte */
+    
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet de survol */
+.badge-link:hover {
+    transform: translateY(-2px) scale(1.05);
+    filter: brightness(1.2); /* Devient plus lumineux */
+    box-shadow: 0 5px 15px rgba(255, 102, 0, 0.4);
+}
+
+/* --- LE STYLE NIVEAU 10 (Quand le switch est activé) --- */
+/* C'est ici que la magie opère pour l'effet "MAX" */
+.badge-link.border-warning {
+    /* Bordure Dorée */
+    border: 2px solid #ffd700 !important;
+    
+    /* Fond un peu plus riche */
+    background: linear-gradient(180deg, #ffaa00 0%, #ff7700 100%);
+    
+    /* LUEUR EXTERNE ET INTERNE (Glow) */
+    box-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.6), /* Lueur externe dorée */
+        inset 0 0 5px rgba(255, 215, 0, 0.5), /* Lueur interne */
+        0 4px 6px rgba(0,0,0,0.3); /* Ombre portée */
+        
+    color: #fff;
+    text-shadow: 0 0 5px rgba(255, 165, 0, 0.8);
+}
+
+/* Catégories (Bleu Tech) */
+.badge-cat {
+    background: linear-gradient(180deg, #0056b3 0%, #003d80 100%);
+    color: #0dcaf0; 
+    border: 1px solid rgba(13, 202, 240, 0.3);
+    padding: 6px 12px;
+    border-radius: 4px; /* Plus carré que les liens */
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.8);
+    transition: all 0.2s;
+}
+
+.badge-cat:hover {
+    background: linear-gradient(180deg, #0069d9 0%, #004fa3 100%);
+    border-color: #0dcaf0;
+    box-shadow: 0 0 8px rgba(13, 202, 240, 0.4);
+    color: white;
+}
+
+/* --- TOOLTIP (INFOBULLE LIENS) --- */
+.link-container { position: relative; display: inline-block; }
+.link-tooltip {
+    visibility: hidden;
+    width: 200px; /* Largeur fixe pour éviter que ça dépasse */
+    background-color: rgba(15, 15, 20, 0.98);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 100;
+    bottom: 135%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 0.8rem;
+    border: 1px solid #ff6600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    pointer-events: none;
+}
+.link-tooltip::after {
+    content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px;
+    border-width: 6px; border-style: solid; border-color: #ff6600 transparent transparent transparent;
+}
+.link-container:hover .link-tooltip { visibility: visible; opacity: 1; bottom: 125%; }
+
+/* --- STYLE DES BOÎTES DE COMPÉTENCES --- */
+.skill-box {
+    background-color: rgba(0, 0, 0, 0.6); 
+    border-radius: 8px; 
+    padding: 15px; 
+    border-left: 5px solid #555; 
+    height: 100%; /* Force la même hauteur */
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center;
+}
+
+.border-blue-glow { border-left-color: #0dcaf0; background: linear-gradient(90deg, rgba(13, 202, 240, 0.15) 0%, rgba(0,0,0,0) 100%); }
+.border-red-glow { border-left-color: #dc3545; background: linear-gradient(90deg, rgba(220, 53, 69, 0.15) 0%, rgba(0,0,0,0) 100%); }
+.border-ultimate-glow { border-left-color: #ff5722; background: linear-gradient(90deg, rgba(255, 87, 34, 0.25) 0%, rgba(0,0,0,0) 100%); box-shadow: 0 0 15px rgba(255, 87, 34, 0.1); }
+.border-gold-glow { border-left-color: #ffc107; background: linear-gradient(90deg, rgba(255, 193, 7, 0.15) 0%, rgba(0,0,0,0) 100%); }
+
+/* Style Active Skill (Rose/Violet) - Même structure que les autres */
+.border-purple-glow {
+    border-left-color: #d63384 !important; 
+    background: linear-gradient(90deg, rgba(214, 51, 132, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+    box-shadow: 0 0 15px rgba(214, 51, 132, 0.1);
+}
+
+.badge-ki { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; margin-bottom: 8px; display: inline-block; color: #000; font-weight: bold; }
+
+/* --- FORMATAGE DOKKAN (Pour le Texte JS) --- */
+.dokkan-title { color: #ffaa00; font-weight: bold; font-size: 1.05rem; margin-top: 12px; margin-bottom: 4px; display: block; }
+.dokkan-text { color: #e0e0e0; line-height: 1.6; font-size: 0.95rem; }
+.dokkan-highlight { color: #ffcc00; font-weight: bold; }
+.stat-up { color: #00ff00; font-weight: bold; margin-left: 3px; }
+.badge-dokkan { background-color: #ffcc00; color: #000; border-radius: 12px; padding: 1px 7px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-left: 4px; vertical-align: middle; box-shadow: 0 0 5px rgba(255, 204, 0, 0.4); }
+
+/* FORCE LA COULEUR EN BLANC pour la condition d'Active Skill */
+#detail-active-cond {
+    color: white !important;
+}
+
+#same-name-title {
+    color: #ff4444 !important;
+    text-shadow: 0 0 8px rgba(255, 50, 50, 0.6);
+}
+
+#same-name-list span {
+    color: white !important;
+}
+

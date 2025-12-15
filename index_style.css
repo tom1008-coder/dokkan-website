@@ -1,0 +1,104 @@
+/* style.css */
+
+/* 1. L'AMBIANCE GÉNÉRALE (Fond sombre comme l'espace) */
+body {
+    background-color: #0d0e1b; /* Un noir bleuté très profond */
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}
+
+/* 2. LE CONTENEUR PRINCIPAL */
+.container {
+    max-width: 1200px;
+    padding-top: 20px;
+}
+
+/* 3. BARRE DE RECHERCHE (Style futuriste) */
+#search-input {
+    background-color: #1c1e2f; /* Plus clair que le fond */
+    border: 2px solid #2d3047;
+    color: white;
+    border-radius: 50px; /* Bords très arrondis */
+    padding: 15px 25px;
+}
+
+#search-input:focus {
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.4); /* Lueur bleue au focus */
+    outline: none;
+    border-color: #58a6ff;
+}
+
+/* 4. LES CARTES (Style "Ultra") */
+.dokkan-card {
+    background: linear-gradient(145deg, #161825, #12131e); /* Dégradé subtil */
+    border: 2px solid #2d3047; /* Bordure sombre par défaut */
+    border-radius: 16px; /* Coins bien arrondis comme sur ton image */
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* L'image dans la carte */
+.dokkan-card img {
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    filter: brightness(0.9); /* Légèrement sombre par défaut */
+}
+
+/* 5. EFFET DE SURVOL (HOVER) - C'est là que la magie opère */
+.dokkan-card:hover {
+    transform: translateY(-5px) scale(1.02); /* La carte flotte vers le haut */
+    border-color: #a259ff; /* Bordure violette néon */
+    box-shadow: 
+        0 0 10px rgba(162, 89, 255, 0.3), /* Halo interne */
+        0 0 20px rgba(162, 89, 255, 0.2); /* Halo externe */
+    z-index: 10;
+}
+
+.dokkan-card:hover img {
+    filter: brightness(1.2); /* L'image s'illumine */
+}
+
+/* 6. TYPOGRAPHIE ET BADGES */
+.dokkan-card h6 {
+    font-weight: 700;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+}
+
+/* On personnalise les badges Bootstrap pour qu'ils brillent */
+.badge {
+    box-shadow: 0 0 5px currentColor; /* Le badge brille de sa propre couleur */
+    padding: 6px 12px;
+    font-size: 0.8em;
+}
+
+/* Pour le texte "Chargement..." */
+.text-secondary {
+    color: #8b949e !important;
+}
+
+/* Style du titre "Header" */
+.dokkan-header {
+    font-family: sans-serif; /* Police simple et propre */
+    font-weight: 700;        /* Texte bien gras */
+    font-size: 1.2rem;       /* Taille du texte */
+    color: white;            /* Texte blanc */
+    text-transform: uppercase; /* Tout en majuscule automatiquement */
+    
+    /* La ligne bleue en dessous */
+    border-bottom: 4px solid #00aeef; 
+    
+    padding-bottom: 10px;    /* Espace entre texte et ligne */
+    margin-bottom: 20px;     /* Espace entre ligne et cartes */
+    letter-spacing: 0.5px;   /* Espace léger entre les lettres */
+}
+
+/* Pour griser les slashs "/" */
+.dokkan-header .text-muted {
+    color: #6c757d;
+    font-weight: normal;
+    margin: 0 5px;
+}

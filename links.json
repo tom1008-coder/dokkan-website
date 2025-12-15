@@ -1,0 +1,45 @@
+{
+    "Super Saiyan": {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT +15 %"
+    },
+    "Kamehameha": {
+        "lv1": "ATT +5 % lors d'une attaque spéciale",
+        "lv10": "ATT +10 % lors d'une attaque spéciale"
+    },
+    "Rugissement saiyan": {
+        "lv1": "ATT +25 %",
+        "lv10": "ATT +25 %, DÉF +10 %"
+    },
+    "Vitesse époustouflante": {
+        "lv1": "Ki +2",
+        "lv10": "Ki +2, DÉF +5 %"
+    },
+    "GT": {
+        "lv1": "Ki +2",
+        "lv10": "Ki +2, ATT et DÉF +10 %"
+    },
+    "Combat acharné": {
+        "lv1": "ATT +15 %",
+        "lv10": "ATT +20 %"
+    },
+    "Pouvoir légendaire": {
+        "lv1": "ATT +10 % lors d'une attaque spéciale",
+        "lv10": "ATT +15 % lors d'une attaque spéciale"
+    },
+     
+    "Paré au combat": {
+        "lv1": "Ki +2",
+        "lv10": "Ki +2, ATT et DÉF +5 %"
+    },
+
+    "Combat décisif": {
+        "lv1": "Ki +3",
+        "lv10": "Ki +3, ATT +7 %"
+    },
+
+    "Guerrier fusionné": {
+        "lv1": "Ki +2" ,
+        "lv10": "Ki +2, ATT et DÉF +5 %"
+    }
+}

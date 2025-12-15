@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails du Personnage</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="detail.css">
+
+    </head>
+<body>
+
+    <div class="container mt-5 mb-5">
+        <a href="index.html" class="btn btn-outline-light mb-4">← Retour à la liste</a>
+        
+        <div id="loading" class="text-center">Chargement...</div>
+
+        <div id="content" style="display: none;">
+            <div class="row align-items-start"> 
+                
+                <div class="col-md-5 mb-4">
+                    <div class="text-center">
+                        <img id="detail-img" src="" class="img-fluid rounded shadow-lg border border-secondary" style="width: 100%; max-width: 400px;" alt="Personnage">
+                    </div>
+                    
+                    <div id="transfo-area" class="mt-3 text-center d-none">
+                        <p class="text-warning mb-1 small fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">CHANGER DE FORME</p>
+                        <div class="btn-group shadow" role="group">
+                            <button type="button" id="btn-base" class="btn btn-sm btn-primary active" onclick="changerForme('base')">Base</button>
+                            <button type="button" id="btn-transfo" class="btn btn-sm btn-outline-warning" onclick="changerForme('transfo')">Transformation</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 mb-3">
+                        <div class="btn-group w-100 mb-2 shadow-sm" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateStatsDisplay('d0', this)">55%</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateStatsDisplay('d1', this)">69%</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateStatsDisplay('d2', this)">79%</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateStatsDisplay('d3', this)">90%</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning active" onclick="updateStatsDisplay('d4', this)">100%</button>
+                        </div>
+                        <div class="row text-center g-2">
+                            <div class="col-4"><div class="stat-box p-2 border border-secondary rounded bg-dark"><div class="text-success fw-bold small">PV</div><div id="detail-hp" class="stat-value fw-bold text-white">---</div></div></div>
+                            <div class="col-4"><div class="stat-box p-2 border border-secondary rounded bg-dark"><div class="text-danger fw-bold small">ATT</div><div id="detail-atk" class="stat-value fw-bold text-white">---</div></div></div>
+                            <div class="col-4"><div class="stat-box p-2 border border-secondary rounded bg-dark"><div class="text-warning fw-bold small">DÉF</div><div id="detail-def" class="stat-value fw-bold text-white">---</div></div></div>
+                        </div>
+                    </div>
+
+                    <div id="external-links" class="mt-3 d-flex justify-content-center gap-2"></div>
+
+                    <div class="mt-4 p-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="section-title text-warning mb-0">LIENS D'AMITIÉ</h6>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="linkLevelSwitch" style="cursor: pointer;">
+                                <label class="form-check-label text-white small" for="linkLevelSwitch" id="linkLevelLabel">Niveau 1</label>
+                            </div>
+                        </div>
+                        <div id="detail-liens" class="d-flex flex-wrap justify-content-center gap-2"></div>
+                    </div>
+
+                    <div class="mt-4 p-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
+                        <h6 class="section-title text-warning mb-3 border-bottom border-secondary pb-2">MEILLEURS PARTENAIRES</h6>
+                        <div id="best-partners-list" class="d-flex flex-wrap justify-content-center gap-3"><span class="text-white small">Calcul en cours...</span></div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
+                        <h6 id="same-name-title" class="section-title text-warning mb-3 border-bottom border-secondary pb-2">Personnages de même noms</h6>
+                        <div id="same-name-list" class="d-flex flex-wrap justify-content-center gap-3"><span id="no-same-name" class="text-white small">Calcul en cours...</span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <h1 id="detail-nom" class="display-5 fw-bold text-warning mb-2">Nom du Perso</h1>
+                    <div class="mb-4">
+                        <span id="detail-type" class="badge bg-secondary fs-6 me-2">TYPE</span>
+                        <span id="detail-classe" class="badge bg-dark border border-light fs-6">CLASSE</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="section-title text-info border-bottom border-info pb-1 mb-2">CATÉGORIES</h6>
+                        <div id="detail-cats" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="skill-box border-blue-glow p-3 rounded bg-dark bg-opacity-50">
+                                <h5 class="text-info fw-bold mb-2">APTITUDE LEADER</h5>
+                                <p id="detail-leader" class="mb-0 text-light small">...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="skill-box border-red-glow p-3 rounded bg-dark bg-opacity-50 h-100">
+                                <div><span class="badge rounded-pill bg-danger mb-2">Ki 12</span> <h5 class="text-danger fw-bold mb-1">ATTAQUE SPÉCIALE</h5><h6 id="detail-spe-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6></div>
+                                <p id="detail-spe-desc" class="mb-0 text-light small">...</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="skill-box border-ultimate-glow p-3 rounded bg-dark bg-opacity-50 h-100">
+                                <div><span class="badge rounded-pill mb-2" style="background-color: #ff5722;">Ki 18+ / Transfo</span> <h5 class="fw-bold mb-1" style="color: #ff5722;">ULTIME / TRANSFO</h5><h6 id="detail-ult-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6></div>
+                                <p id="detail-ult-desc" class="mb-0 text-light small">...</p>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="active-skill-section" style="display: none;">
+                            <div class="skill-box border-purple-glow p-3 rounded bg-dark bg-opacity-50">
+                                <h5 class="fw-bold mb-2" style="color: #d63384;">ACTIVE SKILL</h5>
+                                <h6 id="detail-active-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6>
+                                <p id="detail-active-desc" class="mb-0 text-light small">...</p>
+                                <div id="detail-active-cond" class="mt-2 pt-2 border-top border-secondary text-muted small fst-italic">Condition : ...</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="skill-box border-gold-glow p-3 rounded bg-dark bg-opacity-50">
+                                <h5 class="text-warning fw-bold mb-2">APTITUDE PASSIVE</h5>
+                                <div id="detail-passif" class="text-light small">...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <script src="config.js"></script>
+
+    <script src="detail.js"></script>
+
+</body>
+</html>
