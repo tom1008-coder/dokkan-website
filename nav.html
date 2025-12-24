@@ -1,0 +1,54 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-warning sticky-top">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold text-warning d-flex align-items-center" href="index.html">
+            DOKKAN DEX
+        </a>
+
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Toutes les Cartes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Événements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">À Propos</a>
+                </li>
+            </ul>
+
+            <div class="d-flex ms-lg-3 align-items-center">
+                
+                <a id="nav-login-btn" href="auth.html" class="btn btn-outline-warning btn-sm">
+                    Connexion
+                </a>
+
+                <div id="nav-user-menu" class="dropdown d-none">
+                    <button class="btn btn-warning btn-sm dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="nav-user-email">Mon Compte</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-secondary">
+                        <li><a class="dropdown-item" href="compte.html">Profil & Infos</a></li>
+                        <li><hr class="dropdown-divider border-secondary"></li>
+                        <li><button id="nav-logout-btn" class="dropdown-item text-danger">Déconnexion</button></li>
+                    </ul>
+                </div>
+
+            </div>
+            </div>
+    </div>
+</nav>

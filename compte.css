@@ -1,0 +1,50 @@
+/* --- Structure de la page --- */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: #ffffff; /* Force le texte en blanc partout */
+    background-color: #212529; /* Couleur de fond (équivalent bg-dark) */
+}
+
+/* --- Cartes Profil --- */
+.profile-card {
+    border: 1px solid #444;
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.1);
+    background-color: #212529; /* Assure le fond sombre */
+     color: #fff !important;
+}
+
+/* --- Cartes Statistiques --- */
+.stat-card {
+    background-color: rgba(33, 37, 41, 0.8);
+    border: 1px solid #495057;
+    transition: all 0.3s ease;
+    
+    
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: #ffc107;
+    box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2);
+    
+}
+
+/* --- Formulaires Dark Mode --- */
+.form-control {
+    background-color: #212529;
+    border-color: #495057;
+    color: #fff !important; /* Force le texte des inputs en blanc */
+}
+
+.form-control:focus {
+    background-color: #2c3034;
+    border-color: #ffc107;
+    color: #fff !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+}
+
+.form-control::placeholder {
+    color: #adb5bd; /* Gris clair pour le placeholder */
+}

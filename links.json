@@ -41,5 +41,31 @@
     "Guerrier fusionné": {
         "lv1": "Ki +2" ,
         "lv10": "Ki +2, ATT et DÉF +5 %"
+    },
+
+    "Race Saiyan": {
+        "lv1": "ATT +5 %",
+        "lv10": "ATT +10 %"
+    },
+
+    "L’origine des Saiyans": {
+        "lv1": "Ki +1",
+        "lv10": "Ki +2, ATT et DÉF +5 %"
+    },
+
+    "Fonceur": {
+        "lv1": "ATT +10 %, DÉF -10 % pour tous les ennemis",
+        "lv10": "ATT +15 %, DÉF -15 % pour tous les ennemis"
+    },
+
+
+    "Futur désespéré" : {
+        "lv1": "Ki +1",
+        "lv10": "Ki +2, chance de coup critique +5 %"
+    },
+
+      "Lignée royale" : {
+        "lv1": "Ki +1",
+        "lv10": "Ki +2, ATT +5 %"
     }
 }
