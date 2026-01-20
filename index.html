@@ -10,10 +10,8 @@
 </head>
 <body>
 
-    <!-- NAVBAR -->
     <div id="nav-placeholder"></div>
 
-    <!-- CONTENU -->
     <div class="container mt-5">
 
         <div class="text-center mb-5">
@@ -30,6 +28,44 @@
                            class="form-control border-0" 
                            placeholder="Chercher un perso (ex: Goku, Vegeta)...">
                 </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                
+                <div class="p-3 rounded border border-warning mb-3" 
+                     style="background-color: rgba(255, 193, 7, 0.15);"> <div class="d-flex align-items-start">
+                        <span class="fs-4 me-3">✏️</span>
+                        <div>
+                            <h5 class="text-warning fw-bold mb-1">Recherche Créateur de Logo</h5>
+                            <p class="mb-0 text-light small">
+                                Le Dex a besoin d'une identité visuelle ! Nous recherchons une personne talentueuse pour créer le <strong>logo officiel</strong> du site. Si vous êtes graphiste (amateur ou pro), contactez-nous !
+                                <br>
+                                <a href="https://discord.gg/4wPh3zR9CG" target="_blank" class="text-white fw-bold text-decoration-underline mt-1 d-inline-block">
+                                    Proposer un logo →
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded border border-info" 
+                     style="background-color: rgba(13, 202, 240, 0.15);"> <div class="d-flex align-items-start">
+                        <span class="fs-4 me-3">🎨</span>
+                        <div>
+                            <h5 class="text-info fw-bold mb-1">Recherche d'Assets HD</h5>
+                            <p class="mb-0 text-light small">
+                                Nous cherchons à améliorer la qualité visuelle du Dex. Si vous possédez des assets de cartes en haute qualité, n'hésitez pas à les partager avec la communauté.
+                                <br>
+                                <a href="https://discord.gg/4wPh3zR9CG" target="_blank" class="text-white fw-bold text-decoration-underline mt-1 d-inline-block">
+                                    Transmettre les fichiers sur Discord →
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -68,10 +104,8 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <div id="footer-placeholder"></div>
 
-    <!-- SCRIPT POUR CHARGER LA NAVBAR -->
     <script>
         fetch("nav.html")
             .then(response => response.text())
@@ -88,12 +122,11 @@
             .catch(err => console.error("Erreur chargement footer :", err));
     </script>
 
-    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="JS/config.js"></script>
     <script src="JS/script.js"></script>
-    <script src="JS/navbar.js"></script> </body>
+    <script src="JS/navbar.js"></script>
 
 </body>
 </html>
