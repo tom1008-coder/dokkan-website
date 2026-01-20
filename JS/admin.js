@@ -1,0 +1,543 @@
+// JS/admin.js
+
+let tomSelectCats, tomSelectLinks, tomSelectEchangeLinks, tomSelectTransfoLinks, tomSelectSearch;
+let currentEditId = null;
+
+// INIT TINYMCE
+function initTinyMCE(selector = '.rich-text') {
+    if (tinymce.get() && tinymce.get().length > 0) {
+        tinymce.get().forEach(ed => { if(ed.getBody().closest(selector)) ed.remove(); });
+    }
+    tinymce.init({
+        selector: selector,
+        height: 200,
+        menubar: false,
+        skin: 'oxide-dark', 
+        content_css: 'dark',
+        plugins: 'advlist autolink lists link charmap preview searchreplace visualblocks code fullscreen insertdatetime table help wordcount emoticons',
+        toolbar: 'undo redo | forecolor backcolor | bold italic | alignleft aligncenter alignright | bullist numlist | emoticons | removeformat',
+        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; background-color: #151d2e; color: #fff; } .mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before { color: #ffffff; opacity: 0.5; }'
+    });
+}
+
+// LOGS
+(function overrideConsole() {
+    const logContainer = document.getElementById('live-console-logs');
+    if (!logContainer) return;
+    function appendLog(message, type='info') {
+        const line = document.createElement('div');
+        line.innerHTML = `<span style="color:#888;">[${new Date().toLocaleTimeString()}]</span> ${message}`;
+        line.className = type==='error'?'log-error':(type==='success'?'log-success':'log-info');
+        logContainer.appendChild(line);
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    const oLog = console.log, oErr = console.error;
+    console.log = function(...args) { oLog.apply(console,args); appendLog(args.map(a=>typeof a==='object'?JSON.stringify(a):a).join(' '),'info'); };
+    console.error = function(...args) { oErr.apply(console,args); appendLog(args.map(a=>typeof a==='object'?JSON.stringify(a):a).join(' '),'error'); };
+    window.logSuccess = function(msg) { console.log("SUCCESS: "+msg); if(logContainer.lastChild) logContainer.lastChild.className='log-success'; };
+})();
+
+// INIT TOM SELECT
+async function initTomSelects() {
+    const config = { create: true, createOnBlur: true, persist: false, plugins: ['remove_button','dropdown_input'], sortField: { field: "text", direction: "asc" } };
+    tomSelectCats = new TomSelect("#char-cats", config);
+    tomSelectLinks = new TomSelect("#char-links", config);
+    tomSelectTransfoLinks = new TomSelect("#transfo-links", config);
+    tomSelectEchangeLinks = new TomSelect("#echange-links", config);
+    
+    tomSelectSearch = new TomSelect("#search-char-edit", {
+        valueField: 'id', labelField: 'name', searchField: ['name','id'], placeholder: "Rechercher...", maxItems: 1,
+        render: { option: (d,e)=>`<div><b class="text-warning">${e(d.name)}</b> <small>(${e(d.id)})</small></div>`, item: (d,e)=>`<div>${e(d.name)}</div>` },
+        onChange: (v) => { if(v) loadCharacterIntoForm(v); }
+    });
+
+    console.log("🔄 Chargement données DB...");
+    const { data } = await supabase.from('characters').select('id, nom, categories');
+    if(data) {
+        let allCats = new Set();
+        data.forEach(c => {
+            let n = c.id; if(c.nom) n = (typeof c.nom==='string')?c.nom:c.nom.base;
+            tomSelectSearch.addOption({id:c.id, name:n});
+            if(c.categories) {
+                let cats = c.categories;
+                if(typeof cats==='string' && cats.startsWith('[')) try{cats=JSON.parse(cats)}catch(e){}
+                if(Array.isArray(cats)) cats.forEach(x=>allCats.add(x));
+            }
+        });
+        allCats.forEach(x=>tomSelectCats.addOption({value:x, text:x}));
+        console.log(`✅ ${allCats.size} Catégories chargées.`);
+    }
+
+    try {
+        const res = await fetch('links.json'); const json = await res.json();
+        const linkKeys = Object.keys(json);
+        linkKeys.forEach(l => { 
+            tomSelectLinks.addOption({value:l, text:l}); 
+            tomSelectTransfoLinks.addOption({value:l, text:l});
+            tomSelectEchangeLinks.addOption({value:l, text:l}); 
+        });
+        console.log(`✅ ${linkKeys.length} Liens chargés.`);
+    } catch(e) { console.error("Erreur chargement liens :", e); }
+}
+
+// UI ELEMENTS
+const els = {
+    rarity: document.getElementById('char-rarity'),
+    checkTransfo: document.getElementById('has-transfo'), 
+    checkActive: document.getElementById('has-active'),
+    checkRevival: document.getElementById('has-revival'), 
+    checkFureur: document.getElementById('has-fureur'),
+    checkEchange: document.getElementById('has-echange'), 
+    checkZtur: document.getElementById('has-ztur'), 
+    checkZlr: document.getElementById('has-zlr'), 
+    checkSeza: document.getElementById('has-seza'),
+    
+    secTransfo: document.getElementById('section-transfo'), 
+    secEchange: document.getElementById('section-echange'),
+    secActive: document.getElementById('section-active'),
+    secRevival: document.getElementById('section-revival'), 
+    secAutres: document.getElementById('section-autres'),
+    secZtur: document.getElementById('section-ztur'), 
+    secSeza: document.getElementById('section-seza'),
+    
+    blockZturActive: document.getElementById('ztur-active-block'),
+    blockSezaActive: document.getElementById('seza-active-block'),
+    
+    lrFields: document.querySelectorAll('.lr-field')
+};
+
+function updateUI() {
+    if(!els.rarity) return;
+    const isLR = els.rarity.value === 'LR';
+    els.lrFields.forEach(el => isLR ? el.classList.remove('d-none') : el.classList.add('d-none'));
+
+    const toggle = (shouldShow, sec) => {
+        if(shouldShow && sec) {
+            sec.classList.remove('d-none');
+            setTimeout(() => {
+                const textareas = sec.querySelectorAll('textarea.rich-text');
+                if(textareas.length > 0) {
+                    let needsInit = false;
+                    textareas.forEach(ta => { if(!tinymce.get(ta.id)) needsInit = true; });
+                    if(needsInit) initTinyMCE(`#${sec.id} .rich-text`);
+                }
+            }, 50);
+        } else if(sec) { sec.classList.add('d-none'); }
+    };
+
+    toggle(els.checkTransfo.checked, els.secTransfo);
+    toggle(els.checkEchange.checked, els.secEchange);
+    toggle(els.checkActive.checked, els.secActive);
+    toggle(els.checkRevival.checked, els.secRevival); 
+    
+    const showZ = els.checkZtur.checked || els.checkZlr.checked;
+    toggle(showZ, els.secZtur);
+    toggle(els.checkActive.checked, els.blockZturActive);
+    
+    toggle(els.checkSeza.checked, els.secSeza);
+    toggle(els.checkActive.checked, els.blockSezaActive);
+
+    const hasFureur = els.checkFureur.checked;
+    if(hasFureur) {
+        els.secAutres.classList.remove('d-none');
+        document.getElementById('block-fureur').classList.remove('d-none');
+    } else { els.secAutres.classList.add('d-none'); }
+
+    // GESTION CHAMPS TRANSFO ET Z-LR
+    const hasTransfo = els.checkTransfo.checked;
+    document.querySelectorAll('.transfo-field').forEach(div => {
+        if(hasTransfo) div.classList.remove('d-none');
+        else div.classList.add('d-none');
+    });
+
+    const hasZLR = els.checkZlr.checked;
+    document.querySelectorAll('.zlr-field').forEach(div => {
+        if(hasZLR) div.classList.remove('d-none');
+        else div.classList.add('d-none');
+    });
+
+    // GESTION CHAMP ÉCHANGE ZTUR
+    const hasEchange = els.checkEchange.checked;
+    document.querySelectorAll('.echange-field').forEach(div => {
+        if(hasEchange) div.classList.remove('d-none');
+        else div.classList.add('d-none');
+    });
+}
+
+if(els.rarity) {
+    [els.rarity, els.checkTransfo, els.checkActive, els.checkRevival, els.checkFureur, els.checkEchange, els.checkZtur, els.checkZlr, els.checkSeza]
+    .forEach(el => el && el.addEventListener('change', updateUI));
+}
+
+window.calculerStatsAuto = function() {
+    const getVal = (id) => parseInt(document.getElementById(id).value)||0;
+    const h0=getVal('hp-d0'), a0=getVal('atk-d0'), d0=getVal('def-d0');
+    const h4=getVal('hp-d4'), a4=getVal('atk-d4'), d4=getVal('def-d4');
+    if(!h0||!h4) return console.error("PV manquant");
+    const c = (mi,ma,p) => Math.round(mi+(ma-mi)*p);
+    [1,2,3].forEach(i => {
+        const p = i===1?0.4:(i===2?0.6:0.8);
+        document.getElementById(`hp-d${i}`).value = c(h0,h4,p);
+        document.getElementById(`atk-d${i}`).value = c(a0,a4,p);
+        document.getElementById(`def-d${i}`).value = c(d0,d4,p);
+    });
+};
+
+// LOAD
+async function loadCharacterIntoForm(id) {
+    console.log("📥 Chargement : " + id);
+    const { data, error } = await supabase.from('characters').select('*').eq('id', id).single();
+    if(error||!data) return;
+
+    currentEditId = id;
+    document.getElementById('btn-submit').innerText = "MODIFIER";
+    document.getElementById('btn-submit').className = "btn btn-success btn-lg fw-bold text-dark py-3";
+
+    const formatForEditor = (val) => {
+        if(!val) return "";
+        if(typeof val !== 'string') return "";
+        if(val.trim().startsWith('<') || val.includes('<p>') || val.includes('<div>')) return val;
+        return val.replace(/\n/g, '<br>');
+    };
+
+    const setVal = (eid, val) => {
+        const el = document.getElementById(eid);
+        if(el) {
+            el.value = val||"";
+            if(tinymce.get(eid)) {
+                tinymce.get(eid).setContent(formatForEditor(val||""));
+            }
+        }
+    };
+    const setCheck = (eid, val) => { const el = document.getElementById(eid); if(el) el.checked = !!val; };
+
+    setVal('char-id', data.id);
+    setVal('char-rarity', data.tag||'UR');
+    setVal('char-type', data.type);
+    setVal('char-class', data.classe);
+
+    setCheck('has-transfo', data.transformation);
+    setCheck('has-echange', data.echange);
+    setCheck('has-active', data.active_skill && data.active_skill!==null);
+    setCheck('has-fureur', data.fureur);
+    setCheck('has-revival', data.revival);
+    setCheck('has-ztur', data.ztur);
+    setCheck('has-zlr', data.zlr);
+    setCheck('has-seza', data.seza);
+    
+    updateUI(); 
+
+    setTimeout(() => {
+        if(data.stats) {
+            let s = data.stats.base ? data.stats.base : data.stats;
+            ['d0','d1','d2','d3','d4'].forEach(l => { if(s[l]) { setVal(`hp-${l}`, s[l].hp); setVal(`atk-${l}`, s[l].atk); setVal(`def-${l}`, s[l].def); }});
+        }
+        setVal('char-leader', data.leader_skill);
+
+        if(data.categories) {
+            let c = data.categories;
+            if(typeof c==='string' && c.startsWith('[')) try{c=JSON.parse(c)}catch(e){}
+            tomSelectCats.setValue(c);
+        }
+        if(data.liens) {
+            let l = data.liens;
+            if(typeof l==='string') try{l=JSON.parse(l)}catch(e){}
+            if(Array.isArray(l)) tomSelectLinks.setValue(l);
+            else { 
+                if(l.base) tomSelectLinks.setValue(l.base); 
+                if(l.transfo) tomSelectTransfoLinks.setValue(l.transfo); 
+                if(l.echange) tomSelectEchangeLinks.setValue(l.echange); 
+            }
+        }
+
+        const parseP = (arr) => {
+            if(!arr) return {nom:"", effet:""};
+            if(!Array.isArray(arr) && typeof arr === 'object') return {nom: arr.nom, effet: arr.effet};
+            if(Array.isArray(arr)) {
+                let n="", e="";
+                arr.forEach(li => { 
+                    if(li.startsWith('[')&&li.endsWith(']')) n=li.slice(1,-1); 
+                    else e+=li+"<br>"; 
+                });
+                return {nom:n, effet:e.trim()};
+            }
+            return {nom:"", effet:""};
+        };
+
+        if(data.nom) {
+            setVal('base-nom', data.nom.base);
+            setVal('transfo-nom', data.nom.transfo);
+            setVal('echange-nom', data.nom.echange);
+            setVal('fureur-nom', data.nom.fureur);
+            setVal('revival-nom', data.nom.revival);
+        }
+
+        if(data.passif) {
+            let pb = parseP(data.passif.base);
+            setVal('base-passif-nom', pb.nom); setVal('base-passif-effet', pb.effet);
+            if(data.passif.transfo) { let pt = parseP(data.passif.transfo); setVal('transfo-passif-nom', pt.nom); setVal('transfo-passif-effet', pt.effet); }
+            if(data.passif.echange) { let pe = parseP(data.passif.echange); setVal('echange-passif-nom', pe.nom); setVal('echange-passif-effet', pe.effet); }
+            if(data.passif.revival) {
+                let pr = parseP(data.passif.revival);
+                setVal('revival-passif-nom', pr.nom);
+                setVal('revival-passif-effet', pr.effet);
+                if(data.passif.revival.condition) setVal('revival-condition', data.passif.revival.condition);
+            }
+        }
+
+        if(data.spe) {
+            if(data.spe.base) { setVal('base-spe-nom', data.spe.base.nom); setVal('base-spe-effet', data.spe.base.effet); if(data.spe.base.ultime) { setVal('base-ult-nom', data.spe.base.ultime.nom); setVal('base-ult-effet', data.spe.base.ultime.effet); } }
+            if(data.spe.transfo) { setVal('transfo-spe-nom', data.spe.transfo.nom); setVal('transfo-spe-effet', data.spe.transfo.effet); if(data.spe.transfo.ultime) { setVal('transfo-ult-nom', data.spe.transfo.ultime.nom); setVal('transfo-ult-effet', data.spe.transfo.ultime.effet); } }
+            if(data.spe.echange) { setVal('echange-spe-nom', data.spe.echange.nom); setVal('echange-spe-effet', data.spe.echange.effet); if(data.spe.echange.ultime) { setVal('echange-ult-nom', data.spe.echange.ultime.nom); setVal('echange-ult-effet', data.spe.echange.ultime.effet); } }
+            if(data.spe.revival) { 
+                setVal('revival-spe-nom', data.spe.revival.nom); 
+                setVal('revival-spe-effet', data.spe.revival.effet); 
+                if(data.spe.revival.ultime) {
+                    setVal('revival-ult-nom', data.spe.revival.ultime.nom);
+                    setVal('revival-ult-effet', data.spe.revival.ultime.effet);
+                }
+            }
+        }
+
+        setVal('ztur-leader', data.leader_skill_ztur);
+        if(data.passif_ztur) { 
+            let pz = parseP(data.passif_ztur.base); setVal('ztur-passif-nom', pz.nom); setVal('ztur-passif-effet', pz.effet); 
+            
+            // CHARGEMENT NOM + EFFET TRANSFO ZTUR
+            let pzt = parseP(data.passif_ztur.transfo); 
+            setVal('ztur-passif-transfo-nom', pzt.nom);
+            setVal('ztur-passif-transfo', pzt.effet); 
+            
+            // CHARGEMENT NOM + EFFET ECHANGE ZTUR
+            if(data.passif_ztur.echange) {
+                let pez = parseP(data.passif_ztur.echange);
+                setVal('ztur-passif-echange-nom', pez.nom);
+                setVal('ztur-passif-echange', pez.effet);
+            }
+        }
+        if(data.spe_ztur) { 
+            if(data.spe_ztur.base) {
+                setVal('ztur-spe-nom', data.spe_ztur.base.nom); 
+                setVal('ztur-spe-effet', data.spe_ztur.base.effet);
+                if(data.spe_ztur.base.ultime) {
+                    setVal('ztur-ult-nom', data.spe_ztur.base.ultime.nom);
+                    setVal('ztur-ult-effet', data.spe_ztur.base.ultime.effet);
+                }
+            }
+            if(data.spe_ztur.transfo) {
+                setVal('ztur-spe-transfo-nom', data.spe_ztur.transfo.nom);
+                setVal('ztur-spe-transfo', data.spe_ztur.transfo.effet);
+                if(data.spe_ztur.transfo.ultime) {
+                    setVal('ztur-ult-transfo-nom', data.spe_ztur.transfo.ultime.nom);
+                    setVal('ztur-ult-transfo', data.spe_ztur.transfo.ultime.effet);
+                }
+            }
+            // LOAD SPÉ ECHANGE NOM + EFFET
+            if(data.spe_ztur.echange) {
+                setVal('ztur-spe-echange-nom', data.spe_ztur.echange.nom);
+                setVal('ztur-spe-echange', data.spe_ztur.echange.effet);
+                if(data.spe_ztur.echange.ultime) {
+                    setVal('ztur-ult-echange-nom', data.spe_ztur.echange.ultime.nom);
+                    setVal('ztur-ult-echange', data.spe_ztur.echange.ultime.effet);
+                }
+            }
+        }
+        if(data.active_skill_ztur && data.active_skill_ztur.base) { setVal('ztur-active-nom', data.active_skill_ztur.base.nom); setVal('ztur-active-cond', data.active_skill_ztur.base.condition); setVal('ztur-active-effet', data.active_skill_ztur.base.effet); }
+
+        setVal('seza-leader', data.leader_skill_seza);
+        if(data.passif_seza) { 
+            let ps = parseP(data.passif_seza.base); setVal('seza-passif-nom', ps.nom); setVal('seza-passif-effet', ps.effet); 
+            let pst = parseP(data.passif_seza.transfo); setVal('seza-passif-transfo', pst.effet); 
+        }
+        if(data.spe_seza && data.spe_seza.base) { 
+            setVal('seza-spe-nom', data.spe_seza.base.nom); setVal('seza-spe-effet', data.spe_seza.base.effet); 
+            if(data.spe_seza.transfo) setVal('seza-spe-transfo', data.spe_seza.transfo.effet); 
+        }
+        if(data.active_skill_seza && data.active_skill_seza.base) { setVal('seza-active-nom', data.active_skill_seza.base.nom); setVal('seza-active-cond', data.active_skill_seza.base.condition); setVal('seza-active-effet', data.active_skill_seza.base.effet); }
+
+        if(data.active_skill && data.active_skill.base) { setVal('active-nom', data.active_skill.base.nom); setVal('active-cond', data.active_skill.base.condition); setVal('active-effet', data.active_skill.base.effet); }
+        if(data.liens_externes) { let e = data.liens_externes; if(typeof e==='string') try{e=JSON.parse(e)}catch(x){} setVal('ext-wiki', e.wiki); setVal('ext-yt', e.youtube); }
+    }, 100);
+    window.scrollTo(0,0);
+}
+
+document.getElementById('btn-reset-form').addEventListener('click', () => {
+    currentEditId = null;
+    document.getElementById('add-character-form').reset();
+    tomSelectCats.clear(); tomSelectLinks.clear(); tomSelectEchangeLinks.clear(); tomSelectTransfoLinks.clear(); tomSelectSearch.clear();
+    if(typeof tinymce !== 'undefined') tinymce.editors.forEach(ed => ed.setContent(''));
+    document.getElementById('btn-submit').innerText = "ENREGISTRER";
+    document.getElementById('btn-submit').className = "btn btn-warning btn-lg fw-bold text-dark py-3";
+    updateUI();
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || session.user.app_metadata.role !== 'admin') { alert("Accès Admin requis."); window.location.href = "index.html"; return; }
+    
+    initTomSelects(); 
+    initTinyMCE(); 
+    updateUI();
+
+    document.getElementById('add-character-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const mode = currentEditId ? "MODIFICATION" : "CRÉATION";
+        console.log(`⏳ ${mode} en cours...`);
+
+        const val = (id) => {
+            const ed = tinymce.get(id);
+            if(ed) return ed.getContent();
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : "";
+        };
+        const has = (id) => document.getElementById(id).checked;
+
+        const idChar = val('char-id');
+        const rarity = val('char-rarity');
+        const isLR = rarity === 'LR';
+
+        const createContentObj = (nom, effet) => {
+            if (!nom && (!effet || effet === "")) return null;
+            return { nom: nom, effet: effet };
+        };
+
+        const nomJson = { base: val('base-nom'), transfo: has('has-transfo') ? val('transfo-nom') : null, echange: has('has-echange') ? val('echange-nom') : null, fureur: has('has-fureur') ? val('fureur-nom') : null, revival: has('has-revival') ? val('revival-nom') : null };
+        const passifJson = { 
+            base: createContentObj(val('base-passif-nom'), val('base-passif-effet')), 
+            transfo: has('has-transfo') ? createContentObj(val('transfo-passif-nom'), val('transfo-passif-effet')) : null, 
+            echange: has('has-echange') ? createContentObj(val('echange-passif-nom'), val('echange-passif-effet')) : null,
+            revival: has('has-revival') ? { 
+                nom: val('revival-passif-nom'), 
+                effet: val('revival-passif-effet'),
+                condition: val('revival-condition')
+            } : null
+        };
+        
+        // ZTUR PASSIF AVEC NOMS TRANSFO ET ECHANGE
+        const zturPassif = { 
+            base: createContentObj(val('ztur-passif-nom'), val('ztur-passif-effet')), 
+            transfo: has('has-transfo') ? createContentObj(val('ztur-passif-transfo-nom'), val('ztur-passif-transfo')) : null,
+            echange: has('has-echange') ? createContentObj(val('ztur-passif-echange-nom'), val('ztur-passif-echange')) : null
+        };
+        
+        // ZTUR SPÉ AVEC NOMS CORRECTS
+        const zturSpe = { 
+            base: { 
+                nom: val('ztur-spe-nom'), 
+                effet: val('ztur-spe-effet'),
+                ultime: isLR ? { nom: val('ztur-ult-nom'), effet: val('ztur-ult-effet') } : undefined
+            }, 
+            transfo: has('has-transfo') ? { 
+                nom: val('ztur-spe-transfo-nom'), 
+                effet: val('ztur-spe-transfo'),
+                ultime: isLR ? { nom: val('ztur-ult-transfo-nom'), effet: val('ztur-ult-transfo') } : undefined
+            } : null,
+            echange: has('has-echange') ? {
+                nom: val('ztur-spe-echange-nom'),
+                effet: val('ztur-spe-echange'),
+                ultime: isLR ? { nom: val('ztur-ult-echange-nom'), effet: val('ztur-ult-echange') } : undefined
+            } : null
+        };
+
+        let zturActive = null; if(val('ztur-active-nom')||val('ztur-active-effet')) zturActive = { base: {nom:val('ztur-active-nom'), condition:val('ztur-active-cond'), effet:val('ztur-active-effet')}, transfo:null };
+
+        const sezaPassif = { base: createContentObj(val('seza-passif-nom'), val('seza-passif-effet')), transfo: has('has-transfo') ? createContentObj(null, val('seza-passif-transfo')) : null };
+        const sezaSpe = { base: { nom: val('seza-spe-nom'), effet: val('seza-spe-effet') }, transfo: has('has-transfo') ? { nom: null, effet: val('seza-spe-transfo') } : null };
+        let sezaActive = null; if(val('seza-active-nom')||val('seza-active-effet')) sezaActive = { base: {nom:val('seza-active-nom'), condition:val('seza-active-cond'), effet:val('seza-active-effet')}, transfo:null };
+
+        const getNum = (id) => parseInt(document.getElementById(id).value) || 0;
+        const statsJson = {
+            d0: { hp: getNum('hp-d0'), atk: getNum('atk-d0'), def: getNum('def-d0') },
+            d1: { hp: getNum('hp-d1'), atk: getNum('atk-d1'), def: getNum('def-d1') },
+            d2: { hp: getNum('hp-d2'), atk: getNum('atk-d2'), def: getNum('def-d2') },
+            d3: { hp: getNum('hp-d3'), atk: getNum('atk-d3'), def: getNum('def-d3') },
+            d4: { hp: getNum('hp-d4'), atk: getNum('atk-d4'), def: getNum('def-d4') }
+        };
+
+        const speJson = {
+            base: { nom: val('base-spe-nom'), effet: val('base-spe-effet'), ultime: isLR ? { nom: val('base-ult-nom'), effet: val('base-ult-effet') } : undefined },
+            transfo: has('has-transfo') ? { nom: val('transfo-spe-nom'), effet: val('transfo-spe-effet'), ultime: isLR ? { nom: val('transfo-ult-nom'), effet: val('transfo-ult-effet') } : undefined } : null,
+            echange: has('has-echange') ? { nom: val('echange-spe-nom'), effet: val('echange-spe-effet'), ultime: isLR ? { nom: val('echange-ult-nom'), effet: val('echange-ult-effet') } : undefined } : null,
+            revival: has('has-revival') ? { 
+                nom: val('revival-spe-nom'), 
+                effet: val('revival-spe-effet'),
+                ultime: isLR ? { nom: val('revival-ult-nom'), effet: val('revival-ult-effet') } : undefined
+            } : null
+        };
+
+        let activeJson = null; if (has('has-active')) activeJson = { base: { nom: val('active-nom'), condition: val('active-cond'), effet: val('active-effet') }, transfo: null, echange: null };
+
+        const liensBase = tomSelectLinks.getValue();
+        let liensTransfo = null;
+        if(has('has-transfo')) {
+            const valTransfo = tomSelectTransfoLinks.getValue();
+            liensTransfo = valTransfo.length > 0 ? valTransfo : liensBase;
+        }
+
+        const payload = {
+            id: idChar, type: val('char-type'), classe: val('char-class'), tag: rarity, 
+            transformation: has('has-transfo'), fureur: has('has-fureur'), revival: has('has-revival'), echange: has('has-echange'),
+            ztur: has('has-ztur'), zlr: has('has-zlr'), seza: has('has-seza'),
+            leader_skill: val('char-leader'),
+            nom: nomJson, passif: passifJson, spe: speJson, active_skill: activeJson, stats: statsJson, 
+            liens: { 
+                base: liensBase, 
+                transfo: liensTransfo, 
+                echange: has('has-echange') ? (tomSelectEchangeLinks.getValue().length > 0 ? tomSelectEchangeLinks.getValue() : liensBase) : null 
+            }, 
+            categories: tomSelectCats.getValue(), liens_externes: { wiki: val('ext-wiki'), youtube: val('ext-yt') },
+            leader_skill_ztur: val('ztur-leader'), passif_ztur: zturPassif, spe_ztur: zturSpe, active_skill_ztur: zturActive,
+            leader_skill_seza: val('seza-leader'), passif_seza: sezaPassif, spe_seza: sezaSpe, active_skill_seza: sezaActive
+        };
+
+        try {
+            let error;
+            if (currentEditId) { 
+                const res = await supabase.from('characters').update(payload).eq('id', currentEditId); 
+                error = res.error; 
+            } else { 
+                const res = await supabase.from('characters').insert([payload]); 
+                error = res.error; 
+            }
+
+            if (error) throw error;
+
+            window.logSuccess(`✅ ${mode} RÉUSSIE pour : ${idChar}`);
+            if (mode === "CRÉATION") document.getElementById('btn-reset-form').click();
+            window.scrollTo(0,0);
+
+        } catch (err) { 
+            console.error("Erreur : " + err.message); 
+            if (err.message.includes("duplicate key") || err.code === "23505") {
+                alert("⛔ ERREUR : L'ID " + idChar + " existe déjà !");
+            } else {
+                alert("Erreur technique : " + err.message); 
+            }
+        }
+    });
+
+    // SYNCHRONISATION AUTOMATIQUE DES NOMS (BASE -> ZTUR) + (TRANSFO -> ZTUR) + (ECHANGE -> ZTUR)
+    const syncFields = [
+        { src: 'base-spe-nom', dest: 'ztur-spe-nom' },
+        { src: 'base-ult-nom', dest: 'ztur-ult-nom' },
+        { src: 'active-nom', dest: 'ztur-active-nom' },
+        { src: 'transfo-spe-nom', dest: 'ztur-spe-transfo-nom' },
+        { src: 'transfo-ult-nom', dest: 'ztur-ult-transfo-nom' },
+        { src: 'echange-spe-nom', dest: 'ztur-spe-echange-nom' },
+        { src: 'echange-ult-nom', dest: 'ztur-ult-echange-nom' },
+        { src: 'transfo-passif-nom', dest: 'ztur-passif-transfo-nom' },
+        { src: 'echange-passif-nom', dest: 'ztur-passif-echange-nom' }
+    ];
+
+    syncFields.forEach(pair => {
+        const srcEl = document.getElementById(pair.src);
+        const destEl = document.getElementById(pair.dest);
+        
+        if (srcEl && destEl) {
+            srcEl.addEventListener('input', function() {
+                destEl.value = this.value;
+            });
+        }
+    });
+
+});

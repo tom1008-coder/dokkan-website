@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Dokkan Dex</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <link href="CSS/admin.css" rel="stylesheet">
+</head>
+<body class="py-5">
+
+    <div class="container">
+        <h2 class="text-center text-warning mb-4 fw-bold">DOKKAN DEX - MASTER ADMIN</h2>
+
+        <div class="card p-4 mb-5 border-warning shadow-lg">
+            <h4 class="section-title text-warning">🛠️ MODIFIER UN PERSONNAGE</h4>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-9">
+                    <select id="search-char-edit" placeholder="Chercher un personnage..."></select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-secondary w-100" id="btn-reset-form">❌ Mode Création</button>
+                </div>
+            </div>
+        </div>
+
+        <form id="add-character-form">
+            
+            <div class="card p-4 mb-4">
+                <h4 class="section-title">1. Identité</h4>
+                <div class="row g-3">
+                    <div class="col-md-4"><label>ID Unique</label><input type="text" id="char-id" class="form-control" required></div>
+                    <div class="col-md-4"><label>Rareté</label><select id="char-rarity" class="form-select text-warning"><option value="UR">UR</option><option value="LR">LR</option></select></div>
+                    <div class="col-md-2"><label>Type</label><select id="char-type" class="form-select"><option>AGI</option><option>TEC</option><option>INT</option><option>PUI</option><option>END</option></select></div>
+                    <div class="col-md-2"><label>Classe</label><select id="char-class" class="form-select"><option>Super</option><option>Extreme</option></select></div>
+                </div>
+            </div>
+
+            <div class="card p-4 mb-4">
+                <h4 class="section-title">2. Mécaniques</h4>
+                <div class="row">
+                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-transfo"><label class="text-info">Transfo.</label></div></div>
+                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-echange"><label class="text-primary">Échange</label></div></div>
+                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-active"><label class="text-danger">Active</label></div></div>
+                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-ztur"><label class="text-warning">Z-TUR</label></div></div>
+                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-zlr"><label class="text-warning fw-bold" style="color: #ff9900 !important;">Z-LR</label></div></div>
+                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-seza"><label class="text-info fw-bold">SEZA</label></div></div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-revival"><label class="text-success">Revival</label></div></div>
+                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-fureur"><label>Fureur</label></div></div>
+                </div>
+            </div>
+
+            <div class="card p-4 mb-4">
+                <h4 class="section-title">3. Stats & Leader</h4>
+                <div class="d-flex justify-content-between mb-3"><button type="button" class="btn btn-sm btn-outline-info" onclick="calculerStatsAuto()">⚡ Calcul Auto</button></div>
+                <table class="table table-dark table-bordered text-center align-middle mb-3">
+                    <thead><tr class="text-warning"><th>Niveau</th><th>PV</th><th>ATT</th><th>DEF</th></tr></thead>
+                    <tbody>
+                        <tr><td>d0 (55%)</td><td><input type="number" id="hp-d0" class="form-control form-control-sm text-center"></td><td><input type="number" id="atk-d0" class="form-control form-control-sm text-center"></td><td><input type="number" id="def-d0" class="form-control form-control-sm text-center"></td></tr>
+                        <tr><td>d1</td><td><input type="number" id="hp-d1" class="form-control form-control-sm text-center"></td><td><input type="number" id="atk-d1" class="form-control form-control-sm text-center"></td><td><input type="number" id="def-d1" class="form-control form-control-sm text-center"></td></tr>
+                        <tr><td>d2</td><td><input type="number" id="hp-d2" class="form-control form-control-sm text-center"></td><td><input type="number" id="atk-d2" class="form-control form-control-sm text-center"></td><td><input type="number" id="def-d2" class="form-control form-control-sm text-center"></td></tr>
+                        <tr><td>d3</td><td><input type="number" id="hp-d3" class="form-control form-control-sm text-center"></td><td><input type="number" id="atk-d3" class="form-control form-control-sm text-center"></td><td><input type="number" id="def-d3" class="form-control form-control-sm text-center"></td></tr>
+                        <tr><td class="text-warning">d4 (100%)</td><td><input type="number" id="hp-d4" class="form-control form-control-sm text-center border-warning"></td><td><input type="number" id="atk-d4" class="form-control form-control-sm text-center border-warning"></td><td><input type="number" id="def-d4" class="form-control form-control-sm text-center border-warning"></td></tr>
+                    </tbody>
+                </table>
+                <div><label>Leader Skill</label><textarea id="char-leader" class="form-control rich-text" rows="2"></textarea></div>
+                <div class="mt-3"><label>Catégories</label><select id="char-cats" multiple></select></div>
+            </div>
+
+            <div class="card p-4 mb-4 border-light">
+                <h4 class="section-title text-white">4. Forme de Base</h4>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4"><label>Nom</label><input type="text" id="base-nom" class="form-control"></div>
+                    <div class="col-md-4"><label>Nom Passif</label><input type="text" id="base-passif-nom" class="form-control"></div>
+                    <div class="col-12"><label>Effet Passif</label><textarea id="base-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6 p-3 bg-dark border rounded">
+                        <h6 class="text-primary">Spéciale</h6>
+                        <input type="text" id="base-spe-nom" class="form-control mb-2" placeholder="Nom">
+                        <textarea id="base-spe-effet" class="form-control rich-text" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6 lr-field d-none p-3 bg-dark border border-warning rounded">
+                        <h6 class="text-warning">Ultime (LR)</h6>
+                        <input type="text" id="base-ult-nom" class="form-control mb-2" placeholder="Nom">
+                        <textarea id="base-ult-effet" class="form-control rich-text" rows="2"></textarea>
+                    </div>
+                </div>
+                <div><label>Liens (Base)</label><select id="char-links" multiple></select></div>
+
+                <div id="section-active" class="d-none mt-4 pt-3 border-top border-danger">
+                    <h5 class="text-danger fw-bold mb-3">ACTIVE SKILL</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4"><label class="text-danger">Nom Active</label><input type="text" id="active-nom" class="form-control"></div>
+                        <div class="col-md-8"><label class="text-danger">Condition</label><input type="text" id="active-cond" class="form-control"></div>
+                        <div class="col-12"><label class="text-danger">Effet</label><textarea id="active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-transfo" class="card p-4 mb-4 border-info d-none">
+                <h4 class="section-title text-info">5. Transformation</h4>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4"><label>Nom</label><input type="text" id="transfo-nom" class="form-control"></div>
+                    <div class="col-md-4"><label>Nom Passif</label><input type="text" id="transfo-passif-nom" class="form-control"></div>
+                    <div class="col-12"><label>Effet Passif</label><textarea id="transfo-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6 p-3 bg-dark border border-info rounded">
+                        <h6 class="text-info">Spéciale</h6>
+                        <input type="text" id="transfo-spe-nom" class="form-control mb-2">
+                        <textarea id="transfo-spe-effet" class="form-control rich-text" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6 lr-field d-none p-3 bg-dark border border-warning rounded">
+                        <h6 class="text-warning">Ultime</h6>
+                        <input type="text" id="transfo-ult-nom" class="form-control mb-2">
+                        <textarea id="transfo-ult-effet" class="form-control rich-text" rows="2"></textarea>
+                    </div>
+                </div>
+                <div><label>Liens (Transformation)</label><select id="transfo-links" multiple></select></div>
+            </div>
+
+            <div id="section-echange" class="card p-4 mb-4 border-primary d-none">
+                <h4 class="section-title text-primary">6. Échange</h4>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4"><label>Nom</label><input type="text" id="echange-nom" class="form-control"></div>
+                    <div class="col-md-4"><label>Nom Passif</label><input type="text" id="echange-passif-nom" class="form-control"></div>
+                    <div class="col-12"><label>Effet Passif</label><textarea id="echange-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6 p-3 bg-dark border border-primary rounded">
+                        <h6 class="text-primary">Spéciale</h6>
+                        <input type="text" id="echange-spe-nom" class="form-control mb-2">
+                        <textarea id="echange-spe-effet" class="form-control rich-text" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6 lr-field d-none p-3 bg-dark border border-warning rounded">
+                        <h6 class="text-warning">Ultime</h6>
+                        <input type="text" id="echange-ult-nom" class="form-control mb-2">
+                        <textarea id="echange-ult-effet" class="form-control rich-text" rows="2"></textarea>
+                    </div>
+                </div>
+                <div><label>Liens (Échange)</label><select id="echange-links" multiple></select></div>
+            </div>
+
+            <div id="section-revival" class="card p-4 mb-4 border-success d-none">
+                <h4 class="section-title text-success">7. Revival / Résurrection</h4>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4"><label class="text-success">Nom après Revival</label><input type="text" id="revival-nom" class="form-control"></div>
+                    <div class="col-md-4"><label class="text-success">Nom Passif</label><input type="text" id="revival-passif-nom" class="form-control"></div>
+                    <div class="col-12"><label class="text-success">Effet Passif</label><textarea id="revival-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
+                </div>
+                <div class="mb-3"><label class="text-success fw-bold">Condition de Revival</label><textarea id="revival-condition" class="form-control rich-text" rows="2"></textarea></div>
+                <div class="row g-3">
+                    <div class="col-md-6 p-3 bg-dark border border-success rounded"><h6 class="text-success">Spéciale Revival</h6><input type="text" id="revival-spe-nom" class="form-control mb-2"><textarea id="revival-spe-effet" class="form-control rich-text" rows="2"></textarea></div>
+                    <div class="col-md-6 lr-field d-none p-3 bg-dark border border-warning rounded"><h6 class="text-warning">Ultime Revival</h6><input type="text" id="revival-ult-nom" class="form-control mb-2"><textarea id="revival-ult-effet" class="form-control rich-text" rows="2"></textarea></div>
+                </div>
+            </div>
+
+            <div id="section-autres" class="card p-4 mb-4 d-none">
+                <h4 class="section-title">8. Autres</h4>
+                <div id="block-fureur" class="mb-3 d-none"><h6>Fureur / Mode Géant</h6><input type="text" id="fureur-nom" class="form-control" placeholder="Nom Forme Géante"></div>
+            </div>
+
+            <div id="section-ztur" class="card p-4 mb-4 border-warning d-none" style="border-width: 2px;">
+                <h4 class="section-title text-warning">⚡ ÉVEIL-Z (Z-TUR / Z-LR)</h4>
+                <div class="mb-3"><label>Leader Z-Eveil</label><textarea id="ztur-leader" class="form-control rich-text" rows="2"></textarea></div>
+                
+                <div class="row g-4">
+                    <div class="col-md-6 d-flex flex-column gap-3">
+                        <div class="p-3 bg-dark border border-warning rounded">
+                            <h6 class="text-warning mb-3">Passif Amélioré (Base)</h6>
+                            <input type="text" id="ztur-passif-nom" class="form-control mb-2" placeholder="Nom">
+                            <textarea id="ztur-passif-effet" class="form-control rich-text" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="transfo-field p-3 bg-dark border border-info rounded d-none">
+                            <h6 class="text-info mb-2">Passif Amélioré (Transformé)</h6>
+                            <input type="text" id="ztur-passif-transfo-nom" class="form-control mb-2" placeholder="Nom Passif Transfo">
+                            <textarea id="ztur-passif-transfo" class="form-control rich-text" rows="4" placeholder="Passif après Transfo..."></textarea>
+                        </div>
+
+                        <div class="echange-field p-3 bg-dark border border-primary rounded d-none">
+                            <h6 class="text-primary mb-2">Passif Amélioré (Échange)</h6>
+                            <input type="text" id="ztur-passif-echange-nom" class="form-control mb-2" placeholder="Nom Passif Échange">
+                            <textarea id="ztur-passif-echange" class="form-control rich-text" rows="4" placeholder="Passif après Échange..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 d-flex flex-column gap-3">
+                        
+                        <div class="p-3 bg-dark border border-warning rounded">
+                            <h6 class="text-warning mb-3">Spé Améliorée (12 Ki - Base)</h6>
+                            <input type="text" id="ztur-spe-nom" class="form-control mb-2" placeholder="Nom">
+                            <textarea id="ztur-spe-effet" class="form-control rich-text" rows="4"></textarea>
+                        </div>
+
+                        <div class="transfo-field p-3 bg-dark border border-info rounded d-none">
+                            <h6 class="text-info mb-2">Spé Améliorée (12 Ki - Transformé)</h6>
+                            <input type="text" id="ztur-spe-transfo-nom" class="form-control mb-2" placeholder="Nom Spé Transfo">
+                            <textarea id="ztur-spe-transfo" class="form-control rich-text" rows="4" placeholder="Effet Spé Transfo..."></textarea>
+                        </div>
+
+                        <div class="echange-field p-3 bg-dark border border-primary rounded d-none">
+                            <h6 class="text-primary mb-2">Spé Améliorée (12 Ki - Échange)</h6>
+                            <input type="text" id="ztur-spe-echange-nom" class="form-control mb-2" placeholder="Nom Spé Échange">
+                            <textarea id="ztur-spe-echange" class="form-control rich-text" rows="4" placeholder="Effet Spé Échange..."></textarea>
+                        </div>
+
+                        <div class="zlr-field d-none d-flex flex-column gap-3 mt-2">
+                            <div class="p-3 bg-dark border border-warning rounded" style="border-width: 2px !important;">
+                                <h6 class="text-warning fw-bold mb-3">Ultime Améliorée (18 Ki - Base)</h6>
+                                <input type="text" id="ztur-ult-nom" class="form-control mb-2" placeholder="Nom Ultime">
+                                <textarea id="ztur-ult-effet" class="form-control rich-text" rows="4"></textarea>
+                            </div>
+
+                            <div class="transfo-field p-3 bg-dark border border-info rounded d-none">
+                                <h6 class="text-info mb-2">Ultime Améliorée (18 Ki - Transformé)</h6>
+                                <input type="text" id="ztur-ult-transfo-nom" class="form-control mb-2" placeholder="Nom Ultime Transfo">
+                                <textarea id="ztur-ult-transfo" class="form-control rich-text" rows="4" placeholder="Effet Ultime Transfo..."></textarea>
+                            </div>
+
+                            <div class="echange-field p-3 bg-dark border border-primary rounded d-none">
+                                <h6 class="text-primary mb-2">Ultime Améliorée (18 Ki - Échange)</h6>
+                                <input type="text" id="ztur-ult-echange-nom" class="form-control mb-2" placeholder="Nom Ultime Échange">
+                                <textarea id="ztur-ult-echange" class="form-control rich-text" rows="4" placeholder="Effet Ultime Échange..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ztur-active-block" class="d-none mt-4 p-3 bg-dark border border-danger rounded">
+                    <h5 class="text-danger fw-bold mb-3">ACTIVE SKILL (Z-EVEIL)</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4"><label class="text-danger">Nom Active</label><input type="text" id="ztur-active-nom" class="form-control"></div>
+                        <div class="col-md-8"><label class="text-danger">Condition</label><input type="text" id="ztur-active-cond" class="form-control"></div>
+                        <div class="col-12"><label class="text-danger">Effet</label><textarea id="ztur-active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-seza" class="card p-4 mb-4 border-info d-none" style="border-width: 2px;">
+                <h4 class="section-title text-info">🌟 SUPER EZA</h4>
+                <div class="mb-3"><label>Leader SEZA</label><textarea id="seza-leader" class="form-control rich-text" rows="2"></textarea></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6>Passif SEZA</h6>
+                        <input type="text" id="seza-passif-nom" class="form-control mb-2" placeholder="Nom">
+                        <textarea id="seza-passif-effet" class="form-control rich-text" rows="4"></textarea>
+                        <div class="transfo-field mt-2"><textarea id="seza-passif-transfo" class="form-control rich-text" rows="4" placeholder="Transfo..."></textarea></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Spé SEZA</h6>
+                        <input type="text" id="seza-spe-nom" class="form-control mb-2" placeholder="Nom">
+                        <textarea id="seza-spe-effet" class="form-control rich-text" rows="4"></textarea>
+                        <div class="transfo-field mt-2"><textarea id="seza-spe-transfo" class="form-control rich-text" rows="4" placeholder="Transfo..."></textarea></div>
+                    </div>
+                </div>
+                <div id="seza-active-block" class="d-none mt-3 pt-3 border-top border-info">
+                    <h6>Active SEZA</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4"><input type="text" id="seza-active-nom" class="form-control form-control-sm"></div>
+                        <div class="col-md-8"><input type="text" id="seza-active-cond" class="form-control form-control-sm"></div>
+                        <div class="col-12"><textarea id="seza-active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-4 mb-4">
+                <h4 class="section-title">11. Liens Externes</h4>
+                <div class="row g-3"><div class="col-md-6"><input type="url" id="ext-wiki" class="form-control" placeholder="Wiki"></div><div class="col-md-6"><input type="url" id="ext-yt" class="form-control" placeholder="YouTube"></div></div>
+            </div>
+
+            <div class="d-grid gap-2 mb-4"><button type="submit" id="btn-submit" class="btn btn-warning btn-lg fw-bold text-dark py-3">ENREGISTRER</button></div>
+        </form>
+
+        <div id="live-console-container"><div class="console-header">Console</div><div id="live-console-logs"></div></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="JS/config.js"></script>
+    <script src="JS/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+[
+    {
+        "id": "13147",
+        "nom": "Gogeta Super Saiyan 4",
+        "type": "AGI",
+        "classe": "Super",
+        "tag": "LR",
+        "stats": { 
+            "d0": { "hp": "20813", "atk": "16595", "def": "11975" },
+            "d1": { "hp": "22113", "atk": "18295", "def": "14075" },
+            "d2": { "hp": "22413", "atk": "18595", "def": "14375" },
+            "d3": { "hp": "22723", "atk": "19295", "def": "14685" },
+            "d4": { "hp": "23413", "atk": "19595", "def": "15375" }
+        },
+        "leader_skill": "Ki +4, PV, ATT et DÉF +220 % pour la catégorie 'Héros de GT'",
+        "active_skill": {
+            "nom": "Big Bang Kamehameha x100",
+            "effet": "Augmente énormément l'ATT temporairement, inflige des dégâts ultimes à l'ennemi et coups critiques garantis pendant le tour.",
+            "condition": "Peut être activé à partir du 4e tour après le début du combat (une fois seulement)."
+        },
+        "passif": [
+            "[Animation d'apparition]",
+            "Si 2 autres alliés 'Héros de GT' dans l'équipe :",
+            "Pendant 1 tour : ATT SP supp. et coup critique garanti {1}",
+            "Pendant 4 tours : Ki +3 et DÉF +70 % pour la classe Super {1}",
+            "",
+            "[Effets de base]",
+            "Ki +3, ATT et DÉF +300 %",
+            "Ki +1 en plus à chaque sphère de ki",
+            "Attaques extrêmement efficaces contre tous les types",
+            "Grandes chances de coup critique",
+            "Garde activée contre toutes les attaques",
+            "Taux de réduction des dégâts +50 %",
+            "ATT SP supplémentaire",
+            "",
+            "[Lors de l'attaque]",
+            "ATT +300 %",
+            "",
+            "[Au moment d'encaisser une attaque]",
+            "DÉF +200 % sur une attaque",
+            "DÉF +200 % temporairement sur une SP",
+            "",
+            "[Contre-Attaque (Kikoha)]",
+            "Fortes chances d'annulation de celle-ci et de contre-attaquer très vigoureusement",
+            "Si PV à 70% ou moins, annulation de celle-ci et contre-attaque très vigoureusement",
+            "",
+            "[Bonus Progressif]",
+            "Après 3 attaques reçues : ATT SP supplémentaire {inf}",
+            "Après 7 attaques reçues : Ki +4 et Coup critique garanti {inf}"
+        ],
+        "spe": {
+            "base": {
+                "nom": "Impact ultime",
+                "effet": "Augmente l'ATT pendant 1 tour, fortes chances de fortement augmenter l'ATT en plus pendant 1 tour et inflige des dégâts gigantesques"
+            },
+            "ultime": {
+                "nom": "Ultra Big Bang Kamehameha",
+                "effet": "Augmente fortement l'ATT pendant 4 tours, fortes chances d'énormément augmenter l'ATT en plus pendant 1 tour et inflige des dégâts titanesques"
+            }
+        },
+        "liens": [
+            "Super Saiyan",
+            "Kamehameha",
+            "Rugissement saiyan",
+            "Vitesse époustouflante",
+            "GT",
+            "Combat acharné",
+            "Pouvoir légendaire"
+        ],
+        "categories": [
+            "Héros de GT",
+            "Fusion",
+            "Dragon maléfique",
+            "Dernier atout",
+            "Puissance de gorille",
+            "Temps limité",
+            "Combat rapide",
+            "Combat du destin",
+            "Puissance au-delà du Super Saiyan",
+            "Guerrier fusionné",
+            "Héros protecteur de la Terre",
+            "Kamehameha"
+        ]
+    },
+    {
+        "id": "1",
+        "nom": "Son Goku Super Saiyan 4",
+        "type": "PUI",
+        "classe": "Super",
+        "tag": "STUR",
+        "stats": { 
+            "d0": { "hp": "16325", "atk": "16480", "def": "7706" },
+            "d1": { "hp": "18025", "atk": "18580", "def": "9006" },
+            "d2": { "hp": "18325", "atk": "18880", "def": "9306" },
+            "d3": { "hp": "18635", "atk": "19580", "def": "9616" },
+            "d4": { "hp": "19325", "atk": "19880", "def": "10306" }
+        },
+        "leader_skill": " Ki +3, PV, ATT et DÉF +130 % sur le type S. PUI ou ki +3, PV, ATT et DÉF +90 % sur le type E. PUI ",
+        "passif": [
+            "[Effets de base]",
+            "Ki +2, ATT et DÉF +200 %",
+            "Fortes chances de coup critique",
+            "",
+            "[Par allié attaquant du tour de classe Super]",
+            "ATT et DÉF +100 %",
+            "Taux de réduction des dégâts +10 %",
+            "",
+            "[Si ennemi Extrême ou allié Héros de GT]",
+            "ATT +40 % pour tous les alliés",
+            "ATT SP supplémentaire",
+            "",
+            "[Si Ki à 12 ou plus]",
+            "ATT +150 % lors de l'attaque",
+            "",
+            "[Défense positionnelle]",
+            "Au moment d'encaisser une attaque en 1re ou 2e position : DÉF +200 %",
+            "",
+            "[Contre-Attaque]",
+            "Au moment d'encaisser une ATT SP ennemie : DÉF +100 % temporairement",
+            "Grandes chances de l'annuler et de contre-attaquer très vigoureusement"
+        ],
+        "spe": {
+            "base": {
+                "nom": " Kamehameha x10 (suprême)",
+                "effet": " Augmente fortement l'ATT pendant 1 tour, inflige des dégâts immenses et diminue fortement la DÉF ; augmente la DÉF de 30 % pendant 6 tours "
+            }
+        },
+        "liens": [
+            "Super Saiyan",
+            "Kamehameha",
+            "Rugissement saiyan",
+            "Vitesse époustouflante",
+            "GT",
+            "Combat acharné",
+            "Paré au combat"
+        ],
+        "categories": [
+            "Saiyan pur",
+            "Famille de Son Goku",
+            "Kamehameha",
+            "Puissance de gorille",
+            "École tortue",
+            "Éveil miraculeux",
+            "Héros de GT",
+            "Liens d'amitié",
+            "Combat rapide",
+            "Combat du destin",
+            "Puissance au-delà du Super Saiyan",
+            "Lien parental",
+            "Combattant ayant grandi sur Terre",
+            "Héros protecteur de la Terre"
+        ]
+    },
+    {
+        "id": "12099",
+        "nom": "Gogeta Super Saiyan 4",
+        "type": "INT",
+        "classe": "Super",
+        "tag": "UR",
+        "stats": { 
+            "d0": { "hp": "18534", "atk": "19109", "def": "8660" },
+            "d1": { "hp": "20234", "atk": "20809", "def": "10360" },
+            "d2": { "hp": "22413", "atk": "21109", "def": "10660" },
+            "d3": { "hp": "20844", "atk": "21809", "def": "10970" },
+            "d4": { "hp": "21534", "atk": "22109", "def": "11660" }
+        },
+        "leader_skill": " Ki +3, PV, ATT et DÉF +170 % pour la catégorie Puissance de gorille ou Dragon maléfique ",
+        "active_skill": {
+            "nom": "Libération d'énergie positive",
+            "effet": "ATT et DÉF +40 % et ATT et DÉF -40 % pour tous les ennemis pendant 1 tour.",
+            "condition": "Peut être activée après avoir encaissé 4 attaques ou plus lors du combat (1 fois seulement)"
+        },
+        "passif": [
+            "[Effets de base]",
+            "Ki +4, ATT et DÉF +300 %",
+            "Attaques extrêmement efficaces contre tous les types",
+            "Taux de réduction des dégâts +40 %",
+            "",
+            "[Pendant 1 tour dès son apparition]",
+            "Taux de réduction des dégâts +40 %",
+            "",
+            "[À chaque attaque encaissée ou à chaque esquive]",
+            "Chances de coup critique +25 % (max. 100 %)",
+            "",
+            "[En attaquant en 2e ou 3e position]",
+            "ATT et DÉF +250 %",
+            "ATT SP supplémentaire",
+            "",
+            "[Au moment d'encaisser une ATT SP ennemie]",
+            "Pendant 10 tours dès son apparition, fortes chances de l'annuler et de contre-attaquer très vigoureusement",
+            "À partir du 11e tour après son apparition, grandes chances de l'annuler et de contre-attaquer très vigoureusement"
+        ],
+        "spe": {
+            "base": {
+                "nom": "Big Bang Kamehameha (suprême)",
+                "effet": "Augmente énormément l'ATT et augmente fortement la DÉF pendant 4 tours et inflige des dégâts immenses"
+            }
+        },
+        "liens": [
+            "Super Saiyan",
+            "Kamehameha",
+            "Vitesse époustouflante",
+            "Combat décisif",
+            "GT",
+            "Guerrier fusionné",
+            "Combat acharné"
+        ],
+        "categories": [
+            "Puissance de gorille",
+            "Fusion",
+            "Dragon maléfique",
+            "Kamehameha",
+            "Héros de GT",
+            "Dernier atout",
+            "Temps limité",
+            "Combat rapide",
+            "Combat du destin",
+            "Puissance au-delà du Super Saiyan",
+            "Guerrier fusionné",
+            "Héros protecteur de la Terre"
+        ]
+    },
+    {
+        "id": "5",
+        "nom": {
+            "base": "Trunks (Ado) - Messager du destin",
+            "transfo": "Super Saiyan Trunks (Ado) - Lueur d'espoir"
+        },
+        "type": "AGI",
+        "classe": "Super",
+        "tag": "UR",
+        "transformation": true,
+        "stats": { 
+            "d0": { "hp": "14250", "atk": "11890", "def": "6540" },
+            "d1": { "hp": "16250", "atk": "13890", "def": "8540" },
+            "d2": { "hp": "17550", "atk": "15190", "def": "9540" },
+            "d3": { "hp": "18850", "atk": "16490", "def": "10540" },
+            "d4": { "hp": "19250", "atk": "17100", "def": "11200" }
+        },
+        "leader_skill": "Ki +3, PV, ATT et DÉF +170 % pour la catégorie 'Voyageur du Temps' ou 'Saga du Futur', et PV, ATT et DÉF +30 % en plus pour les persos 'Famille de Vegeta'",
+        "active_skill": {
+            "nom": "Transformation Super Saiyan",
+            "effet": "Se transforme en Super Saiyan.",
+            "condition": "Peut être activée dès le 3e tour après le début du combat."
+        },
+        "passif": {
+            "base": [
+                "[Effets de base]",
+                "Ki +2, ATT et DÉF +150 %",
+                "Grandes chances de coup critique",
+                "Attaque supplémentaire garantie et grandes chances d'ATT SP",
+                "Fortes chances d'attaque supplémentaire et grandes chances d'ATT SP",
+                "Changement de sphères de Ki END en sphères de Ki AGI",
+                "Grandes chances d'esquiver l'attaque ennemie",
+                "",
+                "[Lors de l'attaque]",
+                "ATT et DÉF +150 %",
+                "",
+                "[À chaque attaque portée]",
+                "Pendant ce tour, chances d'esquive +5 %",
+                "",
+                "[À chaque ATT SP lancée]",
+                "Pendant ce tour, chances d'esquive +5 %",
+                "",
+                "[Après 3 attaques portées]",
+                "Attaque supplémentaire garantie et fortes chances d'ATT SP (max. 1 fois/tour)",
+                "",
+                "[Au moment d'encaisser une attaque]",
+                "DÉF +150 %",
+                "",
+                "[Avec allié 'Volonté confiée' ou 'Cyborg - Saga de Cell']",
+                "Ki +1, ATT et DÉF +50 % pour tous les alliés"
+            ],
+            "transfo": [
+                "[MODE SUPER SAIYAN]",
+                "Ki +5, ATT et DÉF +250 %",
+                "Réduction des dégâts reçus de 40 %",
+                "Coup critique garanti contre les ennemis de catégorie 'Lignée diabolique' (Frieza)",
+                "Change les sphères de Ki PUI en sphères de Ki AGI",
+                "Attaque supplémentaire garantie"
+            ]
+        },
+        "spe": {
+            "base": {
+                "nom": "Attaque Brûlante",
+                "effet": "Augmente l'ATT et la DÉF pendant 1 tour et inflige des dégâts immenses"
+            },
+            "transfo": {
+                "nom": "Trancheur de Lumière",
+                "effet": "Augmente fortement l'ATT, inflige des dégâts titanesques et annule la garde"
+            }
+        },
+        "liens": {
+            "base": ["Messager du futur", "Famille royale", "Sang froid", "Désespoir du futur", "Paré au combat", "Super Saiyan", "Combat acharné"],
+            "transfo": ["Messager du futur", "Famille royale", "Guerrier doré", "Désespoir du futur", "Paré au combat", "Super Saiyan", "Combat acharné"]
+        },
+        "categories": [
+            "Volonté confiée",
+            "Saiyan de sang-mêlé",
+            "Saga du futur",
+            "Voyageur du temps",
+            "Famille de Vegeta",
+            "Cyborg - Saga de Cell",
+            "Lien maître et disciple",
+            "Sauveur",
+            "Prodiges du combat",
+            "Super Saiyan",
+            "Transformation fortifiante",
+            "Combattant ayant grandi sur Terre",
+            "Héros protecteur de la Terre"
+        ],
+        "liens_externes": {
+            "wiki": "https://dokkan.wiki",
+            "youtube": "https://youtube.com"
+        }
+    }
+]
