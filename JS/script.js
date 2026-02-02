@@ -66,7 +66,8 @@ function afficherCartes(liste) {
     const tooltipAttrs = `data-bs-toggle="tooltip" data-bs-placement="top"`;
 
     liste.forEach(carte => {
-        const cheminImage = `${BASE_IMG_URL}${carte.id}.png`;
+        // MODIFICATION ICI : AJOUT DU DOSSIER ID
+        const cheminImage = `${BASE_IMG_URL}${carte.id}/${carte.id}.png`;
         let couleurBadge = getTypeColor(carte.type);
 
         // --- GESTION DU NOM ---
@@ -132,7 +133,6 @@ function afficherCartes(liste) {
     });
 
     // --- IMPORTANT : INITIALISATION DES TOOLTIPS BOOTSTRAP ---
-    // On doit faire ça APRES avoir injecté le HTML dans la page
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
@@ -156,12 +156,13 @@ function lancerCycleAutomatique() {
         const hasFureur = img.dataset.fureur === "true"; 
 
         // Construction de la liste des images pour ce perso
-        const imagesList = [`${BASE_IMG_URL}${id}.png`]; // Base
+        // MODIFICATION ICI : AJOUT DU DOSSIER ID
+        const imagesList = [`${BASE_IMG_URL}${id}/${id}.png`]; // Base
         
-        if (hasTransfo) imagesList.push(`${BASE_IMG_URL}${id}_transfo.png`);
-        if (hasRevival) imagesList.push(`${BASE_IMG_URL}${id}_revival.png`);
-        if (hasEchange) imagesList.push(`${BASE_IMG_URL}${id}_echange.png`);
-        if (hasFureur) imagesList.push(`${BASE_IMG_URL}${id}_fureur.png`);
+        if (hasTransfo) imagesList.push(`${BASE_IMG_URL}${id}/${id}_transfo.png`);
+        if (hasRevival) imagesList.push(`${BASE_IMG_URL}${id}/${id}_revival.png`);
+        if (hasEchange) imagesList.push(`${BASE_IMG_URL}${id}/${id}_echange.png`);
+        if (hasFureur) imagesList.push(`${BASE_IMG_URL}${id}/${id}_fureur.png`);
 
         // S'il y a plus d'une image, on lance le cycle
         if (imagesList.length > 1) {

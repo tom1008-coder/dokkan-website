@@ -98,7 +98,6 @@ async function chargerDetail() {
                 // Si ni l'un ni l'autre, on cache le bouton
                 btnZ.style.display = 'none';
             } else {
-                // MODIFICATION ICI : Changement du texte selon le type
                 if (currentPersoGlobal.zlr) {
                     btnZ.innerText = "Z-LR";
                 } else {
@@ -220,6 +219,7 @@ function changerForme(forme) {
             passif: p.passif_ztur || p.passif,
             spe: p.spe_ztur || p.spe,
             active_skill: p.active_skill_ztur || p.active_skill,
+            spe_ex: p.spe_ex,
             liens: p.liens
         };
     } else if (currentAwakeningGlobal === 'seza') {
@@ -229,6 +229,7 @@ function changerForme(forme) {
             passif: p.passif_seza || p.passif,
             spe: p.spe_seza || p.spe,
             active_skill: p.active_skill_seza || p.active_skill,
+            spe_ex: p.spe_ex,
             liens: p.liens
         };
     }
@@ -241,8 +242,9 @@ function changerForme(forme) {
     else if (forme === 'echange') suffixe = "_echange";
     else if (forme === 'fureur') suffixe = "_fureur";
 
-    const imgFull = `${BASE_IMG_URL}${p.id}_full${suffixe}.png`;
-    const imgSimple = `${BASE_IMG_URL}${p.id}${suffixe}.png`;
+    // AJOUT DE L'ID DANS LE CHEMIN POUR GÉRER LES SOUS-DOSSIERS
+    const imgFull = `${BASE_IMG_URL}${p.id}/${p.id}_full${suffixe}.png`;
+    const imgSimple = `${BASE_IMG_URL}${p.id}/${p.id}${suffixe}.png`;
     imgElement.src = imgFull;
     imgElement.onerror = function() { if (this.src !== imgSimple) this.src = imgSimple; };
 
@@ -267,6 +269,8 @@ function changerForme(forme) {
     afficherSpeEtUltime(sourceData.spe, forme, speNom, speEffet);
 
     afficherActiveSkill(sourceData.active_skill, forme);
+    afficherSpeEx(sourceData.spe_ex, forme);
+
     updateLiensDisplay();
     updateStatsDisplay();
 }
@@ -327,18 +331,51 @@ function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
 function afficherActiveSkill(rawActive, forme) {
     const section = document.getElementById("active-skill-section");
     if (!section) return;
+
     const activeObj = safeParse(rawActive);
     let currentActive = null;
+
     if (activeObj) {
-        currentActive = activeObj[forme] || activeObj.base;
-        if (!currentActive && activeObj.nom) currentActive = activeObj;
+        if (activeObj.base) {
+            currentActive = activeObj[forme];
+        } else {
+            currentActive = activeObj;
+        }
     }
+
     if (currentActive && currentActive.nom) {
         document.getElementById("detail-active-nom").innerText = currentActive.nom;
         document.getElementById("detail-active-desc").innerHTML = formaterTexteDokkan(currentActive.effet || "");
         document.getElementById("detail-active-cond").innerText = currentActive.condition ? `Condition: ${currentActive.condition}` : "";
         section.style.display = "block";
-    } else { section.style.display = "none"; }
+    } else { 
+        section.style.display = "none"; 
+    }
+}
+
+function afficherSpeEx(rawEx, forme) {
+    const section = document.getElementById("spe-ex-section");
+    if (!section) return;
+
+    const exObj = safeParse(rawEx);
+    let currentEx = null;
+
+    if (exObj) {
+        if (exObj.base) {
+            currentEx = exObj[forme];
+            if(!currentEx && forme !== 'base') currentEx = null; 
+        } else {
+            currentEx = exObj;
+        }
+    }
+
+    if (currentEx && currentEx.nom) {
+        document.getElementById("detail-spe-ex-nom").innerText = currentEx.nom;
+        document.getElementById("detail-spe-ex-desc").innerHTML = formaterTexteDokkan(currentEx.effet || "");
+        section.classList.remove("d-none");
+    } else {
+        section.classList.add("d-none");
+    }
 }
 
 function renderLiens(liste) {
@@ -430,7 +467,8 @@ function afficherMeilleursPartenaires(currentPerso, allPersos) {
     if (top6.length === 0) { container.innerHTML = "<span class='text-muted small'>Aucun partenaire trouvé.</span>"; return; }
     top6.forEach((p) => {
         const pNom = getContent(p.nom, 'base', 'nom');
-        container.innerHTML += `<div class="position-relative text-center" style="width: 60px; cursor: pointer; overflow: visible;" onclick="window.location.href='detail.html?id=${p.id}'" title="${pNom}"><img src="${BASE_IMG_URL}${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'"><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.7rem; z-index: 2;">${p.nbLiensCommuns}</span></div>`;
+        // AJOUT DU DOSSIER ID DANS L'URL
+        container.innerHTML += `<div class="position-relative text-center" style="width: 60px; cursor: pointer; overflow: visible;" onclick="window.location.href='detail.html?id=${p.id}'" title="${pNom}"><img src="${BASE_IMG_URL}${p.id}/${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'"><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.7rem; z-index: 2;">${p.nbLiensCommuns}</span></div>`;
     });
 }
 
@@ -448,7 +486,8 @@ function afficherMemeNom(currentPerso, allPersos) {
     if (matches.length === 0) { container.innerHTML = "<span class='text-muted small'>Aucun autre personnage.</span>"; return; }
     matches.forEach((p) => {
         const pNom = getContent(p.nom, 'base', 'nom');
-        container.innerHTML += `<div class="position-relative text-center" style="width: 60px; cursor: pointer; overflow: visible;" onclick="window.location.href='detail.html?id=${p.id}'" title="${pNom}"><img src="${BASE_IMG_URL}${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'"></div>`;
+        // AJOUT DU DOSSIER ID DANS L'URL
+        container.innerHTML += `<div class="position-relative text-center" style="width: 60px; cursor: pointer; overflow: visible;" onclick="window.location.href='detail.html?id=${p.id}'" title="${pNom}"><img src="${BASE_IMG_URL}${p.id}/${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'"></div>`;
     });
 }
 

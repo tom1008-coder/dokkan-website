@@ -107,7 +107,17 @@
     "Cauchemar" : {
         "lv1": "ATT +10 %",
         "lv10": "ATT +15 %"
-    }
+    },
 
+
+  "Guerrier doré" : {
+        "lv1": "DÉF -5 % pour tous les ennemis, ki +1",
+        "lv10": "DÉF -10 % pour tous les ennemis, ki +1"
+    },
+
+     "Soldat divin" : {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT +10 %, ATT +5 % en plus lors d'une attaque spéciale"
+    }
 
 }

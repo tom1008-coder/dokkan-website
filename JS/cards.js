@@ -1,6 +1,8 @@
 // cards.js - Version Finale (Clean : Image seule + Nom)
 
+// --- URL DE BASE ---
 const BASE_IMG_URL = "https://dpqxaevnarnhmxihkggk.supabase.co/storage/v1/object/public/images/";
+
 let allCardsData = []; 
 let uniqueCategories = new Set();
 let uniqueNames = new Set(); 
@@ -27,9 +29,19 @@ async function initCardsPage() {
         const { data, error } = await supabase
             .from('characters')
             .select('*')
-            .order('created_at', { ascending: false });
+            // TRI PAR DEFAUT : Rareté LR en premier, puis ID décroissant
+            .order('tag', { ascending: true }) // 'tag' contient 'LR' ou 'UR'. 'LR' < 'UR' donc LR d'abord si ascending
+            .order('id', { ascending: false }); // Les plus récents en premier
 
         if (error) throw error;
+        
+        // Tri manuel plus robuste pour être sûr que les LR sont devant
+        data.sort((a, b) => {
+            if (a.tag === 'LR' && b.tag !== 'LR') return -1;
+            if (a.tag !== 'LR' && b.tag === 'LR') return 1;
+            return b.id - a.id;
+        });
+
         allCardsData = data;
 
         extractFiltersData(); 
@@ -47,18 +59,24 @@ async function initCardsPage() {
 function extractFiltersData() {
     allCardsData.forEach(card => {
         // Catégories
-        if (card.categories && Array.isArray(card.categories)) {
-            card.categories.forEach(cat => uniqueCategories.add(cat));
+        if (card.categories) {
+            let cats = card.categories;
+            if (typeof cats === 'string') {
+                try { cats = JSON.parse(cats); } catch(e) {}
+            }
+            if (Array.isArray(cats)) {
+                cats.forEach(cat => uniqueCategories.add(cat));
+            }
         }
 
         // Noms
-        let fullName = (typeof card.nom === 'object') ? card.nom.base : card.nom;
+        let fullName = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
         if(fullName) {
-            uniqueNames.add(fullName.split(" (")[0]); 
+            uniqueNames.add(fullName); // On prend le nom complet pour être précis
         }
     });
 
-    // Remplissage Select Catégories
+    // Remplissage Select Catégories (Tri alphabétique)
     Array.from(uniqueCategories).sort().forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat;
@@ -66,7 +84,7 @@ function extractFiltersData() {
         filterCategory.appendChild(opt);
     });
 
-    // Remplissage Select Personnages
+    // Remplissage Select Personnages (Tri alphabétique)
     Array.from(uniqueNames).sort().forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
@@ -90,22 +108,16 @@ function renderCards(cards) {
     }
 
     cards.forEach(card => {
-        const displayNom = (typeof card.nom === 'object') ? card.nom.base : card.nom;
-        const displayUrl = `${BASE_IMG_URL}${card.id}.png`;
+        const displayNom = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
+        
+        // MODIFICATION ICI : AJOUT DU DOSSIER ID DANS L'URL
+        const displayUrl = `${BASE_IMG_URL}${card.id}/${card.id}.png`;
         
         // HTML : Uniquement l'image et le nom en dessous
         const html = `
-            <div class="col">
-                <div class="card-container" onclick="window.location.href='detail.html?id=${card.id}'" title="${displayNom}">
-                    
-                    <div class="card-icon-wrapper">
-                        <img src="${displayUrl}" class="card-img" 
-                             loading="lazy" onerror="this.src='https://placehold.co/90x90/000/fff?text=?'">
-                    </div>
-                    
-                    <div class="card-name">${displayNom}</div>
-
-                </div>
+            <div class="card-container" onclick="window.location.href='detail.html?id=${card.id}'" title="${displayNom}">
+                <img src="${displayUrl}" class="card-img" loading="lazy" onerror="this.src='https://placehold.co/100x100?text=?'">
+                <div class="card-name">${displayNom}</div>
             </div>
         `;
         gridContainer.innerHTML += html;
@@ -117,22 +129,39 @@ function renderCards(cards) {
 // ============================================================
 function applyFilters() {
     const searchVal = filterSearch.value.toLowerCase().trim();
-    const rarityVal = filterRarity.value;
+    const rarityVal = filterRarity.value; // 'LR', 'UR', etc.
     const typeVal = filterType.value;
     const classVal = filterClass.value;
     const charNameVal = filterCharName.value;
     const catVal = filterCategory.value;
 
     const filtered = allCardsData.filter(card => {
-        const cardName = (typeof card.nom === 'object') ? card.nom.base : card.nom;
-        const cardNameLower = cardName.toLowerCase();
+        const cardName = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
+        const cardNameLower = cardName ? cardName.toLowerCase() : "";
 
-        if (searchVal && !cardNameLower.includes(searchVal)) return false;
-        if (rarityVal && card.rarete !== rarityVal) return false;
+        // Recherche texte (nom ou ID)
+        if (searchVal && !cardNameLower.includes(searchVal) && !String(card.id).includes(searchVal)) return false;
+        
+        // Rareté (colonne 'tag' dans la BDD)
+        if (rarityVal && card.tag !== rarityVal) return false;
+        
+        // Type
         if (typeVal && card.type !== typeVal) return false;
+        
+        // Classe
         if (classVal && card.classe !== classVal) return false;
-        if (catVal && (!card.categories || !card.categories.includes(catVal))) return false;
-        if (charNameVal && !cardName.includes(charNameVal)) return false;
+        
+        // Catégorie
+        if (catVal) {
+            let cCats = card.categories;
+            if (typeof cCats === 'string') {
+                try { cCats = JSON.parse(cCats); } catch(e) {}
+            }
+            if (!Array.isArray(cCats) || !cCats.includes(catVal)) return false;
+        }
+        
+        // Nom Exact (Select)
+        if (charNameVal && cardName !== charNameVal) return false;
 
         return true;
     });

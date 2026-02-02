@@ -52,7 +52,9 @@
                 </div>
                 <div class="row mt-2">
                     <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-revival"><label class="text-success">Revival</label></div></div>
-                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-fureur"><label>Fureur</label></div></div>
+                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-fureur"><label class="text-danger">Mode Fureur</label></div></div>
+                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-geant"><label class="text-secondary fw-bold" style="color: #adb5bd !important;">Mode Géant</label></div></div>
+                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-spe-ex"><label class="fw-bold" style="color: #e040fb;">Attaque Spé EX</label></div></div>
                 </div>
             </div>
 
@@ -95,11 +97,28 @@
                 <div><label>Liens (Base)</label><select id="char-links" multiple></select></div>
 
                 <div id="section-active" class="d-none mt-4 pt-3 border-top border-danger">
-                    <h5 class="text-danger fw-bold mb-3">ACTIVE SKILL</h5>
-                    <div class="row g-3">
-                        <div class="col-md-4"><label class="text-danger">Nom Active</label><input type="text" id="active-nom" class="form-control"></div>
-                        <div class="col-md-8"><label class="text-danger">Condition</label><input type="text" id="active-cond" class="form-control"></div>
-                        <div class="col-12"><label class="text-danger">Effet</label><textarea id="active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-sm btn-danger active" onclick="switchActiveTab('base')">Active Base</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger transfo-field d-none" onclick="switchActiveTab('transfo')">Active Transfo</button>
+                    </div>
+
+                    <div id="active-base-block">
+                        <h5 class="text-danger fw-bold mb-3">ACTIVE SKILL (BASE)</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4"><label class="text-danger">Nom Active</label><input type="text" id="active-nom" class="form-control"></div>
+                            <div class="col-md-8"><label class="text-danger">Condition</label><input type="text" id="active-cond" class="form-control"></div>
+                            <div class="col-12"><label class="text-danger">Effet</label><textarea id="active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                        </div>
+                    </div>
+
+                    <div id="active-transfo-block" class="d-none">
+                        <h5 class="text-danger fw-bold mb-3">ACTIVE SKILL (TRANSFORMÉ)</h5>
+                        <p class="text-muted small">Laisser vide si le personnage n'a pas d'active skill sous cette forme.</p>
+                        <div class="row g-3">
+                            <div class="col-md-4"><label class="text-danger">Nom Active</label><input type="text" id="active-transfo-nom" class="form-control"></div>
+                            <div class="col-md-8"><label class="text-danger">Condition</label><input type="text" id="active-transfo-cond" class="form-control"></div>
+                            <div class="col-12"><label class="text-danger">Effet</label><textarea id="active-transfo-effet" class="form-control rich-text" rows="2"></textarea></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -164,7 +183,8 @@
 
             <div id="section-autres" class="card p-4 mb-4 d-none">
                 <h4 class="section-title">8. Autres</h4>
-                <div id="block-fureur" class="mb-3 d-none"><h6>Fureur / Mode Géant</h6><input type="text" id="fureur-nom" class="form-control" placeholder="Nom Forme Géante"></div>
+                <div id="block-fureur" class="mb-3 d-none"><h6>Fureur</h6><input type="text" id="fureur-nom" class="form-control" placeholder="Nom Mode Fureur"></div>
+                <div id="block-geant" class="mb-3 d-none border-top border-secondary pt-3"><h6>Mode Géant</h6><input type="text" id="geant-nom" class="form-control" placeholder="Nom Mode Géant"></div>
             </div>
 
             <div id="section-ztur" class="card p-4 mb-4 border-warning d-none" style="border-width: 2px;">
@@ -231,6 +251,19 @@
                                 <textarea id="ztur-ult-echange" class="form-control rich-text" rows="4" placeholder="Effet Ultime Échange..."></textarea>
                             </div>
                         </div>
+
+                        <div class="geant-ztur-field d-none p-3 bg-dark border border-secondary rounded mt-3">
+                            <h6 class="text-secondary fw-bold mb-2">Spé Améliorée (Mode Géant)</h6>
+                            <input type="text" id="ztur-spe-geant-nom" class="form-control mb-2" placeholder="Nom Spé Géant">
+                            <textarea id="ztur-spe-geant-effet" class="form-control rich-text" rows="4"></textarea>
+
+                            <div class="lr-field border-top border-warning mt-2 pt-2 d-none">
+                                <h6 class="text-warning">Ultime Améliorée (Mode Géant)</h6>
+                                <input type="text" id="ztur-ult-geant-nom" class="form-control mb-2" placeholder="Nom Ultime Géant">
+                                <textarea id="ztur-ult-geant-effet" class="form-control rich-text" rows="4"></textarea>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -267,6 +300,27 @@
                         <div class="col-md-4"><input type="text" id="seza-active-nom" class="form-control form-control-sm"></div>
                         <div class="col-md-8"><input type="text" id="seza-active-cond" class="form-control form-control-sm"></div>
                         <div class="col-12"><textarea id="seza-active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-spe-ex" class="card p-4 mb-4 border-light d-none" style="border-color: #e040fb !important; border-width: 2px;">
+                <h4 class="section-title" style="color: #e040fb;">🔮 ATTAQUE SPÉCIALE EX</h4>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <h6 style="color: #e040fb;">Forme de Base</h6>
+                        <input type="text" id="spe-ex-nom" class="form-control mb-2" placeholder="Nom Spé EX">
+                        <textarea id="spe-ex-effet" class="form-control rich-text" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-4 transfo-field d-none">
+                        <h6 class="text-info">Transformé</h6>
+                        <input type="text" id="spe-ex-transfo-nom" class="form-control mb-2" placeholder="Nom Spé EX Transfo">
+                        <textarea id="spe-ex-transfo-effet" class="form-control rich-text" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-4 echange-field d-none">
+                        <h6 class="text-primary">Échange</h6>
+                        <input type="text" id="spe-ex-echange-nom" class="form-control mb-2" placeholder="Nom Spé EX Échange">
+                        <textarea id="spe-ex-echange-effet" class="form-control rich-text" rows="3"></textarea>
                     </div>
                 </div>
             </div>
