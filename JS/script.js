@@ -66,7 +66,7 @@ function afficherCartes(liste) {
     const tooltipAttrs = `data-bs-toggle="tooltip" data-bs-placement="top"`;
 
     liste.forEach(carte => {
-        // MODIFICATION ICI : AJOUT DU DOSSIER ID
+        // CONSTRUCTION URL AVEC SOUS-DOSSIER ID
         const cheminImage = `${BASE_IMG_URL}${carte.id}/${carte.id}.png`;
         let couleurBadge = getTypeColor(carte.type);
 
@@ -76,27 +76,23 @@ function afficherCartes(liste) {
         // --- GESTION DES ICÔNES SPÉCIALES (AVEC TOOLTIPS) ---
         let badgeSpecial = "";
         
-        // Ordre de priorité : Fureur > Transfo > Revival > Echange
-        if (carte.fureur) {
+        // Ordre de priorité pour l'icône affichée
+        if (carte.geant) {
+            // Tu devras peut-être créer une icone_geant.png ou utiliser celle de fureur
             badgeSpecial = `<img src="${iconPath}icone_fureur.png" class="card-mechanic-icon" 
-                            alt="Fureur" 
-                            ${tooltipAttrs} 
-                            data-bs-title="Personnage disposant du mode Fureur/Géant">`;
+                            alt="Géant" ${tooltipAttrs} data-bs-title="Mode Géant">`;
+        } else if (carte.fureur) {
+            badgeSpecial = `<img src="${iconPath}icone_fureur.png" class="card-mechanic-icon" 
+                            alt="Fureur" ${tooltipAttrs} data-bs-title="Mode Fureur">`;
         } else if (carte.transformation) {
             badgeSpecial = `<img src="${iconPath}icone_transfo.png" class="card-mechanic-icon" 
-                            alt="Transformation" 
-                            ${tooltipAttrs} 
-                            data-bs-title="Personnage pouvant se transformer">`;
+                            alt="Transformation" ${tooltipAttrs} data-bs-title="Transformation">`;
         } else if (carte.revival) {
             badgeSpecial = `<img src="${iconPath}icone_revival.png" class="card-mechanic-icon" 
-                            alt="Revival" 
-                            ${tooltipAttrs} 
-                            data-bs-title="Personnage pouvant ressusciter (Revival)">`;
+                            alt="Revival" ${tooltipAttrs} data-bs-title="Revival">`;
         } else if (carte.echange) {
             badgeSpecial = `<img src="${iconPath}icone_echange.png" class="card-mechanic-icon" 
-                            alt="Echange" 
-                            ${tooltipAttrs} 
-                            data-bs-title="Personnage pouvant effectuer un échange">`;
+                            alt="Echange" ${tooltipAttrs} data-bs-title="Echange">`;
         }
 
         // --- PRÉPARATION DES DONNÉES POUR LE SCRIPT AUTO ---
@@ -104,6 +100,7 @@ function afficherCartes(liste) {
         const hasRevival = carte.revival ? "true" : "false";
         const hasEchange = carte.echange ? "true" : "false";
         const hasFureur = carte.fureur ? "true" : "false"; 
+        const hasGeant = carte.geant ? "true" : "false"; // AJOUT GÉANT
 
         const codeHTML = `
             <div class="col-6 col-md-3 mb-4">
@@ -121,6 +118,7 @@ function afficherCartes(liste) {
                              data-revival="${hasRevival}"
                              data-echange="${hasEchange}"
                              data-fureur="${hasFureur}" 
+                             data-geant="${hasGeant}" 
                              onerror="this.src='https://placehold.co/100x100?text=?'">
                         
                         <h6 class="card-title" style="font-size: 0.9rem;">${nomAffiche}</h6>
@@ -132,7 +130,7 @@ function afficherCartes(liste) {
         container.innerHTML += codeHTML;
     });
 
-    // --- IMPORTANT : INITIALISATION DES TOOLTIPS BOOTSTRAP ---
+    // --- INITIALISATION DES TOOLTIPS BOOTSTRAP ---
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
@@ -154,11 +152,13 @@ function lancerCycleAutomatique() {
         const hasRevival = img.dataset.revival === "true";
         const hasEchange = img.dataset.echange === "true";
         const hasFureur = img.dataset.fureur === "true"; 
+        const hasGeant = img.dataset.geant === "true"; // LECTURE DONNÉE GÉANT
 
-        // Construction de la liste des images pour ce perso
-        // MODIFICATION ICI : AJOUT DU DOSSIER ID
+        // Construction de la liste des images AVEC LE SOUS-DOSSIER
         const imagesList = [`${BASE_IMG_URL}${id}/${id}.png`]; // Base
         
+        // Ajout des formes dans le cycle
+        if (hasGeant) imagesList.push(`${BASE_IMG_URL}${id}/${id}_geant.png`); // AJOUT IMAGE GÉANT
         if (hasTransfo) imagesList.push(`${BASE_IMG_URL}${id}/${id}_transfo.png`);
         if (hasRevival) imagesList.push(`${BASE_IMG_URL}${id}/${id}_revival.png`);
         if (hasEchange) imagesList.push(`${BASE_IMG_URL}${id}/${id}_echange.png`);

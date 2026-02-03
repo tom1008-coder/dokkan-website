@@ -41,20 +41,74 @@
             </div>
 
             <div class="card p-4 mb-4">
-                <h4 class="section-title">2. Mécaniques</h4>
-                <div class="row">
-                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-transfo"><label class="text-info">Transfo.</label></div></div>
-                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-echange"><label class="text-primary">Échange</label></div></div>
-                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-active"><label class="text-danger">Active</label></div></div>
-                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-ztur"><label class="text-warning">Z-TUR</label></div></div>
-                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-zlr"><label class="text-warning fw-bold" style="color: #ff9900 !important;">Z-LR</label></div></div>
-                    <div class="col-md-2"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-seza"><label class="text-info fw-bold">SEZA</label></div></div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-revival"><label class="text-success">Revival</label></div></div>
-                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-fureur"><label class="text-danger">Mode Fureur</label></div></div>
-                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-geant"><label class="text-secondary fw-bold" style="color: #adb5bd !important;">Mode Géant</label></div></div>
-                    <div class="col-md-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="has-spe-ex"><label class="fw-bold" style="color: #e040fb;">Attaque Spé EX</label></div></div>
+                <h4 class="section-title">2. Mécaniques & Éveils</h4>
+                
+                <div class="row g-4">
+                    
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-dark bg-opacity-25 h-100">
+                            <h6 class="text-white-50 border-bottom pb-2 mb-3 text-uppercase small fw-bold">🔄 Changement de Forme</h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-transfo">
+                                    <label class="form-check-label text-info fw-bold" for="has-transfo">Transformation</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-echange">
+                                    <label class="form-check-label text-primary fw-bold" for="has-echange">Échange</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-revival">
+                                    <label class="form-check-label text-success fw-bold" for="has-revival">Revival (Résurrection)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-dark bg-opacity-25 h-100">
+                            <h6 class="text-white-50 border-bottom pb-2 mb-3 text-uppercase small fw-bold">🔥 Modes Spéciaux</h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-active">
+                                    <label class="form-check-label text-danger fw-bold" for="has-active">Active Skill</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-fureur">
+                                    <label class="form-check-label fw-bold" for="has-fureur" style="color: #ff6b6b !important;">Mode Fureur</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-geant">
+                                    <label class="form-check-label fw-bold" for="has-geant" style="color: #adb5bd !important;">Mode Géant</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-spe-ex">
+                                    <label class="form-check-label fw-bold" for="has-spe-ex" style="color: #e040fb !important;">Attaque Spé EX</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-dark bg-opacity-25 h-100">
+                            <h6 class="text-white-50 border-bottom pb-2 mb-3 text-uppercase small fw-bold">⚡ Éveils Avancés</h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-ztur">
+                                    <label class="form-check-label text-warning fw-bold" for="has-ztur">Z-TUR (EZA)</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-zlr">
+                                    <label class="form-check-label fw-bold" for="has-zlr" style="color: #ff9900 !important;">Z-LR (EZA LR)</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-seza">
+                                    <label class="form-check-label fw-bold" for="has-seza" style="color: #0dcaf0 !important;">SUPER EZA (SEZA)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -306,17 +360,20 @@
 
             <div id="section-spe-ex" class="card p-4 mb-4 border-light d-none" style="border-color: #e040fb !important; border-width: 2px;">
                 <h4 class="section-title" style="color: #e040fb;">🔮 ATTAQUE SPÉCIALE EX</h4>
+                
                 <div class="row g-4">
                     <div class="col-md-4">
                         <h6 style="color: #e040fb;">Forme de Base</h6>
                         <input type="text" id="spe-ex-nom" class="form-control mb-2" placeholder="Nom Spé EX">
                         <textarea id="spe-ex-effet" class="form-control rich-text" rows="3"></textarea>
                     </div>
+
                     <div class="col-md-4 transfo-field d-none">
                         <h6 class="text-info">Transformé</h6>
                         <input type="text" id="spe-ex-transfo-nom" class="form-control mb-2" placeholder="Nom Spé EX Transfo">
                         <textarea id="spe-ex-transfo-effet" class="form-control rich-text" rows="3"></textarea>
                     </div>
+
                     <div class="col-md-4 echange-field d-none">
                         <h6 class="text-primary">Échange</h6>
                         <input type="text" id="spe-ex-echange-nom" class="form-control mb-2" placeholder="Nom Spé EX Échange">

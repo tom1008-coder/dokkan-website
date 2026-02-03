@@ -4,14 +4,18 @@ const params = new URLSearchParams(window.location.search);
 const idRecherche = params.get("id");
 const contentDiv = document.getElementById("content");
 const loadingDiv = document.getElementById("loading");
+
+// URL DE BASE SUPABASE
 const BASE_IMG_URL = "https://dpqxaevnarnhmxihkggk.supabase.co/storage/v1/object/public/images/";
 
+// VARIABLES GLOBALES
 let currentPersoGlobal = null; 
+let allPersosGlobal = []; 
 let linksDataGlobal = null; 
 let isLevel10Global = false; 
 let currentFormeGlobal = 'base';
 let currentStatLevelGlobal = 'd4';
-let currentAwakeningGlobal = 'base'; // 'base', 'ztur', 'seza'
+let currentAwakeningGlobal = 'base'; 
 
 function safeParse(data) {
     if (!data) return null;
@@ -66,12 +70,14 @@ async function chargerDetail() {
     if (!idRecherche) { loadingDiv.innerHTML = "<p class='text-danger'>Aucun ID.</p>"; return; }
 
     try {
+        // 1. Récupération du perso actuel
         const { data: persoData, error } = await supabase.from('characters').select('*').eq('id', idRecherche).single();
         if (error || !persoData) { console.error(error); loadingDiv.innerHTML = "<p class='text-danger'>Introuvable.</p>"; return; }
         currentPersoGlobal = persoData;
 
+        // 2. Récupération de TOUS les persos (pour les partenaires)
         const { data: allData } = await supabase.from('characters').select('id, nom, liens');
-        const allPersos = allData || [];
+        allPersosGlobal = allData || [];
 
         const imgEl = document.getElementById("detail-img");
         if(imgEl) {
@@ -87,15 +93,12 @@ async function chargerDetail() {
         
         const divEveil = document.getElementById("awakening-controls");
         
-        // Vérifie si le perso a un éveil (ZTUR, SEZA ou ZLR)
         if (currentPersoGlobal.ztur || currentPersoGlobal.seza || currentPersoGlobal.zlr) {
             divEveil.classList.remove("d-none");
             
             const btnZ = document.getElementById("btn-mode-ztur");
 
-            // Gestion du bouton Z-TUR / Z-LR
             if (!currentPersoGlobal.ztur && !currentPersoGlobal.zlr) {
-                // Si ni l'un ni l'autre, on cache le bouton
                 btnZ.style.display = 'none';
             } else {
                 if (currentPersoGlobal.zlr) {
@@ -105,7 +108,6 @@ async function chargerDetail() {
                 }
             }
             
-            // Gestion du bouton SEZA
             if (!currentPersoGlobal.seza) {
                 document.getElementById("btn-mode-seza").style.display = 'none';
             }
@@ -129,17 +131,22 @@ async function chargerDetail() {
             if (dSeza) { document.getElementById("date-seza-box").style.display = "block"; document.getElementById("date-seza").innerText = dSeza; }
         }
 
-        const areas = {
-            transfo: document.getElementById("transfo-area"),
-            revival: document.getElementById("revival-area"),
-            echange: document.getElementById("echange-area"),
-            fureur: document.getElementById("fureur-area")
-        };
-        Object.values(areas).forEach(el => el && el.classList.add("d-none"));
-        if (currentPersoGlobal.transformation && areas.transfo) areas.transfo.classList.remove("d-none");
-        if (currentPersoGlobal.revival && areas.revival) areas.revival.classList.remove("d-none");
-        if (currentPersoGlobal.echange && areas.echange) areas.echange.classList.remove("d-none");
-        if (currentPersoGlobal.fureur && areas.fureur) areas.fureur.classList.remove("d-none");
+        // --- GESTION UNIFIÉE DES FORMES ---
+        const formsArea = document.getElementById("forms-area");
+        ['btn-geant', 'btn-transfo', 'btn-revival', 'btn-echange', 'btn-fureur'].forEach(id => {
+            const btn = document.getElementById(id);
+            if(btn) btn.classList.add('d-none');
+        });
+
+        let hasForm = false;
+        if (currentPersoGlobal.geant) { document.getElementById("btn-geant").classList.remove("d-none"); hasForm = true; }
+        if (currentPersoGlobal.transformation) { document.getElementById("btn-transfo").classList.remove("d-none"); hasForm = true; }
+        if (currentPersoGlobal.revival) { document.getElementById("btn-revival").classList.remove("d-none"); hasForm = true; }
+        if (currentPersoGlobal.echange) { document.getElementById("btn-echange").classList.remove("d-none"); hasForm = true; }
+        if (currentPersoGlobal.fureur) { document.getElementById("btn-fureur").classList.remove("d-none"); hasForm = true; }
+
+        if (hasForm) formsArea.classList.remove("d-none");
+        else formsArea.classList.add("d-none");
 
         changerForme('base');
 
@@ -181,8 +188,7 @@ async function chargerDetail() {
             if (Array.isArray(cats)) cats.forEach((cat) => divCats.innerHTML += `<span class="badge-cat">${cat}</span>`);
         }
 
-        afficherMeilleursPartenaires(currentPersoGlobal, allPersos);
-        afficherMemeNom(currentPersoGlobal, allPersos);
+        afficherMemeNom(currentPersoGlobal, allPersosGlobal);
 
         loadingDiv.style.display = "none";
         contentDiv.style.display = "block";
@@ -241,12 +247,16 @@ function changerForme(forme) {
     else if (forme === 'revival') suffixe = "_revival";
     else if (forme === 'echange') suffixe = "_echange";
     else if (forme === 'fureur') suffixe = "_fureur";
+    else if (forme === 'geant') suffixe = "_geant"; 
 
-    // AJOUT DE L'ID DANS LE CHEMIN POUR GÉRER LES SOUS-DOSSIERS
+    // URL AVEC SOUS-DOSSIER ID
     const imgFull = `${BASE_IMG_URL}${p.id}/${p.id}_full${suffixe}.png`;
     const imgSimple = `${BASE_IMG_URL}${p.id}/${p.id}${suffixe}.png`;
     imgElement.src = imgFull;
-    imgElement.onerror = function() { if (this.src !== imgSimple) this.src = imgSimple; };
+    imgElement.onerror = function() { 
+        if (this.src !== imgSimple) this.src = imgSimple; 
+        else this.src = 'https://placehold.co/400x600?text=No+Image';
+    };
 
     updateBtnStyles(forme);
 
@@ -259,9 +269,7 @@ function changerForme(forme) {
     
     let htmlPassif = "";
     if (passifNom) htmlPassif += `<strong class="text-warning mb-1 d-block">${passifNom}</strong>`;
-    
     htmlPassif += formaterTexteDokkan(passifEffet, passifNom);
-    
     document.getElementById("detail-passif").innerHTML = htmlPassif;
 
     const speNom = getContent(sourceData.spe, forme, 'nom');
@@ -273,15 +281,29 @@ function changerForme(forme) {
 
     updateLiensDisplay();
     updateStatsDisplay();
+    
+    // MISE A JOUR DES PARTENAIRES SELON LA FORME
+    afficherMeilleursPartenaires(currentPersoGlobal, allPersosGlobal);
 }
 
 function updateLiensDisplay() {
     const rawLiens = safeParse(currentPersoGlobal.liens);
     let liensListe = [];
-    if (rawLiens) {
-        if (Array.isArray(rawLiens)) liensListe = rawLiens;
-        else if (rawLiens[currentFormeGlobal]) liensListe = rawLiens[currentFormeGlobal];
-        else if (rawLiens.base) liensListe = rawLiens.base;
+
+    // Désactiver les liens en mode Géant ou Fureur
+    if (currentFormeGlobal === 'geant' || currentFormeGlobal === 'fureur') {
+        liensListe = []; 
+    } 
+    else if (rawLiens) {
+        if (Array.isArray(rawLiens)) {
+            liensListe = rawLiens;
+        } 
+        else if (rawLiens[currentFormeGlobal]) {
+            liensListe = rawLiens[currentFormeGlobal];
+        } 
+        else if (rawLiens.base) {
+            liensListe = rawLiens.base;
+        }
     }
     renderLiens(liensListe);
 }
@@ -307,24 +329,56 @@ function updateStatsDisplay(levelKey, btnElement) {
     }
 }
 
+// AFFICHAGE INTELLIGENT SPÉCIALE ET ULTIME (Cache si vide)
 function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
     const colSpe = document.getElementById("col-spe");
     const colUlt = document.getElementById("col-ult");
+    
     if (!colSpe || !colUlt) return;
+
+    // 1. On cache tout par défaut
+    colSpe.style.display = "none";
     colUlt.style.display = "none";
-    colSpe.className = "col-12"; 
-    document.getElementById("detail-spe-nom").innerText = nom || "Attaque Spéciale";
     
-    document.getElementById("detail-spe-desc").innerHTML = formaterTexteDokkan(effet || "Aucun effet.");
-    
+    // Récupération de l'objet complet de la spé pour la forme actuelle
     const speObj = safeParse(rawSpe);
     let currentSpeObj = null;
-    if(speObj) currentSpeObj = speObj[forme] || speObj.base;
-    if (currentSpeObj && currentSpeObj.ultime && currentSpeObj.ultime.nom) {
+    if (speObj) {
+        if (speObj[forme]) {
+            currentSpeObj = speObj[forme];
+        } else if (forme === 'base' || (speObj.base && forme !== 'geant' && forme !== 'fureur')) {
+            // On garde le fallback sur la base sauf pour géant/fureur
+            currentSpeObj = speObj.base;
+        }
+    }
+
+    // --- GESTION ATT. SPÉCIALE (12 Ki) ---
+    // On l'affiche seulement si un NOM est défini et non vide
+    let hasSpe = false;
+    if (nom && nom.trim() !== "") {
+        hasSpe = true;
+        colSpe.style.display = "block";
+        document.getElementById("detail-spe-nom").innerText = nom;
+        document.getElementById("detail-spe-desc").innerHTML = formaterTexteDokkan(effet || "Aucun effet.");
+    }
+
+    // --- GESTION ULTIME (18 Ki) ---
+    // On l'affiche seulement si un NOM est défini et non vide
+    let hasUlt = false;
+    if (currentSpeObj && currentSpeObj.ultime && currentSpeObj.ultime.nom && currentSpeObj.ultime.nom.trim() !== "") {
+        hasUlt = true;
+        colUlt.style.display = "block";
         document.getElementById("detail-ult-nom").innerText = currentSpeObj.ultime.nom;
         document.getElementById("detail-ult-desc").innerHTML = formaterTexteDokkan(currentSpeObj.ultime.effet);
-        colUlt.style.display = "block";
+    }
+
+    // --- GESTION DE LA MISE EN PAGE (COLONNES) ---
+    if (hasSpe && hasUlt) {
         colSpe.className = "col-md-6";
+        colUlt.className = "col-md-6";
+    } else {
+        if (hasSpe) colSpe.className = "col-12";
+        if (hasUlt) colUlt.className = "col-12";
     }
 }
 
@@ -336,7 +390,9 @@ function afficherActiveSkill(rawActive, forme) {
     let currentActive = null;
 
     if (activeObj) {
-        if (activeObj.base) {
+        if(forme === 'geant' || forme === 'fureur') {
+            currentActive = null; // Pas d'active skill par défaut en géant
+        } else if (activeObj.base) {
             currentActive = activeObj[forme];
         } else {
             currentActive = activeObj;
@@ -389,26 +445,36 @@ function renderLiens(liste) {
             const txt = isLevel10Global ? "Nv 10" : "Nv 1";
             div.innerHTML += `<div class="link-container"><span class="badge-link ${cls}">${nom}</span><div class="link-tooltip"><strong class="text-warning">${txt}:</strong> ${desc}</div></div>`;
         });
-    } else { div.innerHTML = "<span class='text-white small'>Aucun lien.</span>"; }
+    } else { 
+        div.innerHTML = "<span class='text-white-50 small fst-italic'>Aucun lien actif sous cette forme.</span>"; 
+    }
 }
 
 function updateBtnStyles(forme) {
-    const setStyle = (base, alt, color) => {
-        const bBase = document.getElementById(base);
-        const bAlt = document.getElementById(alt);
-        if(!bBase || !bAlt) return;
-        bBase.classList.remove('active', 'btn-primary'); bBase.classList.add('btn-outline-primary');
-        bAlt.classList.remove('active', 'btn-'+color); bAlt.classList.add('btn-outline-'+color);
-        if (forme === 'base') { bBase.classList.add('active', 'btn-primary'); bBase.classList.remove('btn-outline-primary'); }
-        else if (forme === 'transfo' && alt === 'btn-transfo') { bAlt.classList.add('active', 'btn-warning'); bAlt.classList.remove('btn-outline-warning'); }
-        else if (forme === 'revival' && alt === 'btn-revival') { bAlt.classList.add('active', 'btn-info'); bAlt.classList.remove('btn-outline-info'); }
-        else if (forme === 'echange' && alt === 'btn-echange') { bAlt.classList.add('active', 'btn-info'); bAlt.classList.remove('btn-outline-info'); }
-        else if (forme === 'fureur' && alt === 'btn-fureur') { bAlt.classList.add('active', 'btn-danger'); bAlt.classList.remove('btn-outline-danger'); }
+    const mapBtns = {
+        'base': { id: 'btn-base', color: 'primary' },
+        'geant': { id: 'btn-geant', color: 'secondary' },
+        'transfo': { id: 'btn-transfo', color: 'warning' },
+        'revival': { id: 'btn-revival', color: 'success' },
+        'echange': { id: 'btn-echange', color: 'info' },
+        'fureur': { id: 'btn-fureur', color: 'danger' }
     };
-    setStyle("btn-base", "btn-transfo", "warning");
-    setStyle("btn-base-revival", "btn-revival", "info");
-    setStyle("btn-base-echange", "btn-echange", "info");
-    setStyle("btn-base-fureur", "btn-fureur", "danger");
+
+    Object.values(mapBtns).forEach(conf => {
+        const btn = document.getElementById(conf.id);
+        if(btn) {
+            btn.classList.remove('active', `btn-${conf.color}`);
+            btn.classList.add(`btn-outline-${conf.color}`);
+        }
+    });
+
+    if (mapBtns[forme]) {
+        const activeBtn = document.getElementById(mapBtns[forme].id);
+        if(activeBtn) {
+            activeBtn.classList.remove(`btn-outline-${mapBtns[forme].color}`);
+            activeBtn.classList.add('active', `btn-${mapBtns[forme].color}`);
+        }
+    }
 }
 
 function formaterTexteDokkan(texte, titreAExclure) {
@@ -442,32 +508,55 @@ function getTypeColor(t) {
 function afficherMeilleursPartenaires(currentPerso, allPersos) {
     const container = document.getElementById("best-partners-list");
     if (!container) return;
+
+    // SI MODE GÉANT OU FUREUR => AUCUN PARTENAIRE
+    if (currentFormeGlobal === 'geant' || currentFormeGlobal === 'fureur') {
+        container.innerHTML = "<span class='text-white-50 small fst-italic'>Aucun partenaire (Mode Géant/Fureur).</span>";
+        return;
+    }
+
     const getNomBaseClean = (p) => {
         let n = getContent(p.nom, 'base', 'nom');
         if(!n || typeof n !== 'string') n = "Inconnu";
         return n.split(" - ")[0].trim();
     };
+    
     const nomBaseCurrent = getNomBaseClean(currentPerso);
     const rawLiens = safeParse(currentPerso.liens);
+    
+    // Récupération intelligente des liens de la forme courante
     let liensBasePerso = [];
-    if(Array.isArray(rawLiens)) liensBasePerso = rawLiens;
-    else if(rawLiens && rawLiens.base) liensBasePerso = rawLiens.base;
+    if(Array.isArray(rawLiens)) {
+        liensBasePerso = rawLiens;
+    } else if(rawLiens && rawLiens[currentFormeGlobal]) {
+        liensBasePerso = rawLiens[currentFormeGlobal];
+    } else if(rawLiens && rawLiens.base) {
+        liensBasePerso = rawLiens.base;
+    }
+
+    // Filtrage et Score
     const candidats = allPersos.filter((p) => p.id !== currentPerso.id && getNomBaseClean(p) !== nomBaseCurrent);
     const scores = candidats.map((candidat) => {
         const rawC = safeParse(candidat.liens);
         let liensC = [];
         if(Array.isArray(rawC)) liensC = rawC;
         else if(rawC && rawC.base) liensC = rawC.base;
+        
         const liensCommuns = liensC.filter((l) => liensBasePerso.includes(l));
         return { ...candidat, nbLiensCommuns: liensCommuns.length };
     });
+    
     scores.sort((a, b) => b.nbLiensCommuns - a.nbLiensCommuns);
     const top6 = scores.slice(0, 6);
+    
     container.innerHTML = "";
-    if (top6.length === 0) { container.innerHTML = "<span class='text-muted small'>Aucun partenaire trouvé.</span>"; return; }
+    if (top6.length === 0 || top6[0].nbLiensCommuns === 0) { 
+        container.innerHTML = "<span class='text-muted small'>Aucun partenaire trouvé.</span>"; 
+        return; 
+    }
+    
     top6.forEach((p) => {
         const pNom = getContent(p.nom, 'base', 'nom');
-        // AJOUT DU DOSSIER ID DANS L'URL
         container.innerHTML += `<div class="position-relative text-center" style="width: 60px; cursor: pointer; overflow: visible;" onclick="window.location.href='detail.html?id=${p.id}'" title="${pNom}"><img src="${BASE_IMG_URL}${p.id}/${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'"><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.7rem; z-index: 2;">${p.nbLiensCommuns}</span></div>`;
     });
 }
@@ -486,7 +575,6 @@ function afficherMemeNom(currentPerso, allPersos) {
     if (matches.length === 0) { container.innerHTML = "<span class='text-muted small'>Aucun autre personnage.</span>"; return; }
     matches.forEach((p) => {
         const pNom = getContent(p.nom, 'base', 'nom');
-        // AJOUT DU DOSSIER ID DANS L'URL
         container.innerHTML += `<div class="position-relative text-center" style="width: 60px; cursor: pointer; overflow: visible;" onclick="window.location.href='detail.html?id=${p.id}'" title="${pNom}"><img src="${BASE_IMG_URL}${p.id}/${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'"></div>`;
     });
 }
