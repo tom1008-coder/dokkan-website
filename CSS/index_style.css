@@ -127,3 +127,54 @@ body {
      transform: scale(1.1); /* Grossit légèrement au survol de la carte */
 }
 
+
+/* --- EFFET LR DYNAMIQUE (Couleur du Type) --- */
+.dokkan-card.is-lr {
+    /* Valeur par défaut (Or) si la variable n'est pas définie */
+    --lr-color: #ffd700; 
+    
+    position: relative;
+    border: 2px solid var(--lr-color);
+    box-shadow: 0 0 10px var(--lr-color);
+    animation: lr-electric 1.5s infinite alternate;
+    overflow: hidden;
+}
+
+/* Animation utilisant la variable de couleur */
+@keyframes lr-electric {
+    0% {
+        box-shadow: 0 0 5px var(--lr-color), 0 0 10px var(--lr-color) inset;
+        border-color: var(--lr-color);
+        opacity: 0.8;
+    }
+    50% {
+        /* On augmente l'intensité */
+        box-shadow: 0 0 20px var(--lr-color), 0 0 15px var(--lr-color) inset;
+        border-color: var(--lr-color); 
+        opacity: 1;
+    }
+    100% {
+        box-shadow: 0 0 5px var(--lr-color), 0 0 10px var(--lr-color) inset;
+        border-color: var(--lr-color);
+        opacity: 0.8;
+    }
+}
+
+/* Le reflet brillant reste blanc */
+.dokkan-card.is-lr::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+    transform: skewX(-25deg);
+    animation: lr-shine 3s infinite;
+    pointer-events: none;
+}
+
+@keyframes lr-shine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+}

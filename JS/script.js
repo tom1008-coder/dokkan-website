@@ -9,7 +9,7 @@ const searchInput = document.getElementById('search-input');
 // --- URL DE BASE DES IMAGES (SUPABASE STORAGE) ---
 const BASE_IMG_URL = "https://dpqxaevnarnhmxihkggk.supabase.co/storage/v1/object/public/images/";
 
-// --- GESTION DES TIMERS (Pour éviter les bugs lors de la recherche) ---
+// --- GESTION DES TIMERS ---
 let activeIntervals = []; 
 
 // --- SÉCURITÉ ---
@@ -53,7 +53,7 @@ async function chargerDonnees() {
 // 3. AFFICHAGE DES CARTES
 // ============================================================
 function afficherCartes(liste) {
-    // 1. On nettoie les anciens timers avant de redessiner
+    // 1. On nettoie les anciens timers
     nettoyerIntervalles();
     
     container.innerHTML = "";
@@ -63,34 +63,41 @@ function afficherCartes(liste) {
         return;
     }
 
-    // Le chemin des icônes n'est plus nécessaire ici si on ne les affiche plus
-    // const iconPath = "icons/"; 
-
     liste.forEach(carte => {
-        // CONSTRUCTION URL AVEC SOUS-DOSSIER ID
+        // CONSTRUCTION URL
         const cheminImage = `${BASE_IMG_URL}${carte.id}/${carte.id}.png`;
+        
+        // 1. Couleur du badge (Bootstrap class)
         let couleurBadge = getTypeColor(carte.type);
+        
+        // 2. Couleur du Glow (Code HEX pour CSS variable)
+        let hexGlow = getGlowColor(carte.type);
 
-        // --- GESTION DU NOM ---
+        // GESTION DU NOM
         const nomAffiche = (typeof carte.nom === 'object' && carte.nom !== null) ? carte.nom.base : carte.nom;
 
-        // --- SUPPRESSION DE LA GESTION DES ICÔNES SPÉCIALES ---
-        // La variable badgeSpecial a été retirée
+        // --- DÉTECTION LR ---
+        const isLR = (carte.tag === 'LR' || carte.rarity === 'LR');
+        const lrClass = isLR ? 'is-lr' : '';
 
-        // --- PRÉPARATION DES DONNÉES POUR LE SCRIPT AUTO ---
+        // --- PRÉPARATION DES DONNÉES POUR LE CARROUSEL AUTO ---
         const hasTransfo = carte.transformation ? "true" : "false";
         const hasRevival = carte.revival ? "true" : "false";
         const hasEchange = carte.echange ? "true" : "false";
         const hasFureur = carte.fureur ? "true" : "false"; 
         const hasGeant = carte.geant ? "true" : "false";
-        const hasStandby = carte.standby ? "true" : "false"; // AJOUT STANDBY DATA
+        const hasStandby = carte.standby ? "true" : "false"; 
 
-        // MODIFICATIONS CSS DANS LE HTML GÉNÉRÉ :
+        // --- INJECTION HTML ---
+        // On injecte la variable CSS --lr-color directement dans le style de la div .dokkan-card
         const codeHTML = `
             <div class="col-6 col-md-3 mb-4">
-                <div class="dokkan-card h-100" onclick="allerVersPageDetail('${carte.id}')" style="cursor: pointer;">
+                <div class="dokkan-card h-100 ${lrClass}" 
+                     onclick="allerVersPageDetail('${carte.id}')" 
+                     style="cursor: pointer; --lr-color: ${hexGlow};">
                     
                     <div class="card-body text-center p-2 position-relative">
+                        
                         <img src="${cheminImage}" 
                              class="img-fluid mb-1 auto-cycle-img" 
                              alt="${nomAffiche}" 
@@ -113,20 +120,15 @@ function afficherCartes(liste) {
         container.innerHTML += codeHTML;
     });
 
-    // Plus besoin d'initialiser les tooltips pour les badges spéciaux puisqu'ils sont supprimés
-    // const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    // const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-
     // 2. On lance les cycles automatiques des images
     lancerCycleAutomatique();
 }
 
 // ============================================================
-// 4. GESTION DU CYCLE AUTOMATIQUE (5 SECONDES)
+// 4. GESTION DU CARROUSEL AUTOMATIQUE
 // ============================================================
 
 function lancerCycleAutomatique() {
-    // On sélectionne toutes les images qu'on vient de créer
     const imagesElements = document.querySelectorAll('.auto-cycle-img');
 
     imagesElements.forEach(img => {
@@ -136,46 +138,33 @@ function lancerCycleAutomatique() {
         const hasEchange = img.dataset.echange === "true";
         const hasFureur = img.dataset.fureur === "true"; 
         const hasGeant = img.dataset.geant === "true";
-        const hasStandby = img.dataset.standby === "true"; // LECTURE DONNÉE STANDBY
+        const hasStandby = img.dataset.standby === "true"; 
 
-        // Construction de la liste des images AVEC LE SOUS-DOSSIER
         const imagesList = [`${BASE_IMG_URL}${id}/${id}.png`]; // Base
         
-        // Ajout des formes dans le cycle
-        if (hasStandby) imagesList.push(`${BASE_IMG_URL}${id}/${id}_standby.png`); // AJOUT IMAGE STANDBY
+        if (hasStandby) imagesList.push(`${BASE_IMG_URL}${id}/${id}_standby.png`);
         if (hasGeant) imagesList.push(`${BASE_IMG_URL}${id}/${id}_geant.png`);
         if (hasTransfo) imagesList.push(`${BASE_IMG_URL}${id}/${id}_transfo.png`);
         if (hasRevival) imagesList.push(`${BASE_IMG_URL}${id}/${id}_revival.png`);
         if (hasEchange) imagesList.push(`${BASE_IMG_URL}${id}/${id}_echange.png`);
         if (hasFureur) imagesList.push(`${BASE_IMG_URL}${id}/${id}_fureur.png`);
 
-        // S'il y a plus d'une image, on lance le cycle
         if (imagesList.length > 1) {
             let currentIndex = 0;
-
             const intervalId = setInterval(() => {
-                // Petit effet de fondu sortant
                 img.style.opacity = 0.5;
-
                 setTimeout(() => {
-                    // Changement d'image
                     currentIndex = (currentIndex + 1) % imagesList.length;
                     img.src = imagesList[currentIndex];
-                    
-                    // Fondu entrant
                     img.style.opacity = 1;
                 }, 200);
-
-            }, 5000); // 5000ms = 5 secondes
-
-            // On stocke l'ID pour pouvoir l'arrêter plus tard
+            }, 5000); 
             activeIntervals.push(intervalId);
         }
     });
 }
 
 function nettoyerIntervalles() {
-    // Coupe tous les chronomètres actifs
     activeIntervals.forEach(id => clearInterval(id));
     activeIntervals = [];
 }
@@ -192,7 +181,6 @@ if (searchInput) {
         const texteRecherche = e.target.value.toLowerCase();
 
         if (texteRecherche === "") {
-            // On réaffiche les 8 dernières si la recherche est vide
             const dernieresSorties = toutesLesCartes.slice(-8).reverse();
             afficherCartes(dernieresSorties);
         } else {
@@ -200,7 +188,6 @@ if (searchInput) {
                 let nomPourRecherche = "";
                 if (typeof carte.nom === 'object' && carte.nom !== null) {
                     const nomSup = carte.nom.transfo || carte.nom.revival || carte.nom.echange || carte.nom.fureur || "";
-                    // Pour la recherche, on peut aussi chercher dans le nom Standby si besoin
                     const nomStandby = (carte.standby && carte.standby.form) ? carte.standby.form.nom : "";
                     nomPourRecherche = (carte.nom.base + " " + nomSup + " " + nomStandby).toLowerCase();
                 } else {
@@ -214,8 +201,10 @@ if (searchInput) {
 }
 
 // ============================================================
-// 6. UTILITAIRES (COULEURS)
+// 6. UTILITAIRES (COULEURS & CLASSES)
 // ============================================================
+
+// Retourne la classe Bootstrap pour le Badge
 function getTypeColor(type) {
     if (!type) return 'bg-secondary';
     const t = type.toUpperCase();
@@ -225,6 +214,18 @@ function getTypeColor(type) {
     if (t === 'INT') return 'bg-int';       
     if (t === 'PHY' || t === 'END') return 'bg-warning text-dark';
     return 'bg-secondary';
+}
+
+// Retourne le Code HEX pour l'effet Glow
+function getGlowColor(type) {
+    if (!type) return '#ffd700'; // Or par défaut
+    const t = type.toUpperCase();
+    if (t === 'PUI' || t === 'STR') return '#dc3545'; // Rouge
+    if (t === 'AGI' || t === 'AGL') return '#0d6efd'; // Bleu
+    if (t === 'TEQ' || t === 'TEC') return '#198754'; // Vert
+    if (t === 'INT') return '#6f42c1'; // Violet
+    if (t === 'PHY' || t === 'END') return '#ffc107'; // Jaune/Orange
+    return '#ffd700';
 }
 
 // Lancement
