@@ -63,9 +63,8 @@ function afficherCartes(liste) {
         return;
     }
 
-    const iconPath = "icons/"; // Chemin vers tes icônes
-    // Configuration commune pour les tooltips Bootstrap
-    const tooltipAttrs = `data-bs-toggle="tooltip" data-bs-placement="top"`;
+    // Le chemin des icônes n'est plus nécessaire ici si on ne les affiche plus
+    // const iconPath = "icons/"; 
 
     liste.forEach(carte => {
         // CONSTRUCTION URL AVEC SOUS-DOSSIER ID
@@ -75,31 +74,8 @@ function afficherCartes(liste) {
         // --- GESTION DU NOM ---
         const nomAffiche = (typeof carte.nom === 'object' && carte.nom !== null) ? carte.nom.base : carte.nom;
 
-        // --- GESTION DES ICÔNES SPÉCIALES (AVEC TOOLTIPS) ---
-        let badgeSpecial = "";
-        
-        // Ordre de priorité pour l'icône affichée
-        if (carte.standby) { // AJOUT STANDBY EN PRIORITÉ (Exemple)
-             // Tu devras créer une icone_standby.png ou utiliser une autre
-             badgeSpecial = `<img src="${iconPath}icone_standby.png" class="card-mechanic-icon" 
-                            alt="Standby" ${tooltipAttrs} data-bs-title="Standby Skill"
-                            onerror="this.style.display='none'">`; // Cache si pas d'image
-        } else if (carte.geant) {
-            badgeSpecial = `<img src="${iconPath}icone_fureur.png" class="card-mechanic-icon" 
-                            alt="Géant" ${tooltipAttrs} data-bs-title="Mode Géant">`;
-        } else if (carte.fureur) {
-            badgeSpecial = `<img src="${iconPath}icone_fureur.png" class="card-mechanic-icon" 
-                            alt="Fureur" ${tooltipAttrs} data-bs-title="Mode Fureur">`;
-        } else if (carte.transformation) {
-            badgeSpecial = `<img src="${iconPath}icone_transfo.png" class="card-mechanic-icon" 
-                            alt="Transformation" ${tooltipAttrs} data-bs-title="Transformation">`;
-        } else if (carte.revival) {
-            badgeSpecial = `<img src="${iconPath}icone_revival.png" class="card-mechanic-icon" 
-                            alt="Revival" ${tooltipAttrs} data-bs-title="Revival">`;
-        } else if (carte.echange) {
-            badgeSpecial = `<img src="${iconPath}icone_echange.png" class="card-mechanic-icon" 
-                            alt="Echange" ${tooltipAttrs} data-bs-title="Echange">`;
-        }
+        // --- SUPPRESSION DE LA GESTION DES ICÔNES SPÉCIALES ---
+        // La variable badgeSpecial a été retirée
 
         // --- PRÉPARATION DES DONNÉES POUR LE SCRIPT AUTO ---
         const hasTransfo = carte.transformation ? "true" : "false";
@@ -110,15 +86,11 @@ function afficherCartes(liste) {
         const hasStandby = carte.standby ? "true" : "false"; // AJOUT STANDBY DATA
 
         // MODIFICATIONS CSS DANS LE HTML GÉNÉRÉ :
-        // 1. Image : suppression de mb-2, ajout de mb-1 pour réduire l'écart
-        // 2. Nom : ajout de mb-2 pour pousser le badge vers le bas
         const codeHTML = `
             <div class="col-6 col-md-3 mb-4">
                 <div class="dokkan-card h-100" onclick="allerVersPageDetail('${carte.id}')" style="cursor: pointer;">
                     
                     <div class="card-body text-center p-2 position-relative">
-                        ${badgeSpecial}
-
                         <img src="${cheminImage}" 
                              class="img-fluid mb-1 auto-cycle-img" 
                              alt="${nomAffiche}" 
@@ -141,9 +113,9 @@ function afficherCartes(liste) {
         container.innerHTML += codeHTML;
     });
 
-    // --- INITIALISATION DES TOOLTIPS BOOTSTRAP ---
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    // Plus besoin d'initialiser les tooltips pour les badges spéciaux puisqu'ils sont supprimés
+    // const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    // const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
     // 2. On lance les cycles automatiques des images
     lancerCycleAutomatique();
