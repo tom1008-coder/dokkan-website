@@ -1,10 +1,8 @@
-// cards.js - Version Finale (Clean : Image seule + Nom)
+// JS/cards.js
 
-// --- URL DE BASE ---
 const BASE_IMG_URL = "https://dpqxaevnarnhmxihkggk.supabase.co/storage/v1/object/public/images/";
 
 let allCardsData = []; 
-let uniqueCategories = new Set();
 let uniqueNames = new Set(); 
 
 // Éléments du DOM
@@ -26,16 +24,17 @@ const filterSearch = document.getElementById('filter-search');
 // ============================================================
 async function initCardsPage() {
     try {
-        const { data, error } = await supabase
-            .from('characters')
-            .select('*')
-            // TRI PAR DEFAUT : Rareté LR en premier, puis ID décroissant
-            .order('tag', { ascending: true }) // 'tag' contient 'LR' ou 'UR'. 'LR' < 'UR' donc LR d'abord si ascending
-            .order('id', { ascending: false }); // Les plus récents en premier
+        // Chargement parallèle (Cartes + Catégories)
+        const [resCards, resCats] = await Promise.all([
+            supabase.from('characters').select('*').order('tag', {ascending:true}).order('id', {ascending:false}),
+            supabase.from('categories').select('nom').order('nom', {ascending:true})
+        ]);
 
-        if (error) throw error;
+        if (resCards.error) throw resCards.error;
+        if (resCats.error) console.error("Erreur categories", resCats.error);
         
-        // Tri manuel plus robuste pour être sûr que les LR sont devant
+        // Tri manuel plus robuste
+        let data = resCards.data;
         data.sort((a, b) => {
             if (a.tag === 'LR' && b.tag !== 'LR') return -1;
             if (a.tag !== 'LR' && b.tag === 'LR') return 1;
@@ -43,6 +42,17 @@ async function initCardsPage() {
         });
 
         allCardsData = data;
+
+        // Remplissage Filtre Catégories
+        if (resCats.data) {
+            filterCategory.innerHTML = '<option value="">Toutes les catégories</option>';
+            resCats.data.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.nom;
+                opt.textContent = c.nom;
+                filterCategory.appendChild(opt);
+            });
+        }
 
         extractFiltersData(); 
         renderCards(allCardsData);
@@ -54,37 +64,17 @@ async function initCardsPage() {
 }
 
 // ============================================================
-// 2. EXTRACTION DES FILTRES
+// 2. EXTRACTION DES FILTRES (Noms uniquement)
 // ============================================================
 function extractFiltersData() {
+    uniqueNames.clear();
+    
     allCardsData.forEach(card => {
-        // Catégories
-        if (card.categories) {
-            let cats = card.categories;
-            if (typeof cats === 'string') {
-                try { cats = JSON.parse(cats); } catch(e) {}
-            }
-            if (Array.isArray(cats)) {
-                cats.forEach(cat => uniqueCategories.add(cat));
-            }
-        }
-
-        // Noms
         let fullName = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
-        if(fullName) {
-            uniqueNames.add(fullName); // On prend le nom complet pour être précis
-        }
+        if(fullName) uniqueNames.add(fullName);
     });
 
-    // Remplissage Select Catégories (Tri alphabétique)
-    Array.from(uniqueCategories).sort().forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        filterCategory.appendChild(opt);
-    });
-
-    // Remplissage Select Personnages (Tri alphabétique)
+    filterCharName.innerHTML = '<option value="">Tous les personnages</option>';
     Array.from(uniqueNames).sort().forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
@@ -109,15 +99,18 @@ function renderCards(cards) {
 
     cards.forEach(card => {
         const displayNom = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
-        
-        // MODIFICATION ICI : AJOUT DU DOSSIER ID DANS L'URL
+        // URL AVEC SOUS-DOSSIER
         const displayUrl = `${BASE_IMG_URL}${card.id}/${card.id}.png`;
         
-        // HTML : Uniquement l'image et le nom en dessous
         const html = `
-            <div class="card-container" onclick="window.location.href='detail.html?id=${card.id}'" title="${displayNom}">
-                <img src="${displayUrl}" class="card-img" loading="lazy" onerror="this.src='https://placehold.co/100x100?text=?'">
-                <div class="card-name">${displayNom}</div>
+            <div class="col">
+                <div class="card-container" onclick="window.location.href='detail.html?id=${card.id}'" title="${displayNom}">
+                    <div class="card-icon-wrapper">
+                        <img src="${displayUrl}" class="card-img" 
+                             loading="lazy" onerror="this.src='https://placehold.co/90x90/000/fff?text=?'">
+                    </div>
+                    <div class="card-name">${displayNom}</div>
+                </div>
             </div>
         `;
         gridContainer.innerHTML += html;
@@ -129,7 +122,7 @@ function renderCards(cards) {
 // ============================================================
 function applyFilters() {
     const searchVal = filterSearch.value.toLowerCase().trim();
-    const rarityVal = filterRarity.value; // 'LR', 'UR', etc.
+    const rarityVal = filterRarity.value; 
     const typeVal = filterType.value;
     const classVal = filterClass.value;
     const charNameVal = filterCharName.value;
@@ -139,28 +132,16 @@ function applyFilters() {
         const cardName = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
         const cardNameLower = cardName ? cardName.toLowerCase() : "";
 
-        // Recherche texte (nom ou ID)
         if (searchVal && !cardNameLower.includes(searchVal) && !String(card.id).includes(searchVal)) return false;
-        
-        // Rareté (colonne 'tag' dans la BDD)
         if (rarityVal && card.tag !== rarityVal) return false;
-        
-        // Type
         if (typeVal && card.type !== typeVal) return false;
-        
-        // Classe
         if (classVal && card.classe !== classVal) return false;
         
-        // Catégorie
+        // Filtre Catégorie (Compatible tableau text[])
         if (catVal) {
-            let cCats = card.categories;
-            if (typeof cCats === 'string') {
-                try { cCats = JSON.parse(cCats); } catch(e) {}
-            }
-            if (!Array.isArray(cCats) || !cCats.includes(catVal)) return false;
+            if (!Array.isArray(card.categories) || !card.categories.includes(catVal)) return false;
         }
         
-        // Nom Exact (Select)
         if (charNameVal && cardName !== charNameVal) return false;
 
         return true;
@@ -169,7 +150,6 @@ function applyFilters() {
     renderCards(filtered);
 }
 
-// Listeners
 filterSearch.addEventListener('input', applyFilters);
 filterRarity.addEventListener('change', applyFilters);
 filterType.addEventListener('change', applyFilters);
@@ -177,5 +157,4 @@ filterClass.addEventListener('change', applyFilters);
 filterCharName.addEventListener('change', applyFilters);
 filterCategory.addEventListener('change', applyFilters);
 
-// Démarrage
 document.addEventListener('DOMContentLoaded', initCardsPage);

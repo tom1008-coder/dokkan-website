@@ -118,6 +118,17 @@
      "Soldat divin" : {
         "lv1": "ATT +10 %",
         "lv10": "ATT +10 %, ATT +5 % en plus lors d'une attaque spéciale"
-    }
+    },
 
+
+     "Guerrier vétéran" : {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT +15 %"
+    },
+
+
+     "Guerrier tenace" : {
+        "lv1": "DÉF +15 %",
+        "lv10": "DÉF +20 %, dégâts encaissés réduits de +5 %"
+    }
 }

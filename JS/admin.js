@@ -1,6 +1,6 @@
 // JS/admin.js
 
-let tomSelectCats, tomSelectLinks, tomSelectEchangeLinks, tomSelectTransfoLinks, tomSelectSearch;
+let tomSelectCats, tomSelectLinks, tomSelectEchangeLinks, tomSelectTransfoLinks, tomSelectStandbyLinks, tomSelectSearch;
 let currentEditId = null;
 
 // INIT TINYMCE
@@ -37,7 +37,7 @@ function initTinyMCE(selector = '.rich-text') {
     window.logSuccess = function(msg) { console.log("SUCCESS: "+msg); if(logContainer.lastChild) logContainer.lastChild.className='log-success'; };
 })();
 
-// TOGGLE ACTIVE TABS (Ajouté)
+// GESTION TABS ACTIVE SKILL
 window.switchActiveTab = function(tab) {
     const baseBlock = document.getElementById('active-base-block');
     const transfoBlock = document.getElementById('active-transfo-block');
@@ -48,7 +48,6 @@ window.switchActiveTab = function(tab) {
         b.classList.add('btn-outline-danger');
     });
     
-    // Le bouton cliqué devient actif
     const activeBtn = Array.from(btns).find(b => b.innerText.toLowerCase().includes(tab));
     if(activeBtn) {
         activeBtn.classList.remove('btn-outline-danger');
@@ -61,52 +60,75 @@ window.switchActiveTab = function(tab) {
     } else {
         baseBlock.classList.add('d-none');
         transfoBlock.classList.remove('d-none');
-        // Init tinymce si besoin
         initTinyMCE('#active-transfo-block .rich-text');
     }
 };
 
-// INIT TOM SELECT
+// INIT TOM SELECT (CORRIGÉ & DÉBUGGÉ)
 async function initTomSelects() {
-    const config = { create: true, createOnBlur: true, persist: false, plugins: ['remove_button','dropdown_input'], sortField: { field: "text", direction: "asc" } };
-    tomSelectCats = new TomSelect("#char-cats", config);
-    tomSelectLinks = new TomSelect("#char-links", config);
-    tomSelectTransfoLinks = new TomSelect("#transfo-links", config);
-    tomSelectEchangeLinks = new TomSelect("#echange-links", config);
-    
-    tomSelectSearch = new TomSelect("#search-char-edit", {
-        valueField: 'id', labelField: 'name', searchField: ['name','id'], placeholder: "Rechercher...", maxItems: 1,
-        render: { option: (d,e)=>`<div><b class="text-warning">${e(d.name)}</b> <small>(${e(d.id)})</small></div>`, item: (d,e)=>`<div>${e(d.name)}</div>` },
-        onChange: (v) => { if(v) loadCharacterIntoForm(v); }
-    });
+    // Config pour les Catégories (Table dédiée)
+    const configCats = { 
+        create: true, 
+        createOnBlur: true, 
+        persist: false, 
+        plugins: ['remove_button','dropdown_input'], 
+        sortField: { field: "text", direction: "asc" },
+        valueField: 'nom', 
+        labelField: 'nom', 
+        searchField: 'nom'
+    };
 
-    console.log("🔄 Chargement données DB...");
-    const { data } = await supabase.from('characters').select('id, nom, categories');
-    if(data) {
-        let allCats = new Set();
-        data.forEach(c => {
-            let n = c.id; if(c.nom) n = (typeof c.nom==='string')?c.nom:c.nom.base;
-            tomSelectSearch.addOption({id:c.id, name:n});
-            if(c.categories) {
-                let cats = c.categories;
-                if(typeof cats==='string' && cats.startsWith('[')) try{cats=JSON.parse(cats)}catch(e){}
-                if(Array.isArray(cats)) cats.forEach(x=>allCats.add(x));
-            }
+    const configStd = { create: true, createOnBlur: true, persist: false, plugins: ['remove_button','dropdown_input'], sortField: { field: "text", direction: "asc" } };
+
+    if(document.getElementById("char-cats")) tomSelectCats = new TomSelect("#char-cats", configCats);
+    if(document.getElementById("char-links")) tomSelectLinks = new TomSelect("#char-links", configStd);
+    if(document.getElementById("transfo-links")) tomSelectTransfoLinks = new TomSelect("#transfo-links", configStd);
+    if(document.getElementById("echange-links")) tomSelectEchangeLinks = new TomSelect("#echange-links", configStd);
+    if(document.getElementById("standby-links")) tomSelectStandbyLinks = new TomSelect("#standby-links", configStd);
+    
+    // 1. Charger Catégories depuis la BDD
+    console.log("🔄 Chargement Catégories DB...");
+    try {
+        const { data: catsData, error } = await supabase.from('categories').select('nom').order('nom', { ascending: true });
+        if (error) {
+            console.error("❌ ERREUR SUPABASE (Catégories) :", error.message);
+        } else if (catsData) {
+            catsData.forEach(c => { if(tomSelectCats) tomSelectCats.addOption({nom: c.nom}); });
+            console.log(`✅ ${catsData.length} Catégories chargées.`);
+            if(tomSelectCats) tomSelectCats.refreshOptions(false);
+        }
+    } catch (err) { console.error("❌ ERREUR TECHNIQUE JS :", err); }
+
+    // 2. Charger Personnages
+    if(document.getElementById("search-char-edit")) {
+        tomSelectSearch = new TomSelect("#search-char-edit", {
+            valueField: 'id', labelField: 'name', searchField: ['name','id'], placeholder: "Rechercher...", maxItems: 1,
+            render: { option: (d,e)=>`<div><b class="text-warning">${e(d.name)}</b> <small>(${e(d.id)})</small></div>`, item: (d,e)=>`<div>${e(d.name)}</div>` },
+            onChange: (v) => { if(v) loadCharacterIntoForm(v); }
         });
-        allCats.forEach(x=>tomSelectCats.addOption({value:x, text:x}));
-        console.log(`✅ ${allCats.size} Catégories chargées.`);
+
+        const { data: charsData } = await supabase.from('characters').select('id, nom');
+        if(charsData) {
+            charsData.forEach(c => {
+                let n = c.id; if(c.nom) n = (typeof c.nom==='string')?c.nom:c.nom.base;
+                tomSelectSearch.addOption({id:c.id, name:n});
+            });
+        }
     }
 
+    // 3. Charger Liens (JSON)
     try {
-        const res = await fetch('links.json'); const json = await res.json();
-        const linkKeys = Object.keys(json);
-        linkKeys.forEach(l => { 
-            tomSelectLinks.addOption({value:l, text:l}); 
-            tomSelectTransfoLinks.addOption({value:l, text:l});
-            tomSelectEchangeLinks.addOption({value:l, text:l}); 
-        });
-        console.log(`✅ ${linkKeys.length} Liens chargés.`);
-    } catch(e) { console.error("Erreur chargement liens :", e); }
+        const res = await fetch('links.json'); 
+        if(res.ok) {
+            const json = await res.json();
+            Object.keys(json).forEach(l => { 
+                if(tomSelectLinks) tomSelectLinks.addOption({value:l, text:l}); 
+                if(tomSelectTransfoLinks) tomSelectTransfoLinks.addOption({value:l, text:l});
+                if(tomSelectEchangeLinks) tomSelectEchangeLinks.addOption({value:l, text:l}); 
+                if(tomSelectStandbyLinks) tomSelectStandbyLinks.addOption({value:l, text:l});
+            });
+        }
+    } catch(e) { console.error("Erreur liens :", e); }
 }
 
 // UI ELEMENTS
@@ -114,6 +136,7 @@ const els = {
     rarity: document.getElementById('char-rarity'),
     checkTransfo: document.getElementById('has-transfo'), 
     checkActive: document.getElementById('has-active'),
+    checkStandby: document.getElementById('has-standby'),
     checkRevival: document.getElementById('has-revival'), 
     checkFureur: document.getElementById('has-fureur'),
     checkGeant: document.getElementById('has-geant'),
@@ -126,6 +149,7 @@ const els = {
     secTransfo: document.getElementById('section-transfo'), 
     secEchange: document.getElementById('section-echange'),
     secActive: document.getElementById('section-active'),
+    secStandby: document.getElementById('section-standby'),
     secRevival: document.getElementById('section-revival'), 
     secAutres: document.getElementById('section-autres'),
     secZtur: document.getElementById('section-ztur'), 
@@ -134,8 +158,6 @@ const els = {
     
     blockZturActive: document.getElementById('ztur-active-block'),
     blockSezaActive: document.getElementById('seza-active-block'),
-    
-    lrFields: document.querySelectorAll('.lr-field')
 };
 
 function updateUI() {
@@ -160,6 +182,7 @@ function updateUI() {
     toggle(els.checkTransfo.checked, els.secTransfo);
     toggle(els.checkEchange.checked, els.secEchange);
     toggle(els.checkActive.checked, els.secActive);
+    toggle(els.checkStandby.checked, els.secStandby);
     toggle(els.checkRevival.checked, els.secRevival); 
     
     const showZ = els.checkZtur.checked || els.checkZlr.checked;
@@ -174,7 +197,6 @@ function updateUI() {
     const hasFureur = els.checkFureur.checked;
     const hasGeant = els.checkGeant.checked;
 
-    // GESTION BLOC GÉANT Z-TUR
     const geantZturFields = document.querySelectorAll('.geant-ztur-field');
     geantZturFields.forEach(div => {
         if(showZ && hasGeant) div.classList.remove('d-none');
@@ -265,7 +287,7 @@ function updateUI() {
 }
 
 if(els.rarity) {
-    [els.rarity, els.checkTransfo, els.checkActive, els.checkRevival, els.checkFureur, els.checkGeant, els.checkEchange, els.checkZtur, els.checkZlr, els.checkSeza, els.checkSpeEx]
+    [els.rarity, els.checkTransfo, els.checkActive, els.checkStandby, els.checkRevival, els.checkFureur, els.checkGeant, els.checkEchange, els.checkZtur, els.checkZlr, els.checkSeza, els.checkSpeEx]
     .forEach(el => el && el.addEventListener('change', updateUI));
 }
 
@@ -319,6 +341,7 @@ async function loadCharacterIntoForm(id) {
     setCheck('has-transfo', data.transformation);
     setCheck('has-echange', data.echange);
     setCheck('has-active', data.active_skill && data.active_skill!==null);
+    setCheck('has-standby', data.standby && data.standby!==null); 
     setCheck('has-fureur', data.fureur);
     setCheck('has-geant', data.geant);
     setCheck('has-revival', data.revival);
@@ -337,8 +360,7 @@ async function loadCharacterIntoForm(id) {
 
         if(data.categories) {
             let c = data.categories;
-            if(typeof c==='string' && c.startsWith('[')) try{c=JSON.parse(c)}catch(e){}
-            tomSelectCats.setValue(c);
+            if(Array.isArray(c)) tomSelectCats.setValue(c);
         }
         if(data.liens) {
             let l = data.liens;
@@ -348,6 +370,7 @@ async function loadCharacterIntoForm(id) {
                 if(l.base) tomSelectLinks.setValue(l.base); 
                 if(l.transfo) tomSelectTransfoLinks.setValue(l.transfo); 
                 if(l.echange) tomSelectEchangeLinks.setValue(l.echange); 
+                if(l.standby) tomSelectStandbyLinks.setValue(l.standby);
             }
         }
 
@@ -420,9 +443,62 @@ async function loadCharacterIntoForm(id) {
 
         setCheck('has-spe-ex', data.spe_ex);
         if(data.spe_ex) {
-            if(data.spe_ex.base) { setVal('spe-ex-nom', data.spe_ex.base.nom); setVal('spe-ex-effet', data.spe_ex.base.effet); }
-            if(data.spe_ex.transfo) { setVal('spe-ex-transfo-nom', data.spe_ex.transfo.nom); setVal('spe-ex-transfo-effet', data.spe_ex.transfo.effet); }
-            if(data.spe_ex.echange) { setVal('spe-ex-echange-nom', data.spe_ex.echange.nom); setVal('spe-ex-echange-effet', data.spe_ex.echange.effet); }
+            if(data.spe_ex.base) { 
+                setVal('spe-ex-nom', data.spe_ex.base.nom); 
+                setVal('spe-ex-effet', data.spe_ex.base.effet);
+                setVal('spe-ex-type', data.spe_ex.base.type || 'base');
+                setVal('spe-ex-condition', data.spe_ex.base.condition);
+            }
+            if(data.spe_ex.transfo) { 
+                setVal('spe-ex-transfo-nom', data.spe_ex.transfo.nom); 
+                setVal('spe-ex-transfo-effet', data.spe_ex.transfo.effet);
+                setVal('spe-ex-transfo-type', data.spe_ex.transfo.type || 'base');
+                setVal('spe-ex-transfo-condition', data.spe_ex.transfo.condition);
+            }
+            if(data.spe_ex.echange) { 
+                setVal('spe-ex-echange-nom', data.spe_ex.echange.nom); 
+                setVal('spe-ex-echange-effet', data.spe_ex.echange.effet);
+                setVal('spe-ex-echange-type', data.spe_ex.echange.type || 'base');
+                setVal('spe-ex-echange-condition', data.spe_ex.echange.condition);
+            }
+        }
+
+        // CHARGEMENT STANDBY (2 FINISH TYPE ACTIVE - VIOLET)
+        if(data.standby) {
+            // Activation
+            if(data.standby.activation) {
+                setVal('standby-nom', data.standby.activation.nom);
+                setVal('standby-condition', data.standby.activation.condition);
+                setVal('standby-effet', data.standby.activation.effet);
+            }
+            // Forme Standby
+            if(data.standby.form) {
+                setVal('standby-form-nom', data.standby.form.nom);
+                setVal('standby-passif', data.standby.form.passif);
+            }
+            // Liens Standby
+            if(data.liens && data.liens.standby && tomSelectStandbyLinks) {
+                 tomSelectStandbyLinks.setValue(data.liens.standby);
+            }
+
+            // Finish 1
+            if(data.standby.finish1) {
+                setVal('standby-finish1-nom', data.standby.finish1.nom);
+                setVal('standby-finish1-condition', data.standby.finish1.condition);
+                setVal('standby-finish1-effet', data.standby.finish1.effet);
+            } 
+            // Rétro-compatibilité
+            else if (data.standby.finish) {
+                setVal('standby-finish1-nom', data.standby.finish.nom);
+                setVal('standby-finish1-effet', data.standby.finish.effet);
+            }
+            
+            // Finish 2
+            if(data.standby.finish2) {
+                setVal('standby-finish2-nom', data.standby.finish2.nom);
+                setVal('standby-finish2-condition', data.standby.finish2.condition);
+                setVal('standby-finish2-effet', data.standby.finish2.effet);
+            }
         }
 
         setVal('ztur-leader', data.leader_skill_ztur);
@@ -507,6 +583,7 @@ document.getElementById('btn-reset-form').addEventListener('click', () => {
     currentEditId = null;
     document.getElementById('add-character-form').reset();
     tomSelectCats.clear(); tomSelectLinks.clear(); tomSelectEchangeLinks.clear(); tomSelectTransfoLinks.clear(); tomSelectSearch.clear();
+    if(tomSelectStandbyLinks) tomSelectStandbyLinks.clear();
     if(typeof tinymce !== 'undefined') tinymce.editors.forEach(ed => ed.setContent(''));
     document.getElementById('btn-submit').innerText = "ENREGISTRER";
     document.getElementById('btn-submit').className = "btn btn-warning btn-lg fw-bold text-dark py-3";
@@ -533,6 +610,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             return el ? el.value.trim() : "";
         };
         const has = (id) => document.getElementById(id).checked;
+
+        // --- SAUVEGARDE DES NOUVELLES CATÉGORIES DANS LA TABLE DÉDIÉE ---
+        const selectedCats = tomSelectCats.getValue(); 
+        if (selectedCats.length > 0) {
+            const catsToInsert = selectedCats.map(catName => ({ nom: catName }));
+            const { error: catError } = await supabase.from('categories').upsert(catsToInsert, { onConflict: 'nom', ignoreDuplicates: true });
+            if (catError) console.error("Erreur sauvegarde catégories :", catError);
+        }
 
         const idChar = val('char-id');
         const rarity = val('char-rarity');
@@ -606,12 +691,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         }
 
+        // --- GESTION SPE EX AVEC TYPE ET CONDITION ---
+        const createSpeExObj = (idNom, idEffet, idType, idCond) => {
+            const nom = val(idNom);
+            const effet = val(idEffet);
+            const type = val(idType) || 'base';
+            const condition = val(idCond); 
+            
+            if (!nom && (!effet || effet === "")) return null;
+            return { nom, effet, type, condition };
+        };
+
         const hasSpeEx = has('has-spe-ex');
         const speExJson = hasSpeEx ? {
-            base: createContentObj(val('spe-ex-nom'), val('spe-ex-effet')),
-            transfo: has('has-transfo') ? createContentObj(val('spe-ex-transfo-nom'), val('spe-ex-transfo-effet')) : null,
-            echange: has('has-echange') ? createContentObj(val('spe-ex-echange-nom'), val('spe-ex-echange-effet')) : null
+            base: createSpeExObj('spe-ex-nom', 'spe-ex-effet', 'spe-ex-type', 'spe-ex-condition'),
+            transfo: has('has-transfo') ? createSpeExObj('spe-ex-transfo-nom', 'spe-ex-transfo-effet', 'spe-ex-transfo-type', 'spe-ex-transfo-condition') : null,
+            echange: has('has-echange') ? createSpeExObj('spe-ex-echange-nom', 'spe-ex-echange-effet', 'spe-ex-echange-type', 'spe-ex-echange-condition') : null
         } : null;
+
+        // --- GESTION STANDBY SKILL ---
+        let standbyJson = null;
+        if(has('has-standby')) {
+            const createFinish = (num) => {
+                const nom = val(`standby-finish${num}-nom`);
+                const cond = val(`standby-finish${num}-condition`);
+                const effet = val(`standby-finish${num}-effet`);
+                if(!nom && !effet) return null;
+                // On garde la structure : Nom, Condition, Effet (Comme un Active Skill)
+                return { nom: nom, condition: cond, effet: effet };
+            };
+
+            standbyJson = {
+                activation: {
+                    nom: val('standby-nom'),
+                    condition: val('standby-condition'),
+                    effet: val('standby-effet')
+                },
+                form: {
+                    nom: val('standby-form-nom'),
+                    passif: val('standby-passif')
+                },
+                finish1: createFinish(1),
+                finish2: createFinish(2)
+            };
+        }
 
         const sezaPassif = { base: createContentObj(val('seza-passif-nom'), val('seza-passif-effet')), transfo: has('has-transfo') ? createContentObj(null, val('seza-passif-transfo')) : null };
         const sezaSpe = { base: { nom: val('seza-spe-nom'), effet: val('seza-spe-effet') }, transfo: has('has-transfo') ? { nom: null, effet: val('seza-spe-transfo') } : null };
@@ -646,7 +769,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             } : null
         };
 
-        // GESTION ACTIVE SKILL (BASE ET TRANSFO)
         let activeJson = null; 
         if (has('has-active')) {
             activeJson = { 
@@ -655,7 +777,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     condition: val('active-cond'), 
                     effet: val('active-effet') 
                 }, 
-                // Si la case Transfo est cochée et que des infos sont saisies
                 transfo: (has('has-transfo') && (val('active-transfo-nom') || val('active-transfo-effet'))) ? {
                     nom: val('active-transfo-nom'),
                     condition: val('active-transfo-cond'),
@@ -678,6 +799,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             geant: has('has-geant'), 
             revival: has('has-revival'), echange: has('has-echange'),
             ztur: has('has-ztur'), zlr: has('has-zlr'), seza: has('has-seza'),
+            standby: standbyJson,
             leader_skill: val('char-leader'),
             nom: nomJson, passif: passifJson, spe: speJson, active_skill: activeJson, 
             spe_ex: speExJson,
@@ -685,7 +807,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             liens: { 
                 base: liensBase, 
                 transfo: liensTransfo, 
-                echange: has('has-echange') ? (tomSelectEchangeLinks.getValue().length > 0 ? tomSelectEchangeLinks.getValue() : liensBase) : null 
+                echange: has('has-echange') ? (tomSelectEchangeLinks.getValue().length > 0 ? tomSelectEchangeLinks.getValue() : liensBase) : null,
+                standby: has('has-standby') ? (tomSelectStandbyLinks.getValue().length > 0 ? tomSelectStandbyLinks.getValue() : liensBase) : null
             }, 
             categories: tomSelectCats.getValue(), liens_externes: { wiki: val('ext-wiki'), youtube: val('ext-yt') },
             leader_skill_ztur: val('ztur-leader'), passif_ztur: zturPassif, spe_ztur: zturSpe, active_skill_ztur: zturActive,
@@ -718,7 +841,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // SYNCHRONISATION AUTOMATIQUE
     const syncFields = [
         { src: 'base-spe-nom', dest: 'ztur-spe-nom' },
         { src: 'base-ult-nom', dest: 'ztur-ult-nom' },

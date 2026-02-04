@@ -39,7 +39,6 @@ function getContent(rawData, forme, field = 'effet') {
 
     if (Array.isArray(content)) {
         const titleLine = content.find(line => typeof line === 'string' && line.trim().startsWith('[') && line.trim().endsWith(']'));
-        
         if (field === 'nom') {
             return titleLine ? titleLine.slice(1, -1) : "";
         } else {
@@ -53,7 +52,6 @@ function getContent(rawData, forme, field = 'effet') {
     else if (typeof content === 'string') {
         return content;
     }
-
     return "";
 }
 
@@ -67,15 +65,13 @@ function getStatVal(rawStats, level, key) {
 }
 
 async function chargerDetail() {
-    if (!idRecherche) { loadingDiv.innerHTML = "<p class='text-danger'>Aucun ID.</p>"; return; }
+    if (!idRecherche) { loadingDiv.innerHTML = "<p class='text-danger'>Aucun ID fourni.</p>"; return; }
 
     try {
-        // 1. Récupération du perso actuel
         const { data: persoData, error } = await supabase.from('characters').select('*').eq('id', idRecherche).single();
-        if (error || !persoData) { console.error(error); loadingDiv.innerHTML = "<p class='text-danger'>Introuvable.</p>"; return; }
+        if (error || !persoData) { console.error(error); loadingDiv.innerHTML = "<p class='text-danger'>Personnage introuvable.</p>"; return; }
         currentPersoGlobal = persoData;
 
-        // 2. Récupération de TOUS les persos (pour les partenaires)
         const { data: allData } = await supabase.from('characters').select('id, nom, liens');
         allPersosGlobal = allData || [];
 
@@ -92,22 +88,14 @@ async function chargerDetail() {
         document.getElementById("detail-classe").innerText = currentPersoGlobal.classe;
         
         const divEveil = document.getElementById("awakening-controls");
-        
         if (currentPersoGlobal.ztur || currentPersoGlobal.seza || currentPersoGlobal.zlr) {
             divEveil.classList.remove("d-none");
-            
             const btnZ = document.getElementById("btn-mode-ztur");
-
             if (!currentPersoGlobal.ztur && !currentPersoGlobal.zlr) {
                 btnZ.style.display = 'none';
             } else {
-                if (currentPersoGlobal.zlr) {
-                    btnZ.innerText = "Z-LR";
-                } else {
-                    btnZ.innerText = "Z-TUR";
-                }
+                btnZ.innerText = currentPersoGlobal.zlr ? "Z-LR" : "Z-TUR";
             }
-            
             if (!currentPersoGlobal.seza) {
                 document.getElementById("btn-mode-seza").style.display = 'none';
             }
@@ -131,9 +119,8 @@ async function chargerDetail() {
             if (dSeza) { document.getElementById("date-seza-box").style.display = "block"; document.getElementById("date-seza").innerText = dSeza; }
         }
 
-        // --- GESTION UNIFIÉE DES FORMES ---
         const formsArea = document.getElementById("forms-area");
-        ['btn-geant', 'btn-transfo', 'btn-revival', 'btn-echange', 'btn-fureur'].forEach(id => {
+        ['btn-geant', 'btn-transfo', 'btn-revival', 'btn-echange', 'btn-fureur', 'btn-standby'].forEach(id => {
             const btn = document.getElementById(id);
             if(btn) btn.classList.add('d-none');
         });
@@ -144,6 +131,7 @@ async function chargerDetail() {
         if (currentPersoGlobal.revival) { document.getElementById("btn-revival").classList.remove("d-none"); hasForm = true; }
         if (currentPersoGlobal.echange) { document.getElementById("btn-echange").classList.remove("d-none"); hasForm = true; }
         if (currentPersoGlobal.fureur) { document.getElementById("btn-fureur").classList.remove("d-none"); hasForm = true; }
+        if (currentPersoGlobal.standby) { document.getElementById("btn-standby").classList.remove("d-none"); hasForm = true; }
 
         if (hasForm) formsArea.classList.remove("d-none");
         else formsArea.classList.add("d-none");
@@ -212,33 +200,62 @@ function changerEveil(mode) {
 function changerForme(forme) {
     if (!currentPersoGlobal) return;
     currentFormeGlobal = forme;
-    const p = currentPersoGlobal;
+    
+    const p = { ...currentPersoGlobal }; 
     const imgElement = document.getElementById("detail-img");
 
     let sourceData = p;
     let leaderText = p.leader_skill;
 
+    // --- GESTION Z-TUR / SEZA ---
     if (currentAwakeningGlobal === 'ztur') {
         leaderText = p.leader_skill_ztur || leaderText;
         sourceData = {
-            nom: p.nom,
+            ...p, 
             passif: p.passif_ztur || p.passif,
             spe: p.spe_ztur || p.spe,
-            active_skill: p.active_skill_ztur || p.active_skill,
-            spe_ex: p.spe_ex,
-            liens: p.liens
+            active_skill: p.active_skill_ztur || p.active_skill
         };
     } else if (currentAwakeningGlobal === 'seza') {
         leaderText = p.leader_skill_seza || leaderText;
         sourceData = {
-            nom: p.nom,
+            ...p,
             passif: p.passif_seza || p.passif,
             spe: p.spe_seza || p.spe,
-            active_skill: p.active_skill_seza || p.active_skill,
-            spe_ex: p.spe_ex,
-            liens: p.liens
+            active_skill: p.active_skill_seza || p.active_skill
         };
     }
+
+    // --- GESTION STANDBY SKILL ---
+    if (forme === 'standby' && sourceData.standby) {
+        const standbyData = {
+            nom: { standby: sourceData.standby.form?.nom || "Mode Standby" },
+            passif: { standby: { nom: "Défense & Charge", effet: sourceData.standby.form?.passif || "..." } },
+            // MODIFICATION ICI : On met l'active skill à NULL car on est DÉJÀ en standby
+            active_skill: null, 
+            spe: null
+        };
+
+        // Finish Skills
+        const finish1 = sourceData.standby.finish1 || (sourceData.standby.finish ? sourceData.standby.finish : null);
+        const finish2 = sourceData.standby.finish2 || null;
+
+        standbyData.spe = {
+            standby: {
+                nom: finish1?.nom,
+                effet: finish1?.effet,
+                condition: finish1?.condition,
+                ultime: finish2 ? {
+                    nom: finish2.nom,
+                    effet: finish2.effet,
+                    condition: finish2.condition
+                } : null
+            }
+        };
+        sourceData = { ...sourceData, ...standbyData };
+    }
+
+    // --- AFFICHAGE ---
 
     document.getElementById("detail-leader").innerHTML = formaterTexteDokkan(leaderText);
 
@@ -248,10 +265,12 @@ function changerForme(forme) {
     else if (forme === 'echange') suffixe = "_echange";
     else if (forme === 'fureur') suffixe = "_fureur";
     else if (forme === 'geant') suffixe = "_geant"; 
+    else if (forme === 'standby') suffixe = "_standby";
 
-    // URL AVEC SOUS-DOSSIER ID
     const imgFull = `${BASE_IMG_URL}${p.id}/${p.id}_full${suffixe}.png`;
     const imgSimple = `${BASE_IMG_URL}${p.id}/${p.id}${suffixe}.png`;
+    
+    imgElement.src = ""; 
     imgElement.src = imgFull;
     imgElement.onerror = function() { 
         if (this.src !== imgSimple) this.src = imgSimple; 
@@ -261,12 +280,11 @@ function changerForme(forme) {
     updateBtnStyles(forme);
 
     let nomAffiche = getContent(sourceData.nom, forme, 'nom'); 
-    if(!nomAffiche || typeof nomAffiche === 'object') nomAffiche = "Nom Inconnu";
+    if(!nomAffiche || typeof nomAffiche === 'object') nomAffiche = p.nom?.base || "Nom Inconnu";
     document.getElementById("detail-nom").innerText = nomAffiche;
 
     const passifNom = getContent(sourceData.passif, forme, 'nom');
     const passifEffet = getContent(sourceData.passif, forme, 'effet');
-    
     let htmlPassif = "";
     if (passifNom) htmlPassif += `<strong class="text-warning mb-1 d-block">${passifNom}</strong>`;
     htmlPassif += formaterTexteDokkan(passifEffet, passifNom);
@@ -276,13 +294,36 @@ function changerForme(forme) {
     const speEffet = getContent(sourceData.spe, forme, 'effet');
     afficherSpeEtUltime(sourceData.spe, forme, speNom, speEffet);
 
-    afficherActiveSkill(sourceData.active_skill, forme);
+    // --- LOGIQUE ACTIVATION STANDBY (VISIBLE SEULEMENT HORS STANDBY) ---
+    let activeDataToDisplay = sourceData.active_skill;
+    let isStandbyType = false;
+
+    if (forme !== 'standby' && p.standby && p.standby.activation) {
+        const hasNormalActive = getContent(sourceData.active_skill, forme, 'nom');
+        // Si pas d'active skill classique, on montre comment activer le standby
+        if (!hasNormalActive) {
+            activeDataToDisplay = {
+                [forme]: {
+                    nom: p.standby.activation.nom,
+                    condition: p.standby.activation.condition,
+                    effet: p.standby.activation.effet
+                },
+                base: {
+                    nom: p.standby.activation.nom,
+                    condition: p.standby.activation.condition,
+                    effet: p.standby.activation.effet
+                }
+            };
+            isStandbyType = true; 
+        }
+    } 
+    // Si forme === standby, activeDataToDisplay est déjà NULL via le bloc plus haut
+
+    afficherActiveSkill(activeDataToDisplay, forme, isStandbyType);
     afficherSpeEx(sourceData.spe_ex, forme);
 
     updateLiensDisplay();
     updateStatsDisplay();
-    
-    // MISE A JOUR DES PARTENAIRES SELON LA FORME
     afficherMeilleursPartenaires(currentPersoGlobal, allPersosGlobal);
 }
 
@@ -290,7 +331,6 @@ function updateLiensDisplay() {
     const rawLiens = safeParse(currentPersoGlobal.liens);
     let liensListe = [];
 
-    // Désactiver les liens en mode Géant ou Fureur
     if (currentFormeGlobal === 'geant' || currentFormeGlobal === 'fureur') {
         liensListe = []; 
     } 
@@ -329,50 +369,91 @@ function updateStatsDisplay(levelKey, btnElement) {
     }
 }
 
-// AFFICHAGE INTELLIGENT SPÉCIALE ET ULTIME (Cache si vide)
 function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
     const colSpe = document.getElementById("col-spe");
     const colUlt = document.getElementById("col-ult");
+    const titleSpe = document.getElementById("title-spe");
+    const badgeSpe = document.getElementById("badge-spe-ki");
+    const titleUlt = document.getElementById("title-ult");
+    const badgeUlt = document.getElementById("badge-ult-ki");
+    const boxSpe = document.getElementById("spe-box");
+    const boxUlt = document.getElementById("ult-box");
     
     if (!colSpe || !colUlt) return;
 
-    // 1. On cache tout par défaut
+    // Reset textes & styles par défaut
+    titleSpe.innerText = "ATTAQUE SPÉCIALE";
+    badgeSpe.innerText = "Ki 12";
+    titleSpe.className = "text-danger fw-bold mb-1";
+    badgeSpe.className = "badge rounded-pill bg-danger mb-2";
+    boxSpe.className = "skill-box border-spe p-3 rounded bg-dark bg-opacity-50 h-100 border";
+
+    titleUlt.innerText = "ULTIME";
+    badgeUlt.innerText = "Ki 18+";
+    titleUlt.className = "fw-bold mb-1";
+    titleUlt.style.color = "#ff5722";
+    badgeUlt.className = "badge rounded-pill mb-2";
+    badgeUlt.style.backgroundColor = "#ff5722";
+    boxUlt.className = "skill-box border-ult p-3 rounded bg-dark bg-opacity-50 h-100 border";
+
     colSpe.style.display = "none";
     colUlt.style.display = "none";
     
-    // Récupération de l'objet complet de la spé pour la forme actuelle
     const speObj = safeParse(rawSpe);
     let currentSpeObj = null;
     if (speObj) {
         if (speObj[forme]) {
             currentSpeObj = speObj[forme];
-        } else if (forme === 'base' || (speObj.base && forme !== 'geant' && forme !== 'fureur')) {
-            // On garde le fallback sur la base sauf pour géant/fureur
+        } else if (forme === 'base' || (speObj.base && forme !== 'geant' && forme !== 'fureur' && forme !== 'standby')) {
             currentSpeObj = speObj.base;
         }
     }
 
-    // --- GESTION ATT. SPÉCIALE (12 Ki) ---
-    // On l'affiche seulement si un NOM est défini et non vide
+    // SI STANDBY : Changement des titres et couleurs
+    if (forme === 'standby') {
+        // Finish 1
+        titleSpe.innerText = "FINISH SKILL 1";
+        badgeSpe.innerText = "Charge Max";
+        titleSpe.className = "text-standby fw-bold mb-1";
+        badgeSpe.className = "badge rounded-pill bg-standby mb-2";
+        boxSpe.className = "skill-box border-standby p-3 rounded bg-dark bg-opacity-50 h-100 border";
+
+        // Finish 2
+        titleUlt.innerText = "FINISH SKILL 2";
+        badgeUlt.innerText = "Charge Incomplète";
+        titleUlt.style.color = "#6f42c1"; 
+        badgeUlt.style.backgroundColor = "#6f42c1";
+        boxUlt.className = "skill-box border-standby p-3 rounded bg-dark bg-opacity-50 h-100 border";
+    }
+
+    // SPÉCIALE / FINISH 1
     let hasSpe = false;
     if (nom && nom.trim() !== "") {
         hasSpe = true;
         colSpe.style.display = "block";
         document.getElementById("detail-spe-nom").innerText = nom;
-        document.getElementById("detail-spe-desc").innerHTML = formaterTexteDokkan(effet || "Aucun effet.");
+        
+        let fullDesc = formaterTexteDokkan(effet || "Aucun effet.");
+        if (currentSpeObj && currentSpeObj.condition) {
+            fullDesc += `<div class="mt-2 pt-2 border-top border-secondary text-warning small fst-italic">Condition : ${currentSpeObj.condition}</div>`;
+        }
+        document.getElementById("detail-spe-desc").innerHTML = fullDesc;
     }
 
-    // --- GESTION ULTIME (18 Ki) ---
-    // On l'affiche seulement si un NOM est défini et non vide
+    // ULTIME / FINISH 2
     let hasUlt = false;
     if (currentSpeObj && currentSpeObj.ultime && currentSpeObj.ultime.nom && currentSpeObj.ultime.nom.trim() !== "") {
         hasUlt = true;
         colUlt.style.display = "block";
         document.getElementById("detail-ult-nom").innerText = currentSpeObj.ultime.nom;
-        document.getElementById("detail-ult-desc").innerHTML = formaterTexteDokkan(currentSpeObj.ultime.effet);
+        
+        let fullUltDesc = formaterTexteDokkan(currentSpeObj.ultime.effet);
+        if (currentSpeObj.ultime.condition) {
+            fullUltDesc += `<div class="mt-2 pt-2 border-top border-secondary text-warning small fst-italic">Condition : ${currentSpeObj.ultime.condition}</div>`;
+        }
+        document.getElementById("detail-ult-desc").innerHTML = fullUltDesc;
     }
 
-    // --- GESTION DE LA MISE EN PAGE (COLONNES) ---
     if (hasSpe && hasUlt) {
         colSpe.className = "col-md-6";
         colUlt.className = "col-md-6";
@@ -382,20 +463,32 @@ function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
     }
 }
 
-function afficherActiveSkill(rawActive, forme) {
+function afficherActiveSkill(rawActive, forme, isStandbyType = false) {
     const section = document.getElementById("active-skill-section");
+    const box = document.getElementById("active-skill-box");
+    const titleActive = document.getElementById("active-skill-title");
     if (!section) return;
+
+    // Reset styles par défaut
+    titleActive.innerText = "ACTIVE SKILL";
+    titleActive.className = "fw-bold mb-2 text-active"; // CSS text-active (Rose)
+    box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-active"; // Border active (Rose)
+
+    // Style Violet si Standby
+    if (isStandbyType) {
+        titleActive.innerText = "STANDBY SKILL"; 
+        titleActive.className = "fw-bold mb-2 text-standby";
+        box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-standby";
+    }
 
     const activeObj = safeParse(rawActive);
     let currentActive = null;
 
     if (activeObj) {
         if(forme === 'geant' || forme === 'fureur') {
-            currentActive = null; // Pas d'active skill par défaut en géant
-        } else if (activeObj.base) {
-            currentActive = activeObj[forme];
+            currentActive = null; 
         } else {
-            currentActive = activeObj;
+            currentActive = activeObj[forme] || activeObj.base || activeObj;
         }
     }
 
@@ -427,7 +520,15 @@ function afficherSpeEx(rawEx, forme) {
 
     if (currentEx && currentEx.nom) {
         document.getElementById("detail-spe-ex-nom").innerText = currentEx.nom;
-        document.getElementById("detail-spe-ex-desc").innerHTML = formaterTexteDokkan(currentEx.effet || "");
+        let desc = formaterTexteDokkan(currentEx.effet || "");
+        
+        let meta = "";
+        if(currentEx.type) meta += `<span class="badge bg-secondary me-2">${currentEx.type === 'ultime' ? 'Remplace Ultime' : 'Remplace Spé'}</span>`;
+        if(currentEx.condition) meta += `<span class="text-warning small fst-italic">${currentEx.condition}</span>`;
+        
+        if(meta) desc += `<div class="mt-2 pt-2 border-top border-secondary">${meta}</div>`;
+        
+        document.getElementById("detail-spe-ex-desc").innerHTML = desc;
         section.classList.remove("d-none");
     } else {
         section.classList.add("d-none");
@@ -457,22 +558,38 @@ function updateBtnStyles(forme) {
         'transfo': { id: 'btn-transfo', color: 'warning' },
         'revival': { id: 'btn-revival', color: 'success' },
         'echange': { id: 'btn-echange', color: 'info' },
-        'fureur': { id: 'btn-fureur', color: 'danger' }
+        'fureur': { id: 'btn-fureur', color: 'danger' },
+        'standby': { id: 'btn-standby', color: 'purple' } 
     };
 
     Object.values(mapBtns).forEach(conf => {
         const btn = document.getElementById(conf.id);
         if(btn) {
-            btn.classList.remove('active', `btn-${conf.color}`);
-            btn.classList.add(`btn-outline-${conf.color}`);
+            btn.classList.remove('active');
+            if (conf.color !== 'purple') {
+                btn.classList.remove(`btn-${conf.color}`);
+                btn.classList.add(`btn-outline-${conf.color}`);
+            } else {
+                btn.classList.remove('btn-purple');
+                btn.classList.add('btn-outline-purple');
+                btn.style.backgroundColor = "transparent";
+                btn.style.color = "#6f42c1"; 
+                btn.style.borderColor = "#6f42c1";
+            }
         }
     });
 
     if (mapBtns[forme]) {
         const activeBtn = document.getElementById(mapBtns[forme].id);
         if(activeBtn) {
-            activeBtn.classList.remove(`btn-outline-${mapBtns[forme].color}`);
-            activeBtn.classList.add('active', `btn-${mapBtns[forme].color}`);
+            if (mapBtns[forme].color !== 'purple') {
+                activeBtn.classList.remove(`btn-outline-${mapBtns[forme].color}`);
+                activeBtn.classList.add(`btn-${mapBtns[forme].color}`);
+            } else {
+                activeBtn.style.backgroundColor = "#6f42c1"; 
+                activeBtn.style.color = "white";
+            }
+            activeBtn.classList.add('active');
         }
     }
 }
@@ -500,7 +617,7 @@ function getTypeColor(t) {
     if(t.includes('PUI') || t.includes('STR')) return 'bg-danger';
     if(t.includes('AGI') || t.includes('AGL')) return 'bg-primary';
     if(t.includes('TEC') || t.includes('TEQ')) return 'bg-success';
-    if(t.includes('INT')) return 'bg-int';
+    if(t.includes('INT')) return 'bg-int'; 
     if(t.includes('END') || t.includes('PHY')) return 'bg-warning text-dark';
     return 'bg-secondary';
 }
@@ -509,7 +626,6 @@ function afficherMeilleursPartenaires(currentPerso, allPersos) {
     const container = document.getElementById("best-partners-list");
     if (!container) return;
 
-    // SI MODE GÉANT OU FUREUR => AUCUN PARTENAIRE
     if (currentFormeGlobal === 'geant' || currentFormeGlobal === 'fureur') {
         container.innerHTML = "<span class='text-white-50 small fst-italic'>Aucun partenaire (Mode Géant/Fureur).</span>";
         return;
@@ -524,7 +640,6 @@ function afficherMeilleursPartenaires(currentPerso, allPersos) {
     const nomBaseCurrent = getNomBaseClean(currentPerso);
     const rawLiens = safeParse(currentPerso.liens);
     
-    // Récupération intelligente des liens de la forme courante
     let liensBasePerso = [];
     if(Array.isArray(rawLiens)) {
         liensBasePerso = rawLiens;
@@ -534,7 +649,6 @@ function afficherMeilleursPartenaires(currentPerso, allPersos) {
         liensBasePerso = rawLiens.base;
     }
 
-    // Filtrage et Score
     const candidats = allPersos.filter((p) => p.id !== currentPerso.id && getNomBaseClean(p) !== nomBaseCurrent);
     const scores = candidats.map((candidat) => {
         const rawC = safeParse(candidat.liens);

@@ -44,7 +44,6 @@
                 <h4 class="section-title">2. Mécaniques & Éveils</h4>
                 
                 <div class="row g-4">
-                    
                     <div class="col-md-4">
                         <div class="p-3 border rounded bg-dark bg-opacity-25 h-100">
                             <h6 class="text-white-50 border-bottom pb-2 mb-3 text-uppercase small fw-bold">🔄 Changement de Forme</h6>
@@ -72,6 +71,10 @@
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="has-active">
                                     <label class="form-check-label text-danger fw-bold" for="has-active">Active Skill</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="has-standby">
+                                    <label class="form-check-label fw-bold" for="has-standby" style="color: #6f42c1 !important;">Standby Skill</label>
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="has-fureur">
@@ -235,6 +238,90 @@
                 </div>
             </div>
 
+            <div id="section-standby" class="card p-4 mb-4 border-light d-none" style="border-color: #6f42c1 !important; border-width: 2px;">
+                <h4 class="section-title" style="color: #6f42c1;">⏳ STANDBY SKILL (Active)</h4>
+                
+                <div class="mb-4 border-bottom border-secondary pb-3">
+                    <h6 style="color: #6f42c1; font-weight: bold;">1. Activation du Standby (Entrée en scène)</h6>
+                    <p class="text-muted small mb-2">C'est l'Active Skill qui lance le mode.</p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="text-white-50 small">Nom de la compétence</label>
+                            <input type="text" id="standby-nom" class="form-control" placeholder="Ex: Préparation du Genkidama">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="text-white-50 small" style="color: #6f42c1 !important;">Condition d'activation</label>
+                            <input type="text" id="standby-condition" class="form-control" placeholder="Ex: Dès le 4ème tour...">
+                        </div>
+                        <div class="col-12">
+                            <label class="text-white-50 small">Effet de l'activation</label>
+                            <textarea id="standby-effet" class="form-control rich-text" rows="2" placeholder="Ex: Active le mode Standby pour 5 tours..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4 border-bottom border-secondary pb-3">
+                    <h6 class="text-info" style="font-weight: bold;">2. Pendant le Standby (Forme Défensive / Charge)</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="text-white-50 small">Nom de la forme</label>
+                            <input type="text" id="standby-form-nom" class="form-control" placeholder="Ex: Vegeta Super Saiyan 2">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="text-white-50 small">Passif pendant le Standby</label>
+                            <textarea id="standby-passif" class="form-control rich-text" rows="2" placeholder="Ex: DÉF +200%, garde activée, Ki +1 par sphère..."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="text-white-50 small">Liens spécifiques (Optionnel)</label>
+                            <select id="standby-links" multiple></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h6 style="color: #6f42c1; font-weight: bold;">3. Finish Skills (Attaques Finales)</h6>
+                    <p class="text-muted small mb-2">Les attaques déclenchées manuellement ou à la fin du compteur.</p>
+                    
+                    <div class="row g-4 mt-1">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-dark border rounded" style="border-color: #6f42c1 !important;">
+                                <div class="badge mb-2" style="background-color: #6f42c1;">FINISH 1 (Max / Principal)</div>
+                                <div class="mb-2">
+                                    <label class="text-white-50 small">Nom</label>
+                                    <input type="text" id="standby-finish1-nom" class="form-control mb-2" placeholder="Nom du Finish">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="text-white-50 small" style="color: #6f42c1 !important;">Condition de déclenchement</label>
+                                    <input type="text" id="standby-finish1-condition" class="form-control mb-2" placeholder="Ex: Jauge chargée au max">
+                                </div>
+                                <div>
+                                    <label class="text-white-50 small">Effet</label>
+                                    <textarea id="standby-finish1-effet" class="form-control rich-text" rows="3" placeholder="Dégâts, critique, etc..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-dark border rounded" style="border-color: #6f42c1 !important;">
+                                <div class="badge mb-2" style="background-color: #6f42c1;">FINISH 2 (Incomplet / Alternatif)</div>
+                                <div class="mb-2">
+                                    <label class="text-white-50 small">Nom</label>
+                                    <input type="text" id="standby-finish2-nom" class="form-control mb-2" placeholder="Nom du Finish">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="text-white-50 small" style="color: #6f42c1 !important;">Condition de déclenchement</label>
+                                    <input type="text" id="standby-finish2-condition" class="form-control mb-2" placeholder="Ex: Fin du compte à rebours">
+                                </div>
+                                <div>
+                                    <label class="text-white-50 small">Effet</label>
+                                    <textarea id="standby-finish2-effet" class="form-control rich-text" rows="3" placeholder="Dégâts, etc..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="section-autres" class="card p-4 mb-4 d-none">
                 <h4 class="section-title">8. Autres</h4>
                 <div id="block-fureur" class="mb-3 d-none"><h6>Fureur</h6><input type="text" id="fureur-nom" class="form-control" placeholder="Nom Mode Fureur"></div>
@@ -364,26 +451,41 @@
                 <div class="row g-4">
                     <div class="col-md-4">
                         <h6 style="color: #e040fb;">Forme de Base</h6>
+                        <select id="spe-ex-type" class="form-select form-select-sm mb-2 text-white bg-dark border-secondary">
+                            <option value="base">Spéciale Standard (12 Ki)</option>
+                            <option value="ultime">Spéciale Ultime (18+ Ki)</option>
+                        </select>
                         <input type="text" id="spe-ex-nom" class="form-control mb-2" placeholder="Nom Spé EX">
+                        <input type="text" id="spe-ex-condition" class="form-control mb-2 text-warning bg-dark border-secondary" placeholder="Condition">
                         <textarea id="spe-ex-effet" class="form-control rich-text" rows="3"></textarea>
                     </div>
 
                     <div class="col-md-4 transfo-field d-none">
                         <h6 class="text-info">Transformé</h6>
+                        <select id="spe-ex-transfo-type" class="form-select form-select-sm mb-2 text-white bg-dark border-secondary">
+                            <option value="base">Spéciale Standard (12 Ki)</option>
+                            <option value="ultime">Spéciale Ultime (18+ Ki)</option>
+                        </select>
                         <input type="text" id="spe-ex-transfo-nom" class="form-control mb-2" placeholder="Nom Spé EX Transfo">
+                        <input type="text" id="spe-ex-transfo-condition" class="form-control mb-2 text-warning bg-dark border-secondary" placeholder="Condition">
                         <textarea id="spe-ex-transfo-effet" class="form-control rich-text" rows="3"></textarea>
                     </div>
 
                     <div class="col-md-4 echange-field d-none">
                         <h6 class="text-primary">Échange</h6>
+                        <select id="spe-ex-echange-type" class="form-select form-select-sm mb-2 text-white bg-dark border-secondary">
+                            <option value="base">Spéciale Standard (12 Ki)</option>
+                            <option value="ultime">Spéciale Ultime (18+ Ki)</option>
+                        </select>
                         <input type="text" id="spe-ex-echange-nom" class="form-control mb-2" placeholder="Nom Spé EX Échange">
+                        <input type="text" id="spe-ex-echange-condition" class="form-control mb-2 text-warning bg-dark border-secondary" placeholder="Condition">
                         <textarea id="spe-ex-echange-effet" class="form-control rich-text" rows="3"></textarea>
                     </div>
                 </div>
             </div>
 
             <div class="card p-4 mb-4">
-                <h4 class="section-title">11. Liens Externes</h4>
+                <h4 class="section-title">12. Liens Externes</h4>
                 <div class="row g-3"><div class="col-md-6"><input type="url" id="ext-wiki" class="form-control" placeholder="Wiki"></div><div class="col-md-6"><input type="url" id="ext-yt" class="form-control" placeholder="YouTube"></div></div>
             </div>
 

@@ -1,3 +1,5 @@
+// JS/script.js
+
 // ============================================================
 // 1. VARIABLES GLOBALES
 // ============================================================
@@ -77,8 +79,12 @@ function afficherCartes(liste) {
         let badgeSpecial = "";
         
         // Ordre de priorité pour l'icône affichée
-        if (carte.geant) {
-            // Tu devras peut-être créer une icone_geant.png ou utiliser celle de fureur
+        if (carte.standby) { // AJOUT STANDBY EN PRIORITÉ (Exemple)
+             // Tu devras créer une icone_standby.png ou utiliser une autre
+             badgeSpecial = `<img src="${iconPath}icone_standby.png" class="card-mechanic-icon" 
+                            alt="Standby" ${tooltipAttrs} data-bs-title="Standby Skill"
+                            onerror="this.style.display='none'">`; // Cache si pas d'image
+        } else if (carte.geant) {
             badgeSpecial = `<img src="${iconPath}icone_fureur.png" class="card-mechanic-icon" 
                             alt="Géant" ${tooltipAttrs} data-bs-title="Mode Géant">`;
         } else if (carte.fureur) {
@@ -100,8 +106,12 @@ function afficherCartes(liste) {
         const hasRevival = carte.revival ? "true" : "false";
         const hasEchange = carte.echange ? "true" : "false";
         const hasFureur = carte.fureur ? "true" : "false"; 
-        const hasGeant = carte.geant ? "true" : "false"; // AJOUT GÉANT
+        const hasGeant = carte.geant ? "true" : "false";
+        const hasStandby = carte.standby ? "true" : "false"; // AJOUT STANDBY DATA
 
+        // MODIFICATIONS CSS DANS LE HTML GÉNÉRÉ :
+        // 1. Image : suppression de mb-2, ajout de mb-1 pour réduire l'écart
+        // 2. Nom : ajout de mb-2 pour pousser le badge vers le bas
         const codeHTML = `
             <div class="col-6 col-md-3 mb-4">
                 <div class="dokkan-card h-100" onclick="allerVersPageDetail('${carte.id}')" style="cursor: pointer;">
@@ -110,7 +120,7 @@ function afficherCartes(liste) {
                         ${badgeSpecial}
 
                         <img src="${cheminImage}" 
-                             class="img-fluid mb-2 auto-cycle-img" 
+                             class="img-fluid mb-1 auto-cycle-img" 
                              alt="${nomAffiche}" 
                              style="max-height: 100px; transition: opacity 0.5s ease;"
                              data-id="${carte.id}"
@@ -119,9 +129,10 @@ function afficherCartes(liste) {
                              data-echange="${hasEchange}"
                              data-fureur="${hasFureur}" 
                              data-geant="${hasGeant}" 
+                             data-standby="${hasStandby}"
                              onerror="this.src='https://placehold.co/100x100?text=?'">
                         
-                        <h6 class="card-title" style="font-size: 0.9rem;">${nomAffiche}</h6>
+                        <h6 class="card-title mb-2" style="font-size: 0.9rem; line-height: 1.2;">${nomAffiche}</h6>
                         <span class="badge ${couleurBadge}">${carte.type}</span>
                     </div>
                 </div>
@@ -152,13 +163,15 @@ function lancerCycleAutomatique() {
         const hasRevival = img.dataset.revival === "true";
         const hasEchange = img.dataset.echange === "true";
         const hasFureur = img.dataset.fureur === "true"; 
-        const hasGeant = img.dataset.geant === "true"; // LECTURE DONNÉE GÉANT
+        const hasGeant = img.dataset.geant === "true";
+        const hasStandby = img.dataset.standby === "true"; // LECTURE DONNÉE STANDBY
 
         // Construction de la liste des images AVEC LE SOUS-DOSSIER
         const imagesList = [`${BASE_IMG_URL}${id}/${id}.png`]; // Base
         
         // Ajout des formes dans le cycle
-        if (hasGeant) imagesList.push(`${BASE_IMG_URL}${id}/${id}_geant.png`); // AJOUT IMAGE GÉANT
+        if (hasStandby) imagesList.push(`${BASE_IMG_URL}${id}/${id}_standby.png`); // AJOUT IMAGE STANDBY
+        if (hasGeant) imagesList.push(`${BASE_IMG_URL}${id}/${id}_geant.png`);
         if (hasTransfo) imagesList.push(`${BASE_IMG_URL}${id}/${id}_transfo.png`);
         if (hasRevival) imagesList.push(`${BASE_IMG_URL}${id}/${id}_revival.png`);
         if (hasEchange) imagesList.push(`${BASE_IMG_URL}${id}/${id}_echange.png`);
@@ -215,7 +228,9 @@ if (searchInput) {
                 let nomPourRecherche = "";
                 if (typeof carte.nom === 'object' && carte.nom !== null) {
                     const nomSup = carte.nom.transfo || carte.nom.revival || carte.nom.echange || carte.nom.fureur || "";
-                    nomPourRecherche = (carte.nom.base + " " + nomSup).toLowerCase();
+                    // Pour la recherche, on peut aussi chercher dans le nom Standby si besoin
+                    const nomStandby = (carte.standby && carte.standby.form) ? carte.standby.form.nom : "";
+                    nomPourRecherche = (carte.nom.base + " " + nomSup + " " + nomStandby).toLowerCase();
                 } else {
                     nomPourRecherche = String(carte.nom).toLowerCase();
                 }
