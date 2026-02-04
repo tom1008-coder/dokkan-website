@@ -130,5 +130,10 @@
      "Guerrier tenace" : {
         "lv1": "DÉF +15 %",
         "lv10": "DÉF +20 %, dégâts encaissés réduits de +5 %"
+    },
+
+    "Innocent" : {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT +15 %"
     }
 }
