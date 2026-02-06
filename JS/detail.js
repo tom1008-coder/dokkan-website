@@ -17,6 +17,7 @@ let currentFormeGlobal = 'base';
 let currentStatLevelGlobal = 'd4';
 let currentAwakeningGlobal = 'base'; 
 
+// Parseur JSON sécurisé
 function safeParse(data) {
     if (!data) return null;
     if (typeof data === 'object') return data; 
@@ -24,14 +25,17 @@ function safeParse(data) {
     return data;
 }
 
+// Fonction générique pour récupérer un contenu (Nom ou Effet) selon la forme
 function getContent(rawData, forme, field = 'effet') {
     const data = safeParse(rawData);
     if (!data) return "";
 
     let content = null;
+    
     if (Array.isArray(data)) {
         content = data; 
     } else {
+        // On cherche la clé de la forme, sinon fallback sur 'base'
         content = data[forme] || data.base || data; 
     }
 
@@ -87,6 +91,7 @@ async function chargerDetail() {
         document.getElementById("detail-type").innerText = currentPersoGlobal.type;
         document.getElementById("detail-classe").innerText = currentPersoGlobal.classe;
         
+        // Gestion Boutons Eveil
         const divEveil = document.getElementById("awakening-controls");
         if (currentPersoGlobal.ztur || currentPersoGlobal.seza || currentPersoGlobal.zlr) {
             divEveil.classList.remove("d-none");
@@ -101,6 +106,7 @@ async function chargerDetail() {
             }
         }
 
+        // Dates
         const formatDate = (dateStr) => {
             if (!dateStr) return null;
             const d = new Date(dateStr);
@@ -119,6 +125,7 @@ async function chargerDetail() {
             if (dSeza) { document.getElementById("date-seza-box").style.display = "block"; document.getElementById("date-seza").innerText = dSeza; }
         }
 
+        // Formes
         const formsArea = document.getElementById("forms-area");
         ['btn-geant', 'btn-transfo', 'btn-revival', 'btn-echange', 'btn-fureur', 'btn-standby'].forEach(id => {
             const btn = document.getElementById(id);
@@ -201,6 +208,7 @@ function changerForme(forme) {
     if (!currentPersoGlobal) return;
     currentFormeGlobal = forme;
     
+    // IMPORTANT : COPIE de l'objet pour ne pas écraser les données
     const p = { ...currentPersoGlobal }; 
     const imgElement = document.getElementById("detail-img");
 
@@ -214,7 +222,9 @@ function changerForme(forme) {
             ...p, 
             passif: p.passif_ztur || p.passif,
             spe: p.spe_ztur || p.spe,
-            active_skill: p.active_skill_ztur || p.active_skill
+            active_skill: p.active_skill_ztur || p.active_skill,
+            spe_ex: p.spe_ex,
+            standby: p.standby 
         };
     } else if (currentAwakeningGlobal === 'seza') {
         leaderText = p.leader_skill_seza || leaderText;
@@ -222,7 +232,9 @@ function changerForme(forme) {
             ...p,
             passif: p.passif_seza || p.passif,
             spe: p.spe_seza || p.spe,
-            active_skill: p.active_skill_seza || p.active_skill
+            active_skill: p.active_skill_seza || p.active_skill,
+            spe_ex: p.spe_ex,
+            standby: p.standby
         };
     }
 
@@ -231,12 +243,10 @@ function changerForme(forme) {
         const standbyData = {
             nom: { standby: sourceData.standby.form?.nom || "Mode Standby" },
             passif: { standby: { nom: "Défense & Charge", effet: sourceData.standby.form?.passif || "..." } },
-            // MODIFICATION ICI : On met l'active skill à NULL car on est DÉJÀ en standby
-            active_skill: null, 
+            active_skill: null, // On cache l'active skill car on est DÉJÀ en standby
             spe: null
         };
 
-        // Finish Skills
         const finish1 = sourceData.standby.finish1 || (sourceData.standby.finish ? sourceData.standby.finish : null);
         const finish2 = sourceData.standby.finish2 || null;
 
@@ -299,8 +309,23 @@ function changerForme(forme) {
     let isStandbyType = false;
 
     if (forme !== 'standby' && p.standby && p.standby.activation) {
-        const hasNormalActive = getContent(sourceData.active_skill, forme, 'nom');
-        // Si pas d'active skill classique, on montre comment activer le standby
+        
+        // On récupère l'Active Skill "Normal" pour la forme actuelle
+        const normalActive = safeParse(sourceData.active_skill);
+        let hasNormalActive = false;
+        
+        if (normalActive) {
+            // Check robuste : est-ce que cette forme a un active skill ?
+            // On utilise la même logique que afficherActiveSkill pour déterminer si quelque chose va s'afficher
+            if (normalActive.base || normalActive.transfo) {
+                if (normalActive[forme]) hasNormalActive = true;
+            } else {
+                // Ancien format ou objet simple : s'affiche si base ou si standbyType forcé
+                if (forme === 'base') hasNormalActive = true;
+            }
+        }
+
+        // Si PAS d'active skill normal sous cette forme, on affiche l'activation Standby
         if (!hasNormalActive) {
             activeDataToDisplay = {
                 [forme]: {
@@ -308,7 +333,7 @@ function changerForme(forme) {
                     condition: p.standby.activation.condition,
                     effet: p.standby.activation.effet
                 },
-                base: {
+                base: { // Fallback
                     nom: p.standby.activation.nom,
                     condition: p.standby.activation.condition,
                     effet: p.standby.activation.effet
@@ -317,7 +342,6 @@ function changerForme(forme) {
             isStandbyType = true; 
         }
     } 
-    // Si forme === standby, activeDataToDisplay est déjà NULL via le bloc plus haut
 
     afficherActiveSkill(activeDataToDisplay, forme, isStandbyType);
     afficherSpeEx(sourceData.spe_ex, forme);
@@ -409,7 +433,7 @@ function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
         }
     }
 
-    // SI STANDBY : Changement des titres et couleurs
+    // SI STANDBY : Changement en VIOLET et Titres FINISH
     if (forme === 'standby') {
         // Finish 1
         titleSpe.innerText = "FINISH SKILL 1";
@@ -471,8 +495,8 @@ function afficherActiveSkill(rawActive, forme, isStandbyType = false) {
 
     // Reset styles par défaut
     titleActive.innerText = "ACTIVE SKILL";
-    titleActive.className = "fw-bold mb-2 text-active"; // CSS text-active (Rose)
-    box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-active"; // Border active (Rose)
+    titleActive.className = "fw-bold mb-2 text-active"; // Utilisation classe CSS
+    box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-active"; // Border active
 
     // Style Violet si Standby
     if (isStandbyType) {
@@ -488,7 +512,16 @@ function afficherActiveSkill(rawActive, forme, isStandbyType = false) {
         if(forme === 'geant' || forme === 'fureur') {
             currentActive = null; 
         } else {
-            currentActive = activeObj[forme] || activeObj.base || activeObj;
+            // CORRECTION ACTIVE SKILL APRÈS TRANSFO
+            // Si on a une structure { base, transfo }, on prend strictement celle de la forme
+            if (activeObj.base || activeObj.transfo) {
+                currentActive = activeObj[forme];
+            } else {
+                // Si ancien format, on ne l'affiche qu'en base (ou si on force le standby)
+                if (forme === 'base' || isStandbyType) {
+                    currentActive = activeObj;
+                }
+            }
         }
     }
 

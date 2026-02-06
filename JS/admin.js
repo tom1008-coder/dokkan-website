@@ -64,6 +64,35 @@ window.switchActiveTab = function(tab) {
     }
 };
 
+// GESTION TABS ACTIVE SKILL Z-TUR
+window.switchZturActiveTab = function(tab) {
+    const baseBlock = document.getElementById('ztur-active-base-block');
+    const transfoBlock = document.getElementById('ztur-active-transfo-block');
+    // On sélectionne les boutons DANS le bloc Z-TUR seulement
+    const btns = document.querySelectorAll('#ztur-active-block .btn');
+    
+    btns.forEach(b => {
+        b.classList.remove('btn-warning', 'active');
+        b.classList.add('btn-outline-warning');
+    });
+    
+    // On trouve le bouton cliqué
+    const activeBtn = Array.from(btns).find(b => b.getAttribute('onclick').includes(tab));
+    if(activeBtn) {
+        activeBtn.classList.remove('btn-outline-warning');
+        activeBtn.classList.add('btn-warning', 'active');
+    }
+
+    if(tab === 'base') {
+        baseBlock.classList.remove('d-none');
+        transfoBlock.classList.add('d-none');
+    } else {
+        baseBlock.classList.add('d-none');
+        transfoBlock.classList.remove('d-none');
+        initTinyMCE('#ztur-active-transfo-block .rich-text');
+    }
+};
+
 // INIT TOM SELECT (CORRIGÉ & DÉBUGGÉ)
 async function initTomSelects() {
     // Config pour les Catégories (Table dédiée)
@@ -501,53 +530,21 @@ async function loadCharacterIntoForm(id) {
             }
         }
 
-        setVal('ztur-leader', data.leader_skill_ztur);
-        if(data.passif_ztur) { 
-            let pz = parseP(data.passif_ztur.base); setVal('ztur-passif-nom', pz.nom); setVal('ztur-passif-effet', pz.effet); 
-            let pzt = parseP(data.passif_ztur.transfo); 
-            setVal('ztur-passif-transfo-nom', pzt.nom);
-            setVal('ztur-passif-transfo', pzt.effet); 
-            if(data.passif_ztur.echange) {
-                let pez = parseP(data.passif_ztur.echange);
-                setVal('ztur-passif-echange-nom', pez.nom);
-                setVal('ztur-passif-echange', pez.effet);
+        if(data.active_skill_ztur) {
+            // Base
+            let zActiveBase = data.active_skill_ztur.base || data.active_skill_ztur; // Rétro-compatibilité si c'était un objet simple avant
+            if(zActiveBase) {
+                setVal('ztur-active-nom', zActiveBase.nom);
+                setVal('ztur-active-cond', zActiveBase.condition);
+                setVal('ztur-active-effet', zActiveBase.effet);
+            }
+            // Transfo
+            if(data.active_skill_ztur.transfo) {
+                setVal('ztur-active-transfo-nom', data.active_skill_ztur.transfo.nom);
+                setVal('ztur-active-transfo-cond', data.active_skill_ztur.transfo.condition);
+                setVal('ztur-active-transfo-effet', data.active_skill_ztur.transfo.effet);
             }
         }
-        if(data.spe_ztur) { 
-            if(data.spe_ztur.base) {
-                setVal('ztur-spe-nom', data.spe_ztur.base.nom); 
-                setVal('ztur-spe-effet', data.spe_ztur.base.effet);
-                if(data.spe_ztur.base.ultime) {
-                    setVal('ztur-ult-nom', data.spe_ztur.base.ultime.nom);
-                    setVal('ztur-ult-effet', data.spe_ztur.base.ultime.effet);
-                }
-            }
-            if(data.spe_ztur.transfo) {
-                setVal('ztur-spe-transfo-nom', data.spe_ztur.transfo.nom);
-                setVal('ztur-spe-transfo', data.spe_ztur.transfo.effet);
-                if(data.spe_ztur.transfo.ultime) {
-                    setVal('ztur-ult-transfo-nom', data.spe_ztur.transfo.ultime.nom);
-                    setVal('ztur-ult-transfo', data.spe_ztur.transfo.ultime.effet);
-                }
-            }
-            if(data.spe_ztur.echange) {
-                setVal('ztur-spe-echange-nom', data.spe_ztur.echange.nom);
-                setVal('ztur-spe-echange', data.spe_ztur.echange.effet);
-                if(data.spe_ztur.echange.ultime) {
-                    setVal('ztur-ult-echange-nom', data.spe_ztur.echange.ultime.nom);
-                    setVal('ztur-ult-echange', data.spe_ztur.echange.ultime.effet);
-                }
-            }
-            if(data.spe_ztur.geant) {
-                setVal('ztur-spe-geant-nom', data.spe_ztur.geant.nom);
-                setVal('ztur-spe-geant-effet', data.spe_ztur.geant.effet);
-                if(data.spe_ztur.geant.ultime) {
-                    setVal('ztur-ult-geant-nom', data.spe_ztur.geant.ultime.nom);
-                    setVal('ztur-ult-geant-effet', data.spe_ztur.geant.ultime.effet);
-                }
-            }
-        }
-        if(data.active_skill_ztur && data.active_skill_ztur.base) { setVal('ztur-active-nom', data.active_skill_ztur.base.nom); setVal('ztur-active-cond', data.active_skill_ztur.base.condition); setVal('ztur-active-effet', data.active_skill_ztur.base.effet); }
 
         setVal('seza-leader', data.leader_skill_seza);
         if(data.passif_seza) { 
@@ -680,14 +677,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         let zturActive = null; 
-        if(val('ztur-active-nom')||val('ztur-active-effet')) {
+        const hasZActiveBase = val('ztur-active-nom') || val('ztur-active-effet');
+        
+        if(hasZActiveBase) {
             zturActive = { 
                 base: {
-                    nom:val('ztur-active-nom'), 
-                    condition:val('ztur-active-cond'), 
-                    effet:val('ztur-active-effet')
+                    nom: val('ztur-active-nom'), 
+                    condition: val('ztur-active-cond'), 
+                    effet: val('ztur-active-effet')
                 }, 
-                transfo: null 
+                transfo: (has('has-transfo') && (val('ztur-active-transfo-nom') || val('ztur-active-transfo-effet'))) ? {
+                    nom: val('ztur-active-transfo-nom'),
+                    condition: val('ztur-active-transfo-cond'),
+                    effet: val('ztur-active-transfo-effet')
+                } : null 
             };
         }
 

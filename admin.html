@@ -408,12 +408,29 @@
                     </div>
                 </div>
 
-                <div id="ztur-active-block" class="d-none mt-4 p-3 bg-dark border border-danger rounded">
-                    <h5 class="text-danger fw-bold mb-3">ACTIVE SKILL (Z-EVEIL)</h5>
-                    <div class="row g-3">
-                        <div class="col-md-4"><label class="text-danger">Nom Active</label><input type="text" id="ztur-active-nom" class="form-control"></div>
-                        <div class="col-md-8"><label class="text-danger">Condition</label><input type="text" id="ztur-active-cond" class="form-control"></div>
-                        <div class="col-12"><label class="text-danger">Effet</label><textarea id="ztur-active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                <div id="ztur-active-block" class="d-none mt-4 pt-3 border-top border-warning">
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-sm btn-warning active" onclick="switchZturActiveTab('base')">Active Z (Base)</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning transfo-field d-none" onclick="switchZturActiveTab('transfo')">Active Z (Transfo)</button>
+                    </div>
+
+                    <div id="ztur-active-base-block" class="p-3 bg-dark border border-warning rounded">
+                        <h5 class="text-warning fw-bold mb-3">ACTIVE SKILL Z (BASE)</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4"><label class="text-warning">Nom Active</label><input type="text" id="ztur-active-nom" class="form-control"></div>
+                            <div class="col-md-8"><label class="text-warning">Condition</label><input type="text" id="ztur-active-cond" class="form-control"></div>
+                            <div class="col-12"><label class="text-warning">Effet</label><textarea id="ztur-active-effet" class="form-control rich-text" rows="2"></textarea></div>
+                        </div>
+                    </div>
+
+                    <div id="ztur-active-transfo-block" class="d-none p-3 bg-dark border border-warning rounded">
+                        <h5 class="text-warning fw-bold mb-3">ACTIVE SKILL Z (TRANSFORMÉ)</h5>
+                        <p class="text-muted small">Laisser vide si pas d'active skill sous cette forme.</p>
+                        <div class="row g-3">
+                            <div class="col-md-4"><label class="text-warning">Nom Active</label><input type="text" id="ztur-active-transfo-nom" class="form-control"></div>
+                            <div class="col-md-8"><label class="text-warning">Condition</label><input type="text" id="ztur-active-transfo-cond" class="form-control"></div>
+                            <div class="col-12"><label class="text-warning">Effet</label><textarea id="ztur-active-transfo-effet" class="form-control rich-text" rows="2"></textarea></div>
+                        </div>
                     </div>
                 </div>
             </div>

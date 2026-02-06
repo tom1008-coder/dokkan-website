@@ -135,5 +135,16 @@
     "Innocent" : {
         "lv1": "ATT +10 %",
         "lv10": "ATT +15 %"
+    }, 
+
+  "Déesse de la guerre" : {
+        "lv1": "Ki +2",
+        "lv10": "Ki +3, chance d'esquive +5 %"
+    }, 
+
+    "Famille de Son Goku" : {
+        "lv1": "DÉF +15 %",
+        "lv10": "DÉF +20 %"
     }
+
 }
