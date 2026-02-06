@@ -1,0 +1,170 @@
+/* =========================================
+   STYLE DE LA NAVBAR (Modern Glass)
+   ========================================= */
+
+/* La barre elle-même */
+.navbar {
+    /* Fond sombre semi-transparent avec flou (Glassmorphism) */
+    background: rgba(11, 15, 25, 0.85) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
+    /* Bordure lumineuse subtile en bas */
+    border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    padding: 12px 0;
+}
+
+/* =========================================
+   LOGO / MARQUE
+   ========================================= */
+.navbar-brand {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    
+    /* Texte dégradé doré */
+    background: linear-gradient(to right, #ffd700, #ffca28);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    /* Lueur dorée */
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+}
+
+/* =========================================
+   LIENS DE NAVIGATION
+   ========================================= */
+.nav-link {
+    color: #e0e0e0 !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin: 0 8px;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #ffc107 !important;
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+/* Animation de soulignement */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 5px;
+    left: 50%;
+    background-color: #ffc107;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: translateX(-50%);
+    box-shadow: 0 0 10px #ffc107;
+}
+
+.nav-link:hover::after {
+    width: 80%;
+}
+
+/* =========================================
+   BOUTONS (Connexion / Compte)
+   ========================================= */
+
+/* Bouton Connexion (Outline Glass) */
+.btn-glass-warning {
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    background: rgba(255, 193, 7, 0.05);
+    border-radius: 50px; /* Forme de pilule */
+    padding: 6px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.btn-glass-warning:hover {
+    background: rgba(255, 193, 7, 0.2);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Bouton Utilisateur Connecté (Solid Glass) */
+.btn-glass-user {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.8), rgba(255, 152, 0, 0.8));
+    color: #000;
+    border: none;
+    border-radius: 50px;
+    padding: 6px 20px;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-glass-user:hover {
+    background: linear-gradient(135deg, #ffd700, #ff9800);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.5);
+    transform: translateY(-2px);
+    color: #000;
+}
+
+/* =========================================
+   MENU DÉROULANT (DROPDOWN)
+   ========================================= */
+.dropdown-menu {
+    background: rgba(30, 35, 45, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.dropdown-item {
+    color: #e0e0e0;
+    border-radius: 8px;
+    padding: 8px 15px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    transform: translateX(5px);
+}
+
+/* Séparateur dans le menu */
+.dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Bouton déconnexion */
+.text-danger:hover {
+    background: rgba(220, 53, 69, 0.15);
+    color: #ff6b6b !important;
+}
+
+/* =========================================
+   MOBILE TOGGLER
+   ========================================= */
+.navbar-toggler {
+    border: none;
+    outline: none;
+    box-shadow: none !important;
+}
+
+/* Couleur de l'icône burger */
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 193, 7, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}

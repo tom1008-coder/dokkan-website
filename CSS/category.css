@@ -1,0 +1,230 @@
+/* =========================================
+   1. ATMOSPHÈRE & BACKGROUND
+   ========================================= */
+body {
+    /* Dégradé sombre et profond pour faire ressortir les couleurs */
+    background: radial-gradient(circle at top center, #1e2a45 0%, #0f1521 100%);
+    color: #f0f0f0;
+    font-family: 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none !important;
+    transition: all 0.3s ease;
+}
+
+/* Scrollbar stylisée */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ffc107, #ff9800);
+    border-radius: 10px;
+}
+
+/* =========================================
+   2. EN-TÊTE (MODERNE)
+   ========================================= */
+#category-title {
+    /* Effet de texte doré dégradé */
+    background: linear-gradient(to right, #ffd700, #ffca28, #ffe082);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 4px 15px rgba(255, 215, 0, 0.3);
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+/* Bouton retour stylisé */
+.btn-outline-light {
+    border-radius: 50px;
+    padding: 8px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+}
+.btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-5px);
+}
+
+/* =========================================
+   3. SECTIONS LEADERS (GLASSMORPHISM)
+   ========================================= */
+/* Ciblage des colonnes 200% et 170% via les classes Bootstrap existantes */
+
+/* Conteneur générique pour les boîtes de leaders */
+.col-xl-6 > div {
+    background: rgba(30, 35, 45, 0.6) !important; /* Remplace la couleur inline */
+    backdrop-filter: blur(10px);
+    border-radius: 15px !important;
+    border-width: 1px !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.col-xl-6 > div:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Spécifique God Leaders (Warning/Jaune) */
+.border-warning {
+    border-color: rgba(255, 193, 7, 0.3) !important;
+    box-shadow: inset 0 0 20px rgba(255, 193, 7, 0.05);
+}
+.border-warning h5 {
+    color: #ffc107 !important;
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+    border-bottom: 1px solid rgba(255, 193, 7, 0.2) !important;
+}
+
+/* Spécifique Leaders 170% (Info/Bleu) */
+.border-info {
+    border-color: rgba(13, 202, 240, 0.3) !important;
+    box-shadow: inset 0 0 20px rgba(13, 202, 240, 0.05);
+}
+.border-info h5 {
+    color: #0dcaf0 !important;
+    text-shadow: 0 0 10px rgba(13, 202, 240, 0.4);
+    border-bottom: 1px solid rgba(13, 202, 240, 0.2) !important;
+}
+
+/* =========================================
+   4. CARTES PERSONNAGES (SLEEK)
+   ========================================= */
+.dokkan-card {
+    background: #1a1f2b; /* Fond un peu plus clair que le body */
+    border-radius: 12px; /* Coins plus arrondis */
+    border: 1px solid #2c3545;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.dokkan-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    border-color: #4a5568;
+    z-index: 10;
+}
+
+.card-body {
+    padding: 12px;
+}
+
+/* Titre du perso */
+.card-title {
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    height: 38px; /* Hauteur fixe */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.2;
+}
+
+/* Image */
+.dokkan-card img {
+    border-radius: 8px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    /* Ombre portée sous l'image pour la détacher du fond */
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
+}
+
+/* Badges de Type */
+.badge {
+    border-radius: 20px; /* Forme de pilule */
+    padding: 5px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    border: none;
+}
+
+/* =========================================
+   5. EFFET LR ULTIME (Variable CSS)
+   ========================================= */
+/* La classe .is-lr est ajoutée par JS */
+.dokkan-card.is-lr {
+    --lr-color: #ffd700; /* Valeur par défaut */
+    
+    border: 0 !important; /* On retire la bordure standard */
+    /* On crée une bordure animée avec box-shadow */
+    box-shadow: 
+        0 0 5px var(--lr-color),
+        inset 0 0 10px rgba(0,0,0,0.8); /* Profondeur interne */
+        
+    /* Pseudo-élément pour la bordure brillante */
+    position: relative;
+    z-index: 1;
+}
+
+/* Bordure animée via un pseudo-élément sous la carte */
+.dokkan-card.is-lr::before {
+    content: "";
+    position: absolute;
+    inset: -2px; /* Dépasse de 2px pour faire la bordure */
+    background: conic-gradient(
+        from 0deg, 
+        transparent 0%, 
+        var(--lr-color) 20%, 
+        transparent 40%, 
+        transparent 100%
+    );
+    z-index: -1;
+    border-radius: 14px; /* Un peu plus grand que la carte */
+    animation: lr-rotate 3s linear infinite;
+}
+
+/* Animation de rotation de la lumière autour de la carte */
+@keyframes lr-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Fond interne pour cacher le centre du pseudo-élément rotatif */
+.dokkan-card.is-lr .card-body {
+    background: #1a1f2b; /* Même couleur que la carte normale */
+    border-radius: 12px;
+    z-index: 2;
+}
+
+/* Éclair pulsant supplémentaire */
+.dokkan-card.is-lr {
+    animation: lr-glow-pulse 2s infinite alternate;
+}
+
+@keyframes lr-glow-pulse {
+    0% { box-shadow: 0 0 5px var(--lr-color); }
+    100% { box-shadow: 0 0 15px var(--lr-color), 0 0 30px rgba(var(--lr-color), 0.3); }
+}
+
+/* =========================================
+   6. RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+    #category-title {
+        font-size: 1.8rem;
+    }
+    .card-title {
+        font-size: 0.75rem;
+        height: 32px;
+    }
+    .col-6 {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}

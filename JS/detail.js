@@ -172,6 +172,7 @@ async function chargerDetail() {
             });
         }
 
+        // Affichage Catégories (LIENS VERS CATEGORY.HTML)
         const divCats = document.getElementById("detail-cats");
         if (divCats) {
             divCats.innerHTML = "";
@@ -180,7 +181,12 @@ async function chargerDetail() {
                 if (cats.startsWith('[')) { try { cats = JSON.parse(cats); } catch(e) {} }
                 else { cats = cats.split(',').map(s => s.trim()); }
             }
-            if (Array.isArray(cats)) cats.forEach((cat) => divCats.innerHTML += `<span class="badge-cat">${cat}</span>`);
+            if (Array.isArray(cats)) {
+                cats.forEach((cat) => {
+                    // Lien vers la page catégorie
+                    divCats.innerHTML += `<a href="category.html?cat=${encodeURIComponent(cat)}" class="badge-cat text-decoration-none" style="cursor: pointer;">${cat}</a>`;
+                });
+            }
         }
 
         afficherMemeNom(currentPersoGlobal, allPersosGlobal);
@@ -238,12 +244,13 @@ function changerForme(forme) {
         };
     }
 
-    // --- GESTION STANDBY SKILL ---
+    // --- GESTION STANDBY SKILL (MODE STANDBY ACTIVÉ) ---
     if (forme === 'standby' && sourceData.standby) {
         const standbyData = {
             nom: { standby: sourceData.standby.form?.nom || "Mode Standby" },
             passif: { standby: { nom: "Défense & Charge", effet: sourceData.standby.form?.passif || "..." } },
-            active_skill: null, // On cache l'active skill car on est DÉJÀ en standby
+            // On cache l'Active Skill car on est déjà dedans
+            active_skill: null, 
             spe: null
         };
 
@@ -304,10 +311,11 @@ function changerForme(forme) {
     const speEffet = getContent(sourceData.spe, forme, 'effet');
     afficherSpeEtUltime(sourceData.spe, forme, speNom, speEffet);
 
-    // --- LOGIQUE ACTIVATION STANDBY (VISIBLE SEULEMENT HORS STANDBY) ---
+    // --- LOGIQUE D'AFFICHAGE ACTIVE SKILL & STANDBY ACTIVATION ---
     let activeDataToDisplay = sourceData.active_skill;
     let isStandbyType = false;
 
+    // Si on n'est PAS en Standby, on doit peut-être afficher l'activation du Standby
     if (forme !== 'standby' && p.standby && p.standby.activation) {
         
         // On récupère l'Active Skill "Normal" pour la forme actuelle
@@ -316,11 +324,10 @@ function changerForme(forme) {
         
         if (normalActive) {
             // Check robuste : est-ce que cette forme a un active skill ?
-            // On utilise la même logique que afficherActiveSkill pour déterminer si quelque chose va s'afficher
             if (normalActive.base || normalActive.transfo) {
                 if (normalActive[forme]) hasNormalActive = true;
             } else {
-                // Ancien format ou objet simple : s'affiche si base ou si standbyType forcé
+                // Ancien format ou objet simple
                 if (forme === 'base') hasNormalActive = true;
             }
         }
@@ -333,7 +340,8 @@ function changerForme(forme) {
                     condition: p.standby.activation.condition,
                     effet: p.standby.activation.effet
                 },
-                base: { // Fallback
+                // Fallback pour que getContent fonctionne si besoin
+                base: {
                     nom: p.standby.activation.nom,
                     condition: p.standby.activation.condition,
                     effet: p.standby.activation.effet
@@ -435,14 +443,12 @@ function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
 
     // SI STANDBY : Changement en VIOLET et Titres FINISH
     if (forme === 'standby') {
-        // Finish 1
         titleSpe.innerText = "FINISH SKILL 1";
         badgeSpe.innerText = "Charge Max";
         titleSpe.className = "text-standby fw-bold mb-1";
         badgeSpe.className = "badge rounded-pill bg-standby mb-2";
         boxSpe.className = "skill-box border-standby p-3 rounded bg-dark bg-opacity-50 h-100 border";
 
-        // Finish 2
         titleUlt.innerText = "FINISH SKILL 2";
         badgeUlt.innerText = "Charge Incomplète";
         titleUlt.style.color = "#6f42c1"; 
@@ -495,8 +501,8 @@ function afficherActiveSkill(rawActive, forme, isStandbyType = false) {
 
     // Reset styles par défaut
     titleActive.innerText = "ACTIVE SKILL";
-    titleActive.className = "fw-bold mb-2 text-active"; // Utilisation classe CSS
-    box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-active"; // Border active
+    titleActive.className = "fw-bold mb-2 text-active"; // CSS text-active (Rose)
+    box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-active"; // Border active (Rose)
 
     // Style Violet si Standby
     if (isStandbyType) {
