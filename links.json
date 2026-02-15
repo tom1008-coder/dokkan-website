@@ -145,6 +145,30 @@
     "Famille de Son Goku" : {
         "lv1": "DÉF +15 %",
         "lv10": "DÉF +20 %"
+    }, 
+
+     "Intello" : {
+        "lv1": "ATT et DÉF +10 %",
+        "lv10": "ATT et DÉF +15 %"
+    },
+
+    "Soutien infaillible" : {
+        "lv1": "ATT +10 %, DÉF -15 % pour tous les ennemis",
+        "lv10": "ATT +15 %, DÉF -20 % pour tous les ennemis"
+    },
+
+    "Style rapide": {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT +15 %, chance d'esquive +5 %"
+    },
+
+    "L'étonnant sortilège": {
+        "lv1": "ATT +15 %",
+        "lv10": "ATT +15 %, DÉF -10 % pour tous les ennemis"
     }
 
+   
 }
+
+
+
