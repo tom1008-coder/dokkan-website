@@ -42,6 +42,11 @@
             background-color: #ffc107 !important;
             color: #1a1f2b !important;
         }
+
+        /* Forcer le texte en blanc pour les données utilisateur */
+        .user-data-text {
+            color: #ffffff !important;
+        }
     </style>
 </head>
 <body class="bg-dark text-light">
@@ -61,33 +66,43 @@
             <div class="col-lg-8">
                 
                 <div class="card bg-dark border-secondary mb-4">
-    <div class="card-header border-bottom border-secondary bg-secondary bg-opacity-25 py-3">
-        <h4 class="mb-0 text-warning fw-bold">👤 MON PROFIL</h4>
-    </div>
-    <div class="card-body p-4">
-        <div class="mb-4">
-            <label class="text-secondary text-uppercase small fw-bold mb-1">Pseudonyme actuel</label>
-            <div class="fs-4 fw-bold text-white" id="display-pseudo">Chargement...</div>
-        </div>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="text-secondary text-uppercase small fw-bold mb-1">Email</label>
-                <p id="user-email-display" class="mb-0 text-white">...</p>
-            </div>
-            <div class="col-md-6">
-                <label class="text-secondary text-uppercase small fw-bold mb-1">Membre depuis le</label>
-                <p id="user-date-display" class="mb-0 text-white">...</p>
-            </div>
-        </div>
-    </div>
-</div>
+                    <div class="card-header border-bottom border-secondary bg-secondary bg-opacity-25 py-3">
+                        <h4 class="mb-0 text-warning fw-bold">👤 MON PROFIL</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <label class="text-secondary text-uppercase small fw-bold mb-1">Pseudonyme actuel</label>
+                            <div class="fs-4 fw-bold user-data-text" id="display-pseudo">Chargement...</div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="text-secondary text-uppercase small fw-bold mb-1">Email</label>
+                                <p id="user-email-display" class="mb-0 user-data-text">...</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-secondary text-uppercase small fw-bold mb-1">Membre depuis le</label>
+                                <p id="user-date-display" class="mb-0 user-data-text">...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-dark border-secondary mb-4">
+                    <div class="card-header border-bottom border-secondary bg-secondary bg-opacity-25 py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-warning fw-bold">👥 MES AMIS</h5>
+                        <a href="amis.html" class="btn btn-sm btn-outline-warning">Gérer</a>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <div class="display-6 fw-bold user-data-text" id="stat-friends-count">0</div>
+                        <p class="text-secondary small text-uppercase mb-0">Amis connectés</p>
+                    </div>
+                </div>
 
                 <div class="card bg-dark border-secondary mb-4">
                     <div class="card-header border-bottom border-secondary bg-secondary bg-opacity-25 py-3">
                         <h5 class="mb-0 text-info fw-bold">🛠️ PARAMÈTRES DU COMPTE</h5>
                     </div>
                     <div class="card-body p-4">
-                        
                         <form id="form-pseudo" class="mb-4 border-bottom border-secondary pb-4">
                             <label class="form-label text-warning fw-bold">Changer mon Pseudonyme</label>
                             <div class="input-group">
@@ -163,18 +178,25 @@
             document.getElementById('display-pseudo').textContent = currentPseudo;
             if(user.user_metadata.display_name) document.getElementById('input-pseudo').value = user.user_metadata.display_name;
 
-            // --- LOGIQUE COMPTEUR DE BOX ---
+            // --- LOGIQUE COMPTEURS ---
             try {
-                const { count, error: boxError } = await supabase
+                // Compteur Box
+                const { count: boxCount } = await supabase
                     .from('user_box')
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', user.id);
+                document.getElementById('stat-box-count').textContent = boxCount || 0;
 
-                if (boxError) throw boxError;
-                document.getElementById('stat-box-count').textContent = count || 0;
+                // Compteur Amis (status accepted)
+                const { count: friendsCount } = await supabase
+                    .from('friends')
+                    .select('*', { count: 'exact', head: true })
+                    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+                    .eq('status', 'accepted');
+                document.getElementById('stat-friends-count').textContent = friendsCount || 0;
+
             } catch (err) {
-                console.error("Erreur box:", err);
-                document.getElementById('stat-box-count').textContent = "!";
+                console.error("Erreur stats:", err);
             }
 
             document.getElementById('loading-profile').classList.add('d-none');
