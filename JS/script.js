@@ -4,23 +4,21 @@
 // 1. VARIABLES GLOBALES
 // ============================================================
 const container = document.getElementById('card-container');
-const searchInput = document.getElementById('search-input');
+const searchInput = document.getElementById('search-input'); 
+const newsContainer = document.getElementById('news-container');
 
-// --- URL DE BASE DES IMAGES (SUPABASE STORAGE) ---
 const BASE_IMG_URL = "https://dpqxaevnarnhmxihkggk.supabase.co/storage/v1/object/public/images/";
 
-// --- GESTION DES TIMERS ---
 let activeIntervals = []; 
+let toutesLesCartes = [];
+let toutesLesNews = []; // Permet de stocker les news pour le Pop-up
 
-// --- SÉCURITÉ ---
 if (!container) {
     throw new Error("Arrêt normal : Script.js ne doit pas s'exécuter sur cette page.");
 }
 
-let toutesLesCartes = [];
-
 // ============================================================
-// 2. CHARGEMENT DES DONNÉES (VERSION SUPABASE)
+// 2. CHARGEMENT DES DONNÉES CARTES & NEWS
 // ============================================================
 async function chargerDonnees() {
     try {
@@ -30,57 +28,164 @@ async function chargerDonnees() {
             throw new Error("La variable 'supabase' n'existe pas. Vérifie config.js !");
         }
 
-        const { data, error } = await supabase
+        // CHARGEMENT DES CARTES
+        const { data: cardsData, error: cardsError } = await supabase
             .from('characters')
             .select('*')
             .order('created_at', { ascending: true });
 
-        if (error) throw error;
+        if (cardsError) throw cardsError;
 
-        toutesLesCartes = data;
+        toutesLesCartes = cardsData;
         
-        // On affiche les 8 dernières sorties par défaut
+        // On affiche les 8 dernières sorties au max
         const dernieresSorties = toutesLesCartes.slice(-8).reverse();
         afficherCartes(dernieresSorties);
 
+        // CHARGEMENT DES NEWS
+        chargerNews();
+
     } catch (erreur) {
         console.error("Erreur Supabase :", erreur);
-        container.innerHTML = `<p class='text-danger text-center'>Impossible de charger les données : ${erreur.message}</p>`;
+        container.innerHTML = `<p class='text-danger text-center w-100'>Impossible de charger les données : ${erreur.message}</p>`;
+    }
+}
+
+// Fonction pour charger les News depuis Supabase
+async function chargerNews() {
+    if (!newsContainer) return;
+
+    try {
+        const { data: newsData, error } = await supabase
+            .from('news')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        if (error) throw error;
+
+        newsContainer.innerHTML = ""; 
+
+        if (!newsData || newsData.length === 0) {
+            newsContainer.innerHTML = "<p class='text-secondary small fst-italic text-center mt-3'>Aucune news pour le moment.</p>";
+            return;
+        }
+
+        // On sauvegarde globalement
+        toutesLesNews = newsData;
+
+        newsData.forEach(news => {
+            const dateObj = new Date(news.created_at);
+            const dateStr = dateObj.toLocaleDateString('fr-FR').replace(/\//g, '-');
+            const timeStr = dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            
+            let imageHtml = "";
+            if (news.image_url && news.image_url.trim() !== "") {
+                imageHtml = `<img src="${news.image_url}" class="img-fluid mb-2 border border-secondary rounded" alt="News Image">`;
+            }
+
+            let titleColor = "text-white";
+            if(news.badge_color.includes("warning")) titleColor = "text-warning";
+            if(news.badge_color.includes("info")) titleColor = "text-info";
+            if(news.badge_color.includes("success")) titleColor = "text-success";
+            if(news.badge_color.includes("danger")) titleColor = "text-danger";
+
+            const isDarkText = news.badge_color === 'bg-warning' || news.badge_color === 'bg-info';
+            const badgeTextColor = isDarkText ? 'text-dark' : 'text-white';
+            
+            const contenuFormatte = news.contenu ? news.contenu.replace(/\n/g, '<br>') : "";
+
+            const newsHtml = `
+                <div class="news-card-mini mb-3 shadow-sm clickable-news border border-secondary" onclick="ouvrirModalNews(${news.id})">
+                    <div class="news-header-mini">
+                        <span class="badge ${news.badge_color} ${badgeTextColor}">${news.badge_text}</span>
+                        <span class="news-time">${dateStr} à ${timeStr}</span>
+                    </div>
+                    ${imageHtml}
+                    <h6 class="${titleColor} fw-bold mb-1 mt-1">${news.titre}</h6>
+                    <p class="small text-light opacity-75 mb-0 news-text-preview" style="line-height: 1.4;">
+                        ${contenuFormatte}
+                    </p>
+                    <div class="text-end mt-1"><small class="text-info" style="font-size: 0.7rem;">Lire la suite ></small></div>
+                </div>
+            `;
+            newsContainer.innerHTML += newsHtml;
+        });
+
+    } catch (err) {
+        console.error("Erreur chargement news:", err);
+        newsContainer.innerHTML = "<p class='text-danger small text-center mt-3'>Erreur serveur pour les news.</p>";
     }
 }
 
 // ============================================================
-// 3. AFFICHAGE DES CARTES
+// 3. OUVERTURE DU POP-UP DES NEWS
+// ============================================================
+function ouvrirModalNews(id) {
+    const news = toutesLesNews.find(n => n.id === id);
+    if (!news) return;
+
+    const dateObj = new Date(news.created_at);
+    const dateStr = dateObj.toLocaleDateString('fr-FR').replace(/\//g, '-');
+    const timeStr = dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    let titleColor = "text-white";
+    if(news.badge_color.includes("warning")) titleColor = "text-warning";
+    if(news.badge_color.includes("info")) titleColor = "text-info";
+    if(news.badge_color.includes("success")) titleColor = "text-success";
+    if(news.badge_color.includes("danger")) titleColor = "text-danger";
+
+    const isDarkText = news.badge_color === 'bg-warning' || news.badge_color === 'bg-info';
+    const badgeTextColor = isDarkText ? 'text-dark' : 'text-white';
+
+    // Remplissage Modal
+    document.getElementById("modalNewsTitle").className = `modal-title fw-bold ${titleColor}`;
+    document.getElementById("modalNewsTitle").innerText = news.titre;
+    
+    document.getElementById("modalNewsBadge").className = `badge ${news.badge_color} ${badgeTextColor}`;
+    document.getElementById("modalNewsBadge").innerText = news.badge_text;
+    
+    document.getElementById("modalNewsDate").innerHTML = `<i class="bi bi-clock"></i> Publié le ${dateStr} à ${timeStr}`;
+
+    const imageContainer = document.getElementById("modalNewsImageContainer");
+    const imageElement = document.getElementById("modalNewsImage");
+    if (news.image_url && news.image_url.trim() !== "") {
+        imageElement.src = news.image_url;
+        imageContainer.style.display = "block";
+    } else {
+        imageContainer.style.display = "none";
+        imageElement.src = "";
+    }
+
+    document.getElementById("modalNewsContent").innerHTML = news.contenu.replace(/\n/g, '<br>');
+
+    // Afficher
+    const modal = new bootstrap.Modal(document.getElementById('newsModal'));
+    modal.show();
+}
+
+// ============================================================
+// 4. AFFICHAGE DES CARTES
 // ============================================================
 function afficherCartes(liste) {
-    // 1. On nettoie les anciens timers
     nettoyerIntervalles();
     
     container.innerHTML = "";
 
     if (!liste || liste.length === 0) {
-        container.innerHTML = "<p class='text-center text-secondary mt-3'>Aucun personnage trouvé.</p>";
+        container.innerHTML = "<p class='text-center text-secondary mt-3 w-100'>Aucun personnage trouvé.</p>";
         return;
     }
 
     liste.forEach(carte => {
-        // CONSTRUCTION URL
         const cheminImage = `${BASE_IMG_URL}${carte.id}/${carte.id}.png`;
-        
-        // 1. Couleur du badge (Bootstrap class)
-        let couleurBadge = getTypeColor(carte.type);
-        
-        // 2. Couleur du Glow (Code HEX pour CSS variable)
         let hexGlow = getGlowColor(carte.type);
 
-        // GESTION DU NOM
         const nomAffiche = (typeof carte.nom === 'object' && carte.nom !== null) ? carte.nom.base : carte.nom;
 
-        // --- DÉTECTION LR ---
         const isLR = (carte.tag === 'LR' || carte.rarity === 'LR');
         const lrClass = isLR ? 'is-lr' : '';
 
-        // --- PRÉPARATION DES DONNÉES POUR LE CARROUSEL AUTO ---
         const hasTransfo = carte.transformation ? "true" : "false";
         const hasRevival = carte.revival ? "true" : "false";
         const hasEchange = carte.echange ? "true" : "false";
@@ -88,46 +193,39 @@ function afficherCartes(liste) {
         const hasGeant = carte.geant ? "true" : "false";
         const hasStandby = carte.standby ? "true" : "false"; 
 
-        // --- INJECTION HTML ---
-        // On injecte la variable CSS --lr-color directement dans le style de la div .dokkan-card
         const codeHTML = `
-            <div class="col-6 col-md-3 mb-4">
+            <div class="col">
                 <div class="dokkan-card h-100 ${lrClass}" 
                      onclick="allerVersPageDetail('${carte.id}')" 
-                     style="cursor: pointer; --lr-color: ${hexGlow};">
+                     style="cursor: pointer; --lr-color: ${hexGlow};"
+                     title="${nomAffiche}">
                     
-                    <div class="card-body text-center p-2 position-relative">
-                        
-                        <img src="${cheminImage}" 
-                             class="img-fluid mb-1 auto-cycle-img" 
-                             alt="${nomAffiche}" 
-                             style="max-height: 100px; transition: opacity 0.5s ease;"
-                             data-id="${carte.id}"
-                             data-transfo="${hasTransfo}"
-                             data-revival="${hasRevival}"
-                             data-echange="${hasEchange}"
-                             data-fureur="${hasFureur}" 
-                             data-geant="${hasGeant}" 
-                             data-standby="${hasStandby}"
-                             onerror="this.src='https://placehold.co/100x100?text=?'">
-                        
-                        <h6 class="card-title mb-2" style="font-size: 0.9rem; line-height: 1.2;">${nomAffiche}</h6>
-                        <span class="badge ${couleurBadge}">${carte.type}</span>
-                    </div>
+                    <img src="${cheminImage}" 
+                         class="img-fluid auto-cycle-img" 
+                         alt="${nomAffiche}" 
+                         style="transition: opacity 0.5s ease;"
+                         data-id="${carte.id}"
+                         data-transfo="${hasTransfo}"
+                         data-revival="${hasRevival}"
+                         data-echange="${hasEchange}"
+                         data-fureur="${hasFureur}" 
+                         data-geant="${hasGeant}" 
+                         data-standby="${hasStandby}"
+                         onerror="this.src='https://placehold.co/100x100?text=?'">
+                    
+                    <h6 class="card-title text-truncate mt-2">${nomAffiche}</h6>
                 </div>
             </div>
         `;
         container.innerHTML += codeHTML;
     });
 
-    // 2. On lance les cycles automatiques des images
     lancerCycleAutomatique();
 }
 
 // ============================================================
-// 4. GESTION DU CARROUSEL AUTOMATIQUE
+// 5. GESTION DU CARROUSEL AUTOMATIQUE
 // ============================================================
-
 function lancerCycleAutomatique() {
     const imagesElements = document.querySelectorAll('.auto-cycle-img');
 
@@ -140,7 +238,7 @@ function lancerCycleAutomatique() {
         const hasGeant = img.dataset.geant === "true";
         const hasStandby = img.dataset.standby === "true"; 
 
-        const imagesList = [`${BASE_IMG_URL}${id}/${id}.png`]; // Base
+        const imagesList = [`${BASE_IMG_URL}${id}/${id}.png`];
         
         if (hasStandby) imagesList.push(`${BASE_IMG_URL}${id}/${id}_standby.png`);
         if (hasGeant) imagesList.push(`${BASE_IMG_URL}${id}/${id}_geant.png`);
@@ -170,7 +268,7 @@ function nettoyerIntervalles() {
 }
 
 // ============================================================
-// 5. REDIRECTION & RECHERCHE
+// 6. REDIRECTION & RECHERCHE
 // ============================================================
 function allerVersPageDetail(id) {
     window.location.href = `detail.html?id=${id}`;
@@ -201,32 +299,18 @@ if (searchInput) {
 }
 
 // ============================================================
-// 6. UTILITAIRES (COULEURS & CLASSES)
+// 7. UTILITAIRES (COULEURS & CLASSES)
 // ============================================================
-
-// Retourne la classe Bootstrap pour le Badge
-function getTypeColor(type) {
-    if (!type) return 'bg-secondary';
-    const t = type.toUpperCase();
-    if (t === 'PUI' || t === 'STR') return 'bg-danger';
-    if (t === 'AGI' || t === 'AGL') return 'bg-primary';
-    if (t === 'TEQ' || t === 'TEC') return 'bg-success';
-    if (t === 'INT') return 'bg-int';       
-    if (t === 'PHY' || t === 'END') return 'bg-warning text-dark';
-    return 'bg-secondary';
-}
-
-// Retourne le Code HEX pour l'effet Glow
 function getGlowColor(type) {
-    if (!type) return '#ffd700'; // Or par défaut
+    if (!type) return '#ffd700';
     const t = type.toUpperCase();
-    if (t === 'PUI' || t === 'STR') return '#dc3545'; // Rouge
-    if (t === 'AGI' || t === 'AGL') return '#0d6efd'; // Bleu
-    if (t === 'TEQ' || t === 'TEC') return '#198754'; // Vert
-    if (t === 'INT') return '#6f42c1'; // Violet
-    if (t === 'PHY' || t === 'END') return '#ffc107'; // Jaune/Orange
+    if (t === 'PUI' || t === 'STR') return '#dc3545'; 
+    if (t === 'AGI' || t === 'AGL') return '#0d6efd'; 
+    if (t === 'TEQ' || t === 'TEC') return '#198754'; 
+    if (t === 'INT') return '#6f42c1'; 
+    if (t === 'PHY' || t === 'END') return '#ffc107'; 
     return '#ffd700';
 }
 
 // Lancement
-chargerDonnees();
+document.addEventListener('DOMContentLoaded', chargerDonnees);

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin News - Dokkan Dex</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #121212; color: #fff; }
+        .card { background-color: #1e1e1e; border: 1px solid #333; }
+        .form-control, .form-select { background-color: #2b2b2b; border: 1px solid #444; color: #fff; }
+        .form-control:focus, .form-select:focus { background-color: #333; color: #fff; border-color: #ffc107; box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); }
+        .table { color: #fff; }
+        .table-dark th { background-color: #222; border-color: #444; color: #ffc107; }
+        .table-dark td { background-color: #1e1e1e; border-color: #444; vertical-align: middle; }
+    </style>
+</head>
+<body class="py-4">
+
+    <div class="container">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-warning fw-bold mb-0"><i class="bi bi-newspaper"></i> GESTION DES NEWS</h2>
+            <a href="admin.html" class="btn btn-outline-light">← Retour Admin Personnages</a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="card p-4 shadow">
+                    <h4 class="text-info mb-4 border-bottom border-secondary pb-2"><i class="bi bi-plus-circle"></i> Ajouter une News</h4>
+                    
+                    <form id="news-form">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50">Texte du Badge</label>
+                                <input type="text" id="news-badge-text" class="form-control" placeholder="Ex: INFO, NOUVEAU..." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50">Couleur du Badge</label>
+                                <select id="news-badge-color" class="form-select" required>
+                                    <option value="bg-info">Bleu (Info)</option>
+                                    <option value="bg-warning">Jaune (Invocation)</option>
+                                    <option value="bg-success">Vert (Nouveau/Succès)</option>
+                                    <option value="bg-danger">Rouge (Alerte/Maintenance)</option>
+                                    <option value="bg-secondary">Gris (Détail)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-white-50">Titre de l'actualité</label>
+                                <input type="text" id="news-title" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-white-50">Contenu de l'actualité</label>
+                                <textarea id="news-content" class="form-control" rows="5" placeholder="Sauts de ligne autorisés..." required></textarea>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="p-3 border border-secondary rounded" style="background-color: rgba(255,255,255,0.02);">
+                                    <label class="form-label text-warning small fw-bold"><i class="bi bi-image"></i> Image (Optionnel)</label>
+                                    
+                                    <p class="small text-white-50 mb-1 mt-2">1. Depuis ton PC :</p>
+                                    <input type="file" id="news-image-file" class="form-control form-control-sm" accept="image/png, image/jpeg, image/jpg, image/webp">
+                                    
+                                    <p class="small text-white-50 mb-1 mt-3">2. OU Lien externe (URL) :</p>
+                                    <input type="text" id="news-image-url" class="form-control form-control-sm" placeholder="Ex: https://...">
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" id="btn-submit-news" class="btn btn-warning w-100 fw-bold">PUBLIER LA NEWS</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card p-4 shadow h-100">
+                    <h4 class="text-white mb-4 border-bottom border-secondary pb-2"><i class="bi bi-card-list"></i> News Actuelles</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover text-center">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Badge</th>
+                                    <th>Titre</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="news-list-table">
+                                <tr>
+                                    <td colspan="4" class="text-secondary py-3">Chargement...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="JS/config.js"></script>
+    <script src="JS/admin_news.js"></script>
+</body>
+</html>

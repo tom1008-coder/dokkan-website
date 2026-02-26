@@ -1,246 +1,167 @@
 /* =========================================
-   1. BASES & BACKGROUND (Atmosphère Modern Glass)
+   BASES & BACKGROUND (Style Classic Dokkan Wiki)
    ========================================= */
 body {
-    /* Dégradé sombre et profond (Identique à catégorie) */
-    background: radial-gradient(circle at top center, #1e2a45 0%, #0f1521 100%);
+    background-color: #080c16; /* Bleu très foncé typique des sites Dokkan */
     color: #e0e0e0;
-    font-family: 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
 }
 
 /* Scrollbar stylisée */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #0b0f19;
+    background: #05080e;
 }
 ::-webkit-scrollbar-thumb {
-    background: #495057;
-    border-radius: 5px;
-    border: 2px solid #0f1521;
+    background: #1f365c;
+    border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #ffc107;
-}
-
-/* 2. LE CONTENEUR PRINCIPAL */
-.container {
-    max-width: 1200px;
-    padding-top: 20px;
+    background: #0d6efd;
 }
 
 /* =========================================
-   3. BARRE DE RECHERCHE (Style Glassmorphism)
+   TITRES DE SECTIONS
    ========================================= */
-#search-input {
-    background: rgba(30, 35, 45, 0.6); /* Fond semi-transparent */
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border-radius: 50px; /* Pill shape */
-    padding: 15px 25px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-#search-input:focus {
-    background: rgba(40, 45, 60, 0.8);
-    box-shadow: 0 0 20px rgba(13, 202, 240, 0.2); /* Lueur cyan subtile */
-    outline: none;
-    border-color: rgba(13, 202, 240, 0.5);
-    color: #fff;
-}
-
-#search-input::placeholder {
-    color: #adb5bd;
-}
-
-/* =========================================
-   4. LES CARTES (Style "Sleek")
-   ========================================= */
-.dokkan-card {
-    background: #1a1f2b; /* Fond unifié propre */
-    border: 1px solid #2c3545; /* Bordure discrète */
-    border-radius: 12px; /* Coins arrondis modernes */
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-/* L'image dans la carte */
-.dokkan-card img {
-    border-radius: 8px;
-    width: 100%;
-    object-fit: contain;
-    transition: transform 0.5s ease;
-    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); /* Ombre portée sous le perso */
-}
-
-/* 5. EFFET DE SURVOL (HOVER) */
-.dokkan-card:hover {
-    transform: translateY(-8px) scale(1.02); /* Flotte vers le haut */
-    border-color: #4a5568; /* Éclaircit la bordure */
-    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
-    z-index: 10;
-}
-
-/* 6. TYPOGRAPHIE ET BADGES */
-.dokkan-card h6 {
-    font-weight: 600;
-    margin-top: 10px;
-    letter-spacing: 0.5px;
-    color: #fff;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-}
-
-/* Badges Pillules Modernes */
-.badge {
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    border: none;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-
-/* Pour le texte "Chargement..." */
-.text-secondary {
-    color: #8b949e !important;
-}
-
-/* =========================================
-   7. HEADER (TITRES DE SECTION)
-   ========================================= */
-.dokkan-header {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 800;
-    font-size: 1.5rem;
-    
-    /* Texte dégradé doré/blanc */
-    background: linear-gradient(to right, #ffffff, #e0e0e0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    
-    text-transform: uppercase;
-    
-    /* Style de bordure gauche (comme Admin/Category) */
-    border-left: 5px solid #ffc107; 
-    border-bottom: none; /* On retire la ligne du bas pour garder le style moderne */
-    
-    padding-left: 15px;
-    margin-bottom: 25px;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-}
-
-.dokkan-header .text-muted {
-    color: #6c757d;
+.dokkan-section-title {
+    font-size: 1.15rem;
     font-weight: normal;
-    margin: 0 5px;
-    -webkit-text-fill-color: #6c757d; /* Pour surcharger le dégradé */
-}
-
-/* Couleur personnalisée pour le type INT (Violet) */
-.bg-int {
-    background-color: #6f42c1 !important;
-    color: white !important;
-}
-
-/* =========================================
-   8. ICÔNES DE MÉCANIQUE (Transfo, Fureur...)
-   ========================================= */
-.card-mechanic-icon {
-    position: absolute;
-    top: -80px;      
-    left: -90px;     
-    width: 150px;   
-    height: 150px;  
-    z-index: 10;   
-    filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.8)); 
-    transition: transform 0.3s ease;
-    pointer-events: none; /* Pour ne pas gêner le clic sur la carte */
-}
-
-.dokkan-card:hover .card-mechanic-icon {
-     transform: scale(1.1) rotate(5deg); /* Petit mouvement dynamique */
+    color: #ffffff;
+    padding-bottom: 6px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #234b80; /* Ligne bleue sous le titre */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* =========================================
-   9. EFFET LR DYNAMIQUE (Variable JS)
+   BANNIÈRES D'ARRIVÉE (Horizontal)
    ========================================= */
-.dokkan-card.is-lr {
-    /* La variable --lr-color est injectée par le JS selon le type */
-    --lr-color: #ffd700; /* Fallback */
-    
+.banner-arrival {
+    border: 1px solid #ff0000; /* Contour rouge vif */
+    background-color: #000;
     position: relative;
-    border: 0 !important; /* On retire la bordure standard */
-    box-shadow: 
-        0 0 5px var(--lr-color),
-        inset 0 0 10px rgba(0,0,0,0.8);
-    
+    transition: transform 0.2s ease;
+}
+.banner-arrival:hover {
+    transform: scale(1.02);
+    cursor: pointer;
+}
+.banner-arrival img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    display: block;
+}
+.arrival-date {
+    background-color: #ffffff;
+    color: #000000;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 3px 0;
+}
+
+/* =========================================
+   GRILLE DES CARTES (Icônes Carrées)
+   ========================================= */
+/* On annule le style "carte dashboard" pour en faire de simples icônes */
+.dokkan-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-align: center;
+    padding: 0 5px;
+}
+
+.dokkan-card img {
+    width: 100%;
+    max-width: 100px; /* Taille typique des icônes in-game */
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: filter 0.2s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+}
+
+.dokkan-card:hover img {
+    filter: brightness(1.2) contrast(1.1);
+    transform: translateY(-3px);
+}
+
+/* Texte sous l'icône */
+.dokkan-card h6 {
+    font-size: 0.75rem;
+    color: #c9d1d9;
+    margin-top: 8px;
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+/* Cacher certains éléments de l'ancienne carte pour épurer */
+.dokkan-card .card-mechanic-icon,
+.dokkan-card .badge,
+.dokkan-card hr {
+    display: none !important;
+}
+
+/* =========================================
+   SIDEBAR NEWS (Colonne de Droite)
+   ========================================= */
+.news-sidebar {
+    background: transparent;
+}
+
+.news-card-mini {
+    background-color: #111827; /* Fond légèrement plus clair que le body */
+    border: 1px solid #1f2937;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.news-header-mini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #1f2937;
+    padding-bottom: 8px;
+}
+
+.news-header-mini .badge {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+    border-radius: 2px;
+}
+
+.news-time {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+
+
+/* =========================================
+   EFFETS POUR LES NEWS CLIQUABLES
+   ========================================= */
+.clickable-news {
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.clickable-news:hover {
+    transform: translateY(-3px); /* Se soulève légèrement */
+    border-color: #4a5568 !important; /* Bordure plus claire */
+    background-color: #1f2937; /* Fond un peu plus clair */
+}
+
+/* Coupe le texte à 3 lignes max dans la sidebar */
+.news-text-preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    animation: lr-glow-pulse 2s infinite alternate;
 }
-
-/* Pseudo-élément pour la bordure animée (effet "conic") */
-.dokkan-card.is-lr::before {
-    content: "";
-    position: absolute;
-    inset: -2px; /* Déborde légèrement pour faire la bordure */
-    background: conic-gradient(
-        from 0deg, 
-        transparent 0%, 
-        var(--lr-color) 20%, 
-        transparent 40%, 
-        transparent 100%
-    );
-    z-index: -1; /* Derrière le contenu */
-    border-radius: 14px;
-    animation: lr-rotate 3s linear infinite;
-}
-
-/* Fond interne pour cacher le centre de l'effet rotatif */
-.dokkan-card.is-lr .card-body {
-    background: #1a1f2b; /* Même couleur que la carte normale */
-    border-radius: 12px;
-    z-index: 2; /* Devant l'effet de bordure */
-}
-
-/* Animation de rotation */
-@keyframes lr-rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Animation de pulsation globale (Glow) */
-@keyframes lr-glow-pulse {
-    0% { box-shadow: 0 0 5px var(--lr-color); }
-    100% { box-shadow: 0 0 20px var(--lr-color), 0 0 30px rgba(var(--lr-color), 0.3); }
-}
-
-/* Le reflet brillant qui traverse */
-.dokkan-card.is-lr::after {
-    content: "";
-    position: absolute;
-    top: 0; left: -150%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transform: skewX(-25deg);
-    animation: lr-shine 4s infinite;
-    pointer-events: none;
-    z-index: 5; /* Au-dessus du fond mais sous le texte/badges si possible */
-}
-
-@keyframes lr-shine {
-    0% { left: -150%; }
-    30% { left: 150%; }
-    100% { left: 150%; }
-}
-
-

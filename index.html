@@ -6,72 +6,94 @@
     <title>Dokkan Battle Dex</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="CSS/index_style.css">
 </head>
 <body>
 
     <div id="nav-placeholder"></div>
 
-    <div class="container mt-4">
-
-        <div class="row justify-content-center mb-5">
-            <div class="col-12 col-lg-10 text-center">
-                <img src="img/dokkan.jpg" 
-                     alt="Bannière Dokkan Dex" 
-                     class="img-fluid rounded-4 shadow-lg border" 
-                     style="border-color: #2c3545 !important; object-fit: cover; width: 100%;">
-            </div>
-        </div>
-
-
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8">
+    <div class="container-fluid px-md-4 px-lg-5 mt-4 mb-5">
+        <div class="row g-4">
+            
+            <div class="col-lg-8 col-xl-9">
                 
+                <div class="dokkan-section-title">LES CARTES QUI ARRIVENT</div>
+                <div class="row g-3 mb-5">
+                    <div class="col-sm-6 col-md-4">
+                        <div class="banner-arrival">
+                            <img src="img/dokkan.jpg" class="img-fluid" alt="Coming Soon">
+                            <div class="arrival-date">Prochainement</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4 d-none d-sm-block">
+                        <div class="banner-arrival">
+                            <img src="img/dokkan.jpg" class="img-fluid" alt="Coming Soon">
+                            <div class="arrival-date">Prochainement</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4 d-none d-md-block">
+                        <div class="banner-arrival">
+                            <img src="img/dokkan.jpg" class="img-fluid" alt="Coming Soon">
+                            <div class="arrival-date">Prochainement</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dokkan-section-title">LES DERNIÈRES CARTES / EVEILS SORTIES </div>
+                
+                <div id="card-container" class="row row-cols-3 row-cols-sm-4 row-cols-md-4 row-cols-xl-4 g-3 mb-5">
+                    <div class="col-12 w-100 text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-secondary mt-2">Chargement des données...</p>
+                    </div>
+                </div>
+
             </div>
-        </div>
 
-        <div class="dokkan-header">
-            Mises à jour du site <span class="separator"></span> 
-        </div>
-
-        <div class="row justify-content-center mb-5">
-            <div class="col-12">
-                <div class="p-4 border border-secondary border-top-0"
-                     style="background-color: rgba(33, 37, 41, 0.8); border-radius: 0 0 10px 10px; margin-top: -5px;">
-                    <ul class="list-unstyled mb-0 text-light small">
-
-                        <li class="d-flex align-items-start mb-3">
-                            <span class="badge bg-info text-dark me-2 mt-1">Design</span>
-                            <div>
-                                <strong>Refonte Graphique du Site</strong><br>
-                                <span class="text-light opacity-75">
-                                    Le site adopte un nouveau style plus moderne : thème sombre, effets, animations LR dynamiques et interface épurée.
-                                </span>
-                            </div>
-                        </li>
-
-                        <li class="d-flex align-items-start">
-                            <span class="badge bg-secondary me-2 mt-1">Info</span>
-                            <div>
-                                <strong>Lancement du Dex</strong><br>
-                                <span class="text-light opacity-75">
-                                    Bienvenue sur la version 1.0 ! N'hésitez pas à signaler les bugs.
-                                </span>
-                            </div>
-                        </li>
-
-                    </ul>
+            <div class="col-lg-4 col-xl-3">
+                <div class="dokkan-section-title side-title">LES DERNIÈRES NEWS</div>
+                
+                <div class="news-sidebar" id="news-container">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-secondary spinner-border-sm" role="status"></div>
+                        <p class="text-secondary small mt-2">Chargement des news...</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="dokkan-header">
-            Les dernières cartes <span class="separator">/</span> 
-            éveils sorties
         </div>
+    </div>
 
-        <div id="card-container" class="row">
-            <p class="text-center text-secondary">Chargement des données...</p>
+    <div class="modal fade" id="newsModal" tabindex="-1" aria-labelledby="newsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content text-light border-secondary" style="background-color: #111827;">
+                
+                <div class="modal-header border-secondary" style="background-color: #1f2937;">
+                    <h5 class="modal-title fw-bold" id="modalNewsTitle">Titre de la News</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+                        <span id="modalNewsBadge" class="badge">BADGE</span>
+                        <span id="modalNewsDate" class="text-white-50 small"><i class="bi bi-clock"></i> Date</span>
+                    </div>
+                    
+                    <div id="modalNewsImageContainer" class="text-center mb-4" style="display: none;">
+                        <img id="modalNewsImage" src="" class="img-fluid rounded border border-secondary shadow" alt="News Image">
+                    </div>
+                    
+                    <div id="modalNewsContent" class="text-light opacity-75" style="line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem;">
+                        Contenu de la news...
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-secondary" style="background-color: #0d1117;">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fermer</button>
+                </div>
+                
+            </div>
         </div>
     </div>
 
@@ -80,16 +102,12 @@
     <script>
         fetch("nav.html")
             .then(response => response.text())
-            .then(html => {
-                document.getElementById("nav-placeholder").innerHTML = html;
-            })
+            .then(html => { document.getElementById("nav-placeholder").innerHTML = html; })
             .catch(err => console.error("Erreur chargement nav :", err));
 
         fetch("footer.html")
             .then(response => response.text())
-            .then(html => {
-                document.getElementById("footer-placeholder").innerHTML = html;
-            })
+            .then(html => { document.getElementById("footer-placeholder").innerHTML = html; })
             .catch(err => console.error("Erreur chargement footer :", err));
     </script>
 
