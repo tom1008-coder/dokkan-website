@@ -68,7 +68,6 @@ window.switchActiveTab = function(tab) {
 window.switchZturActiveTab = function(tab) {
     const baseBlock = document.getElementById('ztur-active-base-block');
     const transfoBlock = document.getElementById('ztur-active-transfo-block');
-    // On sélectionne les boutons DANS le bloc Z-TUR seulement
     const btns = document.querySelectorAll('#ztur-active-block .btn');
     
     btns.forEach(b => {
@@ -76,7 +75,6 @@ window.switchZturActiveTab = function(tab) {
         b.classList.add('btn-outline-warning');
     });
     
-    // On trouve le bouton cliqué
     const activeBtn = Array.from(btns).find(b => b.getAttribute('onclick').includes(tab));
     if(activeBtn) {
         activeBtn.classList.remove('btn-outline-warning');
@@ -93,9 +91,8 @@ window.switchZturActiveTab = function(tab) {
     }
 };
 
-// INIT TOM SELECT (CORRIGÉ & DÉBUGGÉ)
+// INIT TOM SELECT
 async function initTomSelects() {
-    // Config pour les Catégories (Table dédiée)
     const configCats = { 
         create: true, 
         createOnBlur: true, 
@@ -115,7 +112,6 @@ async function initTomSelects() {
     if(document.getElementById("echange-links")) tomSelectEchangeLinks = new TomSelect("#echange-links", configStd);
     if(document.getElementById("standby-links")) tomSelectStandbyLinks = new TomSelect("#standby-links", configStd);
     
-    // 1. Charger Catégories depuis la BDD
     console.log("🔄 Chargement Catégories DB...");
     try {
         const { data: catsData, error } = await supabase.from('categories').select('nom').order('nom', { ascending: true });
@@ -128,7 +124,6 @@ async function initTomSelects() {
         }
     } catch (err) { console.error("❌ ERREUR TECHNIQUE JS :", err); }
 
-    // 2. Charger Personnages
     if(document.getElementById("search-char-edit")) {
         tomSelectSearch = new TomSelect("#search-char-edit", {
             valueField: 'id', labelField: 'name', searchField: ['name','id'], placeholder: "Rechercher...", maxItems: 1,
@@ -145,7 +140,6 @@ async function initTomSelects() {
         }
     }
 
-    // 3. Charger Liens (JSON)
     try {
         const res = await fetch('links.json'); 
         if(res.ok) {
@@ -217,6 +211,16 @@ function updateUI() {
     const showZ = els.checkZtur.checked || els.checkZlr.checked;
     toggle(showZ, els.secZtur);
     toggle(els.checkActive.checked, els.blockZturActive);
+    
+    // NOUVELLE LOGIQUE POUR STANDBY Z-TUR
+    const zturStandbyBlock = document.getElementById('ztur-standby-block');
+    const showZStandby = els.checkStandby.checked && showZ;
+    if (showZStandby && zturStandbyBlock) {
+        zturStandbyBlock.classList.remove('d-none');
+        setTimeout(() => initTinyMCE('#ztur-standby-block .rich-text'), 50);
+    } else if (zturStandbyBlock) {
+        zturStandbyBlock.classList.add('d-none');
+    }
     
     toggle(els.checkSeza.checked, els.secSeza);
     toggle(els.checkActive.checked, els.blockSezaActive);
@@ -500,10 +504,24 @@ async function loadCharacterIntoForm(id) {
                 setVal('standby-condition', data.standby.activation.condition);
                 setVal('standby-effet', data.standby.activation.effet);
             }
-            // Forme Standby
+            // Forme Standby & Spé
             if(data.standby.form) {
                 setVal('standby-form-nom', data.standby.form.nom);
                 setVal('standby-passif', data.standby.form.passif);
+                
+                // Chargement des spés (rétrocompatible avec spe unique)
+                if(data.standby.form.spe1) {
+                    setVal('standby-spe1-nom', data.standby.form.spe1.nom);
+                    setVal('standby-spe1-effet', data.standby.form.spe1.effet);
+                } else if (data.standby.form.spe) { // Vieux format
+                    setVal('standby-spe1-nom', data.standby.form.spe.nom);
+                    setVal('standby-spe1-effet', data.standby.form.spe.effet);
+                }
+
+                if(data.standby.form.spe2) {
+                    setVal('standby-spe2-nom', data.standby.form.spe2.nom);
+                    setVal('standby-spe2-effet', data.standby.form.spe2.effet);
+                }
             }
             // Liens Standby
             if(data.liens && data.liens.standby && tomSelectStandbyLinks) {
@@ -528,6 +546,13 @@ async function loadCharacterIntoForm(id) {
                 setVal('standby-finish2-condition', data.standby.finish2.condition);
                 setVal('standby-finish2-effet', data.standby.finish2.effet);
             }
+        }
+
+        // CHARGEMENT STANDBY ZTUR
+        if(data.standby_ztur) {
+            setVal('ztur-standby-effet', data.standby_ztur.effet);
+            if(data.standby_ztur.finish1) setVal('ztur-standby-finish1-effet', data.standby_ztur.finish1.effet);
+            if(data.standby_ztur.finish2) setVal('ztur-standby-finish2-effet', data.standby_ztur.finish2.effet);
         }
 
         if(data.active_skill_ztur) {
@@ -720,8 +745,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const cond = val(`standby-finish${num}-condition`);
                 const effet = val(`standby-finish${num}-effet`);
                 if(!nom && !effet) return null;
-                // On garde la structure : Nom, Condition, Effet (Comme un Active Skill)
                 return { nom: nom, condition: cond, effet: effet };
+            };
+
+            const createStandbySpe = (num) => {
+                const nom = val(`standby-spe${num}-nom`);
+                const effet = val(`standby-spe${num}-effet`);
+                if(!nom && !effet) return null;
+                return { nom: nom, effet: effet };
             };
 
             standbyJson = {
@@ -732,10 +763,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 },
                 form: {
                     nom: val('standby-form-nom'),
-                    passif: val('standby-passif')
+                    passif: val('standby-passif'),
+                    spe1: createStandbySpe(1),
+                    spe2: createStandbySpe(2)
                 },
                 finish1: createFinish(1),
                 finish2: createFinish(2)
+            };
+        }
+
+        // --- GESTION STANDBY ZTUR ---
+        let standbyZturJson = null;
+        if (has('has-standby') && (has('has-ztur') || has('has-zlr'))) {
+            standbyZturJson = {
+                effet: val('ztur-standby-effet'),
+                finish1: { effet: val('ztur-standby-finish1-effet') },
+                finish2: { effet: val('ztur-standby-finish2-effet') }
             };
         }
 
@@ -803,6 +846,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             revival: has('has-revival'), echange: has('has-echange'),
             ztur: has('has-ztur'), zlr: has('has-zlr'), seza: has('has-seza'),
             standby: standbyJson,
+            standby_ztur: standbyZturJson,
             leader_skill: val('char-leader'),
             nom: nomJson, passif: passifJson, spe: speJson, active_skill: activeJson, 
             spe_ex: speExJson,

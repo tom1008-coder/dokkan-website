@@ -185,7 +185,7 @@
                 <div class="row g-3 mb-3">
                     <div class="col-md-4"><label>Nom</label><input type="text" id="transfo-nom" class="form-control"></div>
                     <div class="col-md-4"><label>Nom Passif</label><input type="text" id="transfo-passif-nom" class="form-control"></div>
-                    <div class="col-12"><label>Effet Passif</label><textarea id="transfo-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
+                    <div class="col-12"><label class="text-white">Effet Passif</label><textarea id="transfo-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6 p-3 bg-dark border border-info rounded">
@@ -207,7 +207,7 @@
                 <div class="row g-3 mb-3">
                     <div class="col-md-4"><label>Nom</label><input type="text" id="echange-nom" class="form-control"></div>
                     <div class="col-md-4"><label>Nom Passif</label><input type="text" id="echange-passif-nom" class="form-control"></div>
-                    <div class="col-12"><label>Effet Passif</label><textarea id="echange-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
+                    <div class="col-12"><label class="text-white">Effet Passif</label><textarea id="echange-passif-effet" class="form-control rich-text" rows="3"></textarea></div>
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6 p-3 bg-dark border border-primary rounded">
@@ -261,16 +261,36 @@
                 </div>
 
                 <div class="mb-4 border-bottom border-secondary pb-3">
-                    <h6 class="text-info" style="font-weight: bold;">2. Pendant le Standby (Forme Défensive / Charge)</h6>
+                    <h6 class="text-info" style="font-weight: bold;">2. Pendant le Standby (Forme Défensive / Offensive)</h6>
+                    
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="text-white-50 small">Nom de la forme</label>
-                            <input type="text" id="standby-form-nom" class="form-control" placeholder="Ex: Vegeta Super Saiyan 2">
+                            <input type="text" id="standby-form-nom" class="form-control" placeholder="Ex: Vegeta (GT) & Trunks (GT)">
                         </div>
                         <div class="col-md-8">
                             <label class="text-white-50 small">Passif pendant le Standby</label>
-                            <textarea id="standby-passif" class="form-control rich-text" rows="2" placeholder="Ex: DÉF +200%, garde activée, Ki +1 par sphère..."></textarea>
+                            <textarea id="standby-passif" class="form-control rich-text" rows="2" placeholder="Ex: DÉF +200%, garde activée..."></textarea>
                         </div>
+                    </div>
+
+                    <div class="row g-3 mt-3 border-top border-secondary pt-3">
+                        <div class="col-md-12"><p class="text-muted small mb-1">Remplir si le perso attaque pendant le Standby (ex: Duo GT).</p></div>
+                        
+                        <div class="col-md-6 border-end border-secondary">
+                            <span class="badge bg-info text-dark mb-2">SPÉCIALE 1 (12 Ki)</span>
+                            <input type="text" id="standby-spe1-nom" class="form-control mb-2 form-control-sm" placeholder="Nom Spé 1">
+                            <textarea id="standby-spe1-effet" class="form-control rich-text" rows="2" placeholder="Effet Spé 1..."></textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <span class="badge bg-warning text-dark mb-2">SPÉCIALE 2 (18 Ki / LR)</span>
+                            <input type="text" id="standby-spe2-nom" class="form-control mb-2 form-control-sm" placeholder="Nom Spé 2">
+                            <textarea id="standby-spe2-effet" class="form-control rich-text" rows="2" placeholder="Effet Spé 2..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
                         <div class="col-12">
                             <label class="text-white-50 small">Liens spécifiques (Optionnel)</label>
                             <select id="standby-links" multiple></select>
@@ -433,6 +453,29 @@
                         </div>
                     </div>
                 </div>
+                
+                <div id="ztur-standby-block" class="d-none mt-4 pt-3 border-top border-warning">
+                    <h5 class="text-warning fw-bold mb-3">⏳ STANDBY SKILL (Z-EXTREME)</h5>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="text-warning small">Effet du Standby Amélioré (Charge/Def)</label>
+                            <textarea id="ztur-standby-effet" class="form-control rich-text" rows="2" placeholder="Passif pendant le standby amélioré..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 bg-dark border border-warning rounded">
+                                <label class="text-warning small">Finish 1 Amélioré</label>
+                                <textarea id="ztur-standby-finish1-effet" class="form-control rich-text" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 bg-dark border border-warning rounded">
+                                <label class="text-warning small">Finish 2 Amélioré</label>
+                                <textarea id="ztur-standby-finish2-effet" class="form-control rich-text" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div id="section-seza" class="card p-4 mb-4 border-info d-none" style="border-width: 2px;">

@@ -13,6 +13,7 @@
         .border-standby { border-color: #6f42c1 !important; box-shadow: 0 0 10px rgba(111, 66, 193, 0.3) !important; }
         .text-standby { color: #6f42c1 !important; }
         .bg-standby { background-color: #6f42c1 !important; color: white !important; }
+        .badge-standby { background-color: #6f42c1 !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.2); }
         
         .border-active { border-color: #d63384 !important; box-shadow: 0 0 10px rgba(214, 51, 132, 0.3) !important; }
         .text-active { color: #d63384 !important; }
@@ -58,7 +59,6 @@
                         <div class="btn-group shadow flex-wrap" role="group">
                             <button type="button" id="btn-base" class="btn btn-sm btn-primary active" onclick="changerForme('base')">Base</button>
                             <button type="button" id="btn-standby" class="btn btn-sm btn-outline-purple d-none" style="color: #6f42c1; border-color: #6f42c1;" onclick="changerForme('standby')">Standby</button>
-                            
                             <button type="button" id="btn-geant" class="btn btn-sm btn-outline-secondary d-none" onclick="changerForme('geant')">Géant</button>
                             <button type="button" id="btn-transfo" class="btn btn-sm btn-outline-warning d-none" onclick="changerForme('transfo')">Transfo</button>
                             <button type="button" id="btn-revival" class="btn btn-sm btn-outline-success d-none" onclick="changerForme('revival')">Revival</button>
@@ -163,15 +163,15 @@
                                 <h5 id="active-skill-title" class="fw-bold mb-2">ACTIVE SKILL</h5>
                                 <h6 id="detail-active-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6>
                                 <p id="detail-active-desc" class="mb-0 text-light small">...</p>
-                                <div id="detail-active-cond" class="mt-2 pt-2 border-top border-secondary text-muted small fst-italic">Condition : ...</div>
+                                <div id="detail-active-cond" class="mt-2 pt-2 border-top border-secondary text-white-50 small fst-italic">Condition : ...</div>
                             </div>
                         </div>
 
                         <div class="col-md-6" id="col-spe">
-                            <div id="spe-box" class="skill-box p-3 rounded bg-dark bg-opacity-50 h-100 border">
+                            <div id="spe-box" class="skill-box border-spe p-3 rounded bg-dark bg-opacity-50 h-100 border">
                                 <div>
-                                    <span class="badge rounded-pill mb-2" id="badge-spe-ki">Ki 12</span>
-                                    <h5 class="fw-bold mb-1" id="title-spe">ATTAQUE SPÉCIALE</h5>
+                                    <span class="badge bg-danger rounded-pill mb-2" id="badge-spe-ki">Ki 12</span>
+                                    <h5 class="text-danger fw-bold mb-1" id="title-spe">ATTAQUE SPÉCIALE</h5>
                                     <h6 id="detail-spe-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6>
                                 </div>
                                 <p id="detail-spe-desc" class="mb-0 text-light small">...</p>
@@ -179,13 +179,38 @@
                         </div>
 
                         <div class="col-md-6" id="col-ult" style="display: none;">
-                            <div id="ult-box" class="skill-box p-3 rounded bg-dark bg-opacity-50 h-100 border">
+                            <div id="ult-box" class="skill-box border-ult p-3 rounded bg-dark bg-opacity-50 h-100 border">
                                 <div>
-                                    <span class="badge rounded-pill mb-2" id="badge-ult-ki">Ki 18+</span>
-                                    <h5 class="fw-bold mb-1" id="title-ult">ULTIME</h5>
+                                    <span class="badge rounded-pill mb-2" id="badge-ult-ki" style="background-color: #ff5722;">Ki 18+</span>
+                                    <h5 class="fw-bold mb-1" id="title-ult" style="color: #ff5722;">ULTIME</h5>
                                     <h6 id="detail-ult-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6>
                                 </div>
                                 <p id="detail-ult-desc" class="mb-0 text-light small">...</p>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="finish-skill-section" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-md-6" id="col-finish1">
+                                    <div class="skill-box border-standby p-3 rounded bg-dark bg-opacity-50 h-100 border">
+                                        <div>
+                                            <span id="badge-finish1" class="badge badge-standby rounded-pill mb-2">Charge Max</span>
+                                            <h5 class="text-standby fw-bold mb-1">FINISH SKILL 1</h5>
+                                            <h6 id="detail-finish1-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6>
+                                        </div>
+                                        <p id="detail-finish1-desc" class="mb-0 text-light small">...</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" id="col-finish2" style="display: none;">
+                                    <div class="skill-box border-standby p-3 rounded bg-dark bg-opacity-50 h-100 border">
+                                        <div>
+                                            <span id="badge-finish2" class="badge badge-standby rounded-pill mb-2">Charge Incomplète</span>
+                                            <h5 class="text-standby fw-bold mb-1">FINISH SKILL 2</h5>
+                                            <h6 id="detail-finish2-nom" class="text-white fw-bold fst-italic mb-2 small">Nom</h6>
+                                        </div>
+                                        <p id="detail-finish2-desc" class="mb-0 text-light small">...</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -198,7 +223,7 @@
                         </div>
 
                         <div class="col-12">
-                            <div class="skill-box border border-warning p-3 rounded bg-dark bg-opacity-50" style="box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);">
+                            <div id="passif-box" class="skill-box border border-warning p-3 rounded bg-dark bg-opacity-50" style="box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);">
                                 <h5 class="text-warning fw-bold mb-2">APTITUDE PASSIVE</h5>
                                 <div id="detail-passif" class="text-light small">...</div>
                             </div>
