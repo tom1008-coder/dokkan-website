@@ -38,6 +38,24 @@
                     <div class="col-md-2"><label>Type</label><select id="char-type" class="form-select"><option>AGI</option><option>TEC</option><option>INT</option><option>PUI</option><option>END</option></select></div>
                     <div class="col-md-2"><label>Classe</label><select id="char-class" class="form-select"><option>Super</option><option>Extreme</option></select></div>
                 </div>
+                
+                <div class="row g-3 mt-2 border-top border-secondary pt-3">
+                    <div class="col-md-3">
+                        <label>Sortie (JAP)</label>
+                        <input type="datetime-local" id="char-date-jap" class="form-control input-date-dark">
+                    </div>
+                    <div class="col-md-3">
+                        <label>Sortie (GLO)</label>
+                        <input type="datetime-local" id="char-date-glo" class="form-control input-date-dark">
+                    </div>
+                    <div class="col-md-6">
+                        <label>Image du Portail (Fichier ou URL)</label>
+                        <div class="d-flex gap-2">
+                            <input type="file" id="char-portail-file" class="form-control form-control-sm" accept="image/*">
+                            <input type="text" id="char-portail-url" class="form-control form-control-sm" placeholder="Ou coller une URL...">
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="card p-4 mb-4">
@@ -45,7 +63,7 @@
                 
                 <div class="row g-4">
                     <div class="col-md-4">
-                        <div class="p-3 border rounded bg-dark bg-opacity-25 h-100">
+                        <div class="p-3 border rounded bg-dark h-100">
                             <h6 class="text-white-50 border-bottom pb-2 mb-3 text-uppercase small fw-bold">🔄 Changement de Forme</h6>
                             <div class="d-flex flex-column gap-2">
                                 <div class="form-check form-switch">
@@ -65,7 +83,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <div class="p-3 border rounded bg-dark bg-opacity-25 h-100">
+                        <div class="p-3 border rounded bg-dark h-100">
                             <h6 class="text-white-50 border-bottom pb-2 mb-3 text-uppercase small fw-bold">🔥 Modes Spéciaux</h6>
                             <div class="d-flex flex-column gap-2">
                                 <div class="form-check form-switch">
@@ -93,7 +111,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <div class="p-3 border rounded bg-dark bg-opacity-25 h-100">
+                        <div class="p-3 border rounded bg-dark h-100">
                             <h6 class="text-white-50 border-bottom pb-2 mb-3 text-uppercase small fw-bold">⚡ Éveils Avancés</h6>
                             <div class="d-flex flex-column gap-2">
                                 <div class="form-check form-switch">

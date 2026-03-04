@@ -66,6 +66,16 @@ function getStatVal(rawStats, level, key) {
     return statsSource[level][key] || "---";
 }
 
+// Formater une date ISO en format lisible (ex: "15 Janvier 2025 à 14h30")
+function formatDateToLocal(isoString) {
+    if (!isoString) return null;
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return null;
+    
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return date.toLocaleDateString('fr-FR', options).replace(':', 'h');
+}
+
 async function chargerDetail() {
     if (!idRecherche) { loadingDiv.innerHTML = "<p class='text-danger'>Aucun ID fourni.</p>"; return; }
 
@@ -167,6 +177,37 @@ async function chargerDetail() {
             }
         }
 
+        // --- AFFICHAGE DES DATES ---
+        const dateJap = formatDateToLocal(currentPersoGlobal.date_sortie_jap);
+        const dateGlo = formatDateToLocal(currentPersoGlobal.date_sortie_glo);
+        
+        if (dateJap || dateGlo) {
+            document.getElementById("dates-section").style.display = "block";
+            if (dateJap) {
+                document.getElementById("date-jap-box").style.display = "block";
+                document.getElementById("date-jap").innerText = dateJap;
+            }
+            if (dateGlo) {
+                document.getElementById("date-glo-box").style.display = "block";
+                document.getElementById("date-glo").innerText = dateGlo;
+            }
+        }
+
+        // --- AFFICHAGE DU PORTAIL ---
+        const portailRaw = currentPersoGlobal.portail;
+        if (portailRaw && portailRaw.trim() !== "") {
+            document.getElementById("portail-section").style.display = "block";
+            const portailContent = document.getElementById("portail-content");
+            
+            // Vérifie si c'est une URL d'image (Supabase ou autre)
+            if (portailRaw.startsWith("http") && (portailRaw.includes("/storage/") || portailRaw.match(/\.(jpeg|jpg|gif|png|webp)$/i))) {
+                portailContent.innerHTML = `<img src="${portailRaw}" class="portail-banner" alt="Bannière du portail">`;
+            } else {
+                // Sinon on affiche le texte simple (ex: "Festival Dokkan")
+                portailContent.innerHTML = `<span class="badge bg-secondary fs-6 p-2 border border-light">${portailRaw}</span>`;
+            }
+        }
+
         afficherMemeNom(currentPersoGlobal, allPersosGlobal);
 
         loadingDiv.style.display = "none";
@@ -198,7 +239,6 @@ function changerForme(forme) {
     let sourceData = p;
     let leaderText = p.leader_skill;
     
-    // NOUVELLE VARIABLE POUR STOCKER LES FINISH SKILLS
     let finishData = null;
 
     // --- GESTION Z-TUR / SEZA ---
@@ -253,7 +293,6 @@ function changerForme(forme) {
             passif: { standby: { nom: "PASSIF (Défense & Charge)", effet: formPassif } },
         };
 
-        // 1. LES SPÉS DE STANDBY VONT DANS LES SPÉS CLASSIQUES (Rouge/Orange)
         if (sSpe1 || sSpe2) {
             standbyData.spe = {
                 standby: {
@@ -269,10 +308,7 @@ function changerForme(forme) {
             standbyData.spe = null;
         }
 
-        // 2. ON SAUVEGARDE LES FINISH SKILLS POUR LE NOUVEAU BLOC
         finishData = { f1: finish1, f2: finish2 };
-
-        // 3. ON CACHE L'ACTIVE SKILL NORMAL
         standbyData.active_skill = null;
 
         sourceData = { ...sourceData, ...standbyData };
@@ -315,19 +351,15 @@ function changerForme(forme) {
     htmlPassif += formaterTexteDokkan(passifEffet, passifNom);
     document.getElementById("detail-passif").innerHTML = htmlPassif;
 
-    // AFFICHER SPÉS CLASSIQUES (S'il y en a)
     const speNom = getContent(sourceData.spe, forme, 'nom');
     const speEffet = getContent(sourceData.spe, forme, 'effet');
     afficherSpeEtUltime(sourceData.spe, forme, speNom, speEffet);
 
-    // AFFICHER FINISH SKILLS (Nouvelle fonction)
     afficherFinishSkills(finishData);
 
-    // --- AFFICHAGE ACTIVE SKILL / ACTIVATION STANDBY ---
     let activeDataToDisplay = sourceData.active_skill;
     let isStandbyType = false;
 
-    // Si on n'est pas en standby, on regarde si on peut l'activer
     if (forme !== 'standby' && p.standby && p.standby.activation) {
         const normalActive = safeParse(sourceData.active_skill);
         let hasNormalActive = false;
@@ -356,10 +388,6 @@ function changerForme(forme) {
     updateStatsDisplay();
     afficherMeilleursPartenaires(currentPersoGlobal, allPersosGlobal);
 }
-
-// ==========================================
-// FONCTIONS DE MISE A JOUR DES DONNÉES
-// ==========================================
 
 function updateLiensDisplay() {
     const rawLiens = safeParse(currentPersoGlobal.liens);
@@ -408,9 +436,6 @@ function updateStatsDisplay(levelKey, btnElement) {
     }
 }
 
-// ==========================================
-// NOUVELLE FONCTION POUR LES FINISH SKILLS (VIOLET)
-// ==========================================
 function afficherFinishSkills(finishData) {
     const section = document.getElementById("finish-skill-section");
     const col1 = document.getElementById("col-finish1");
@@ -425,7 +450,6 @@ function afficherFinishSkills(finishData) {
 
     section.style.display = "block";
 
-    // BOITE GAUCHE : FINISH 1
     let hasF1 = false;
     if (finishData.f1 && finishData.f1.nom && finishData.f1.nom.trim() !== "") {
         hasF1 = true;
@@ -441,7 +465,6 @@ function afficherFinishSkills(finishData) {
         col1.style.display = "none";
     }
 
-    // BOITE DROITE : FINISH 2
     let hasF2 = false;
     if (finishData.f2 && finishData.f2.nom && finishData.f2.nom.trim() !== "") {
         hasF2 = true;
@@ -457,7 +480,6 @@ function afficherFinishSkills(finishData) {
         col2.style.display = "none";
     }
 
-    // Ajustement de la grille
     if (hasF1 && hasF2) {
         col1.className = "col-md-6";
         col2.className = "col-md-6";
@@ -467,9 +489,6 @@ function afficherFinishSkills(finishData) {
     }
 }
 
-// ==========================================
-// FONCTION POUR LES SPÉS CLASSIQUES (ROUGE / ORANGE)
-// ==========================================
 function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
     const colSpe = document.getElementById("col-spe");
     const colUlt = document.getElementById("col-ult");
@@ -480,7 +499,6 @@ function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
     
     if (!colSpe || !colUlt) return;
 
-    // Reset styles par défaut
     titleSpe.innerText = "ATTAQUE SPÉCIALE";
     badgeSpe.innerText = "Ki 12";
     
@@ -500,7 +518,6 @@ function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
         }
     }
 
-    // SPÉCIALE (Gauche)
     let hasSpe = false;
     if (nom && nom.trim() !== "") {
         hasSpe = true;
@@ -514,7 +531,6 @@ function afficherSpeEtUltime(rawSpe, forme, nom, effet) {
         document.getElementById("detail-spe-desc").innerHTML = fullDesc;
     }
 
-    // ULTIME (Droite)
     let hasUlt = false;
     if (currentSpeObj && currentSpeObj.ultime && currentSpeObj.ultime.nom && currentSpeObj.ultime.nom.trim() !== "") {
         hasUlt = true;
@@ -543,12 +559,10 @@ function afficherActiveSkill(rawActive, forme, isStandbyType = false) {
     const titleActive = document.getElementById("active-skill-title");
     if (!section) return;
 
-    // Reset styles
     titleActive.innerText = "ACTIVE SKILL";
-    titleActive.className = "fw-bold mb-2 text-active"; // Rose
-    box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-active"; // Border Rose
+    titleActive.className = "fw-bold mb-2 text-active";
+    box.className = "skill-box p-3 rounded bg-dark bg-opacity-50 border border-active";
 
-    // Style Violet si Standby Activation
     if (isStandbyType) {
         titleActive.innerText = "STANDBY SKILL (ACTIVATION)"; 
         titleActive.className = "fw-bold mb-2 text-standby";

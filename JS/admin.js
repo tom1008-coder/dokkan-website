@@ -371,6 +371,16 @@ async function loadCharacterIntoForm(id) {
     setVal('char-type', data.type);
     setVal('char-class', data.classe);
 
+    // NOUVEAUX CHAMPS (Dates et Portail)
+    // On coupe l'heure à 16 caractères (YYYY-MM-DDTHH:MM) pour que le HTML l'accepte
+    if (data.date_sortie_jap) setVal('char-date-jap', data.date_sortie_jap.slice(0, 16));
+    if (data.date_sortie_glo) setVal('char-date-glo', data.date_sortie_glo.slice(0, 16));
+    
+    setVal('char-portail-url', data.portail);
+    if(document.getElementById('char-portail-file')) {
+        document.getElementById('char-portail-file').value = ""; 
+    }
+
     setCheck('has-transfo', data.transformation);
     setCheck('has-echange', data.echange);
     setCheck('has-active', data.active_skill && data.active_skill!==null);
@@ -644,225 +654,265 @@ document.addEventListener('DOMContentLoaded', async () => {
         const idChar = val('char-id');
         const rarity = val('char-rarity');
         const isLR = rarity === 'LR';
-
-        const createContentObj = (nom, effet) => {
-            if (!nom && (!effet || effet === "")) return null;
-            return { nom: nom, effet: effet };
-        };
-
-        const nomJson = { 
-            base: val('base-nom'), 
-            transfo: has('has-transfo') ? val('transfo-nom') : null, 
-            echange: has('has-echange') ? val('echange-nom') : null, 
-            fureur: has('has-fureur') ? val('fureur-nom') : null, 
-            geant: has('has-geant') ? val('geant-nom') : null,
-            revival: has('has-revival') ? val('revival-nom') : null 
-        };
-
-        const passifJson = { 
-            base: createContentObj(val('base-passif-nom'), val('base-passif-effet')), 
-            transfo: has('has-transfo') ? createContentObj(val('transfo-passif-nom'), val('transfo-passif-effet')) : null, 
-            echange: has('has-echange') ? createContentObj(val('echange-passif-nom'), val('echange-passif-effet')) : null,
-            revival: has('has-revival') ? { 
-                nom: val('revival-passif-nom'), 
-                effet: val('revival-passif-effet'),
-                condition: val('revival-condition')
-            } : null,
-            fureur: has('has-fureur') ? createContentObj(val('fureur-passif-nom'), val('fureur-passif-effet')) : null,
-            geant: has('has-geant') ? createContentObj(val('geant-passif-nom'), val('geant-passif-effet')) : null
-        };
         
-        const zturPassif = { 
-            base: createContentObj(val('ztur-passif-nom'), val('ztur-passif-effet')), 
-            transfo: has('has-transfo') ? createContentObj(val('ztur-passif-transfo-nom'), val('ztur-passif-transfo')) : null,
-            echange: has('has-echange') ? createContentObj(val('ztur-passif-echange-nom'), val('ztur-passif-echange')) : null
-        };
+        // --- GESTION DU PORTAIL (UPLOAD IMAGE) ET DATES ---
+        const dateSortieJap = val('char-date-jap') || null;
+        const dateSortieGlo = val('char-date-glo') || null;
         
-        const zturSpe = { 
-            base: { 
-                nom: val('ztur-spe-nom'), 
-                effet: val('ztur-spe-effet'),
-                ultime: isLR ? { nom: val('ztur-ult-nom'), effet: val('ztur-ult-effet') } : undefined
-            }, 
-            transfo: has('has-transfo') ? { 
-                nom: val('ztur-spe-transfo-nom'), 
-                effet: val('ztur-spe-transfo'),
-                ultime: isLR ? { nom: val('ztur-ult-transfo-nom'), effet: val('ztur-ult-transfo') } : undefined
-            } : null,
-            echange: has('has-echange') ? {
-                nom: val('ztur-spe-echange-nom'),
-                effet: val('ztur-spe-echange'),
-                ultime: isLR ? { nom: val('ztur-ult-echange-nom'), effet: val('ztur-ult-echange') } : undefined
-            } : null,
-            geant: has('has-geant') ? {
-                nom: val('ztur-spe-geant-nom'),
-                effet: val('ztur-spe-geant-effet'),
-                ultime: isLR ? { nom: val('ztur-ult-geant-nom'), effet: val('ztur-ult-geant-effet') } : undefined
-            } : null
-        };
+        const fileInputPortail = document.getElementById('char-portail-file');
+        let portailFinalUrl = val('char-portail-url');
 
-        let zturActive = null; 
-        const hasZActiveBase = val('ztur-active-nom') || val('ztur-active-effet');
-        
-        if(hasZActiveBase) {
-            zturActive = { 
-                base: {
-                    nom: val('ztur-active-nom'), 
-                    condition: val('ztur-active-cond'), 
-                    effet: val('ztur-active-effet')
-                }, 
-                transfo: (has('has-transfo') && (val('ztur-active-transfo-nom') || val('ztur-active-transfo-effet'))) ? {
-                    nom: val('ztur-active-transfo-nom'),
-                    condition: val('ztur-active-transfo-cond'),
-                    effet: val('ztur-active-transfo-effet')
-                } : null 
-            };
-        }
+        // On met un petit effet de chargement sur le bouton le temps de l'upload
+        const btnSubmit = document.getElementById('btn-submit');
+        const originalBtnText = btnSubmit.innerText;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '⏳ Envoi en cours...';
 
-        // --- GESTION SPE EX AVEC TYPE ET CONDITION ---
-        const createSpeExObj = (idNom, idEffet, idType, idCond) => {
-            const nom = val(idNom);
-            const effet = val(idEffet);
-            const type = val(idType) || 'base';
-            const condition = val(idCond); 
-            
-            if (!nom && (!effet || effet === "")) return null;
-            return { nom, effet, type, condition };
-        };
+        try {
+            // Si un fichier image a été sélectionné pour le portail
+            if (fileInputPortail && fileInputPortail.files.length > 0) {
+                const file = fileInputPortail.files[0];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `portail_${idChar}_${Date.now()}.${fileExt}`;
+                
+                // Envoi de l'image dans le bucket 'portails'
+                const { error: uploadError } = await supabase.storage
+                    .from('Portails')
+                    .upload(fileName, file);
 
-        const hasSpeEx = has('has-spe-ex');
-        const speExJson = hasSpeEx ? {
-            base: createSpeExObj('spe-ex-nom', 'spe-ex-effet', 'spe-ex-type', 'spe-ex-condition'),
-            transfo: has('has-transfo') ? createSpeExObj('spe-ex-transfo-nom', 'spe-ex-transfo-effet', 'spe-ex-transfo-type', 'spe-ex-transfo-condition') : null,
-            echange: has('has-echange') ? createSpeExObj('spe-ex-echange-nom', 'spe-ex-echange-effet', 'spe-ex-echange-type', 'spe-ex-echange-condition') : null
-        } : null;
+                if (uploadError) throw new Error("Erreur d'upload du portail : " + uploadError.message);
 
-        // --- GESTION STANDBY SKILL ---
-        let standbyJson = null;
-        if(has('has-standby')) {
-            const createFinish = (num) => {
-                const nom = val(`standby-finish${num}-nom`);
-                const cond = val(`standby-finish${num}-condition`);
-                const effet = val(`standby-finish${num}-effet`);
-                if(!nom && !effet) return null;
-                return { nom: nom, condition: cond, effet: effet };
-            };
+                const { data: publicUrlData } = supabase.storage
+                    .from('Portails')
+                    .getPublicUrl(fileName);
 
-            const createStandbySpe = (num) => {
-                const nom = val(`standby-spe${num}-nom`);
-                const effet = val(`standby-spe${num}-effet`);
-                if(!nom && !effet) return null;
+                portailFinalUrl = publicUrlData.publicUrl;
+            }
+
+            const createContentObj = (nom, effet) => {
+                if (!nom && (!effet || effet === "")) return null;
                 return { nom: nom, effet: effet };
             };
 
-            standbyJson = {
-                activation: {
-                    nom: val('standby-nom'),
-                    condition: val('standby-condition'),
-                    effet: val('standby-effet')
-                },
-                form: {
-                    nom: val('standby-form-nom'),
-                    passif: val('standby-passif'),
-                    spe1: createStandbySpe(1),
-                    spe2: createStandbySpe(2)
-                },
-                finish1: createFinish(1),
-                finish2: createFinish(2)
+            const nomJson = { 
+                base: val('base-nom'), 
+                transfo: has('has-transfo') ? val('transfo-nom') : null, 
+                echange: has('has-echange') ? val('echange-nom') : null, 
+                fureur: has('has-fureur') ? val('fureur-nom') : null, 
+                geant: has('has-geant') ? val('geant-nom') : null,
+                revival: has('has-revival') ? val('revival-nom') : null 
             };
-        }
 
-        // --- GESTION STANDBY ZTUR ---
-        let standbyZturJson = null;
-        if (has('has-standby') && (has('has-ztur') || has('has-zlr'))) {
-            standbyZturJson = {
-                effet: val('ztur-standby-effet'),
-                finish1: { effet: val('ztur-standby-finish1-effet') },
-                finish2: { effet: val('ztur-standby-finish2-effet') }
-            };
-        }
-
-        const sezaPassif = { base: createContentObj(val('seza-passif-nom'), val('seza-passif-effet')), transfo: has('has-transfo') ? createContentObj(null, val('seza-passif-transfo')) : null };
-        const sezaSpe = { base: { nom: val('seza-spe-nom'), effet: val('seza-spe-effet') }, transfo: has('has-transfo') ? { nom: null, effet: val('seza-spe-transfo') } : null };
-        let sezaActive = null; if(val('seza-active-nom')||val('seza-active-effet')) sezaActive = { base: {nom:val('seza-active-nom'), condition:val('seza-active-cond'), effet:val('seza-active-effet')}, transfo:null };
-
-        const getNum = (id) => parseInt(document.getElementById(id).value) || 0;
-        const statsJson = {
-            d0: { hp: getNum('hp-d0'), atk: getNum('atk-d0'), def: getNum('def-d0') },
-            d1: { hp: getNum('hp-d1'), atk: getNum('atk-d1'), def: getNum('def-d1') },
-            d2: { hp: getNum('hp-d2'), atk: getNum('atk-d2'), def: getNum('def-d2') },
-            d3: { hp: getNum('hp-d3'), atk: getNum('atk-d3'), def: getNum('def-d3') },
-            d4: { hp: getNum('hp-d4'), atk: getNum('atk-d4'), def: getNum('def-d4') }
-        };
-
-        const speJson = {
-            base: { nom: val('base-spe-nom'), effet: val('base-spe-effet'), ultime: isLR ? { nom: val('base-ult-nom'), effet: val('base-ult-effet') } : undefined },
-            transfo: has('has-transfo') ? { nom: val('transfo-spe-nom'), effet: val('transfo-spe-effet'), ultime: isLR ? { nom: val('transfo-ult-nom'), effet: val('transfo-ult-effet') } : undefined } : null,
-            echange: has('has-echange') ? { nom: val('echange-spe-nom'), effet: val('echange-spe-effet'), ultime: isLR ? { nom: val('echange-ult-nom'), effet: val('echange-ult-effet') } : undefined } : null,
-            revival: has('has-revival') ? { 
-                nom: val('revival-spe-nom'), 
-                effet: val('revival-spe-effet'),
-                ultime: isLR ? { nom: val('revival-ult-nom'), effet: val('revival-ult-effet') } : undefined
-            } : null,
-            fureur: has('has-fureur') ? { 
-                nom: val('fureur-spe-nom'), 
-                effet: val('fureur-spe-effet') 
-            } : null,
-            geant: has('has-geant') ? { 
-                nom: val('geant-spe-nom'), 
-                effet: val('geant-spe-effet'),
-                ultime: isLR ? { nom: val('geant-ult-nom'), effet: val('geant-ult-effet') } : undefined
-            } : null
-        };
-
-        let activeJson = null; 
-        if (has('has-active')) {
-            activeJson = { 
-                base: { 
-                    nom: val('active-nom'), 
-                    condition: val('active-cond'), 
-                    effet: val('active-effet') 
-                }, 
-                transfo: (has('has-transfo') && (val('active-transfo-nom') || val('active-transfo-effet'))) ? {
-                    nom: val('active-transfo-nom'),
-                    condition: val('active-transfo-cond'),
-                    effet: val('active-transfo-effet')
+            const passifJson = { 
+                base: createContentObj(val('base-passif-nom'), val('base-passif-effet')), 
+                transfo: has('has-transfo') ? createContentObj(val('transfo-passif-nom'), val('transfo-passif-effet')) : null, 
+                echange: has('has-echange') ? createContentObj(val('echange-passif-nom'), val('echange-passif-effet')) : null,
+                revival: has('has-revival') ? { 
+                    nom: val('revival-passif-nom'), 
+                    effet: val('revival-passif-effet'),
+                    condition: val('revival-condition')
                 } : null,
-                echange: null 
+                fureur: has('has-fureur') ? createContentObj(val('fureur-passif-nom'), val('fureur-passif-effet')) : null,
+                geant: has('has-geant') ? createContentObj(val('geant-passif-nom'), val('geant-passif-effet')) : null
             };
-        }
+            
+            const zturPassif = { 
+                base: createContentObj(val('ztur-passif-nom'), val('ztur-passif-effet')), 
+                transfo: has('has-transfo') ? createContentObj(val('ztur-passif-transfo-nom'), val('ztur-passif-transfo')) : null,
+                echange: has('has-echange') ? createContentObj(val('ztur-passif-echange-nom'), val('ztur-passif-echange')) : null
+            };
+            
+            const zturSpe = { 
+                base: { 
+                    nom: val('ztur-spe-nom'), 
+                    effet: val('ztur-spe-effet'),
+                    ultime: isLR ? { nom: val('ztur-ult-nom'), effet: val('ztur-ult-effet') } : undefined
+                }, 
+                transfo: has('has-transfo') ? { 
+                    nom: val('ztur-spe-transfo-nom'), 
+                    effet: val('ztur-spe-transfo'),
+                    ultime: isLR ? { nom: val('ztur-ult-transfo-nom'), effet: val('ztur-ult-transfo') } : undefined
+                } : null,
+                echange: has('has-echange') ? {
+                    nom: val('ztur-spe-echange-nom'),
+                    effet: val('ztur-spe-echange'),
+                    ultime: isLR ? { nom: val('ztur-ult-echange-nom'), effet: val('ztur-ult-echange') } : undefined
+                } : null,
+                geant: has('has-geant') ? {
+                    nom: val('ztur-spe-geant-nom'),
+                    effet: val('ztur-spe-geant-effet'),
+                    ultime: isLR ? { nom: val('ztur-ult-geant-nom'), effet: val('ztur-ult-geant-effet') } : undefined
+                } : null
+            };
 
-        const liensBase = tomSelectLinks.getValue();
-        let liensTransfo = null;
-        if(has('has-transfo')) {
-            const valTransfo = tomSelectTransfoLinks.getValue();
-            liensTransfo = valTransfo.length > 0 ? valTransfo : liensBase;
-        }
+            let zturActive = null; 
+            const hasZActiveBase = val('ztur-active-nom') || val('ztur-active-effet');
+            
+            if(hasZActiveBase) {
+                zturActive = { 
+                    base: {
+                        nom: val('ztur-active-nom'), 
+                        condition: val('ztur-active-cond'), 
+                        effet: val('ztur-active-effet')
+                    }, 
+                    transfo: (has('has-transfo') && (val('ztur-active-transfo-nom') || val('ztur-active-transfo-effet'))) ? {
+                        nom: val('ztur-active-transfo-nom'),
+                        condition: val('ztur-active-transfo-cond'),
+                        effet: val('ztur-active-transfo-effet')
+                    } : null 
+                };
+            }
 
-        const payload = {
-            id: idChar, type: val('char-type'), classe: val('char-class'), tag: rarity, 
-            transformation: has('has-transfo'), fureur: has('has-fureur'), 
-            geant: has('has-geant'), 
-            revival: has('has-revival'), echange: has('has-echange'),
-            ztur: has('has-ztur'), zlr: has('has-zlr'), seza: has('has-seza'),
-            standby: standbyJson,
-            standby_ztur: standbyZturJson,
-            leader_skill: val('char-leader'),
-            nom: nomJson, passif: passifJson, spe: speJson, active_skill: activeJson, 
-            spe_ex: speExJson,
-            stats: statsJson, 
-            liens: { 
-                base: liensBase, 
-                transfo: liensTransfo, 
-                echange: has('has-echange') ? (tomSelectEchangeLinks.getValue().length > 0 ? tomSelectEchangeLinks.getValue() : liensBase) : null,
-                standby: has('has-standby') ? (tomSelectStandbyLinks.getValue().length > 0 ? tomSelectStandbyLinks.getValue() : liensBase) : null
-            }, 
-            categories: tomSelectCats.getValue(), liens_externes: { wiki: val('ext-wiki'), youtube: val('ext-yt') },
-            leader_skill_ztur: val('ztur-leader'), passif_ztur: zturPassif, spe_ztur: zturSpe, active_skill_ztur: zturActive,
-            leader_skill_seza: val('seza-leader'), passif_seza: sezaPassif, spe_seza: sezaSpe, active_skill_seza: sezaActive
-        };
+            // --- GESTION SPE EX AVEC TYPE ET CONDITION ---
+            const createSpeExObj = (idNom, idEffet, idType, idCond) => {
+                const nom = val(idNom);
+                const effet = val(idEffet);
+                const type = val(idType) || 'base';
+                const condition = val(idCond); 
+                
+                if (!nom && (!effet || effet === "")) return null;
+                return { nom, effet, type, condition };
+            };
 
-        try {
+            const hasSpeEx = has('has-spe-ex');
+            const speExJson = hasSpeEx ? {
+                base: createSpeExObj('spe-ex-nom', 'spe-ex-effet', 'spe-ex-type', 'spe-ex-condition'),
+                transfo: has('has-transfo') ? createSpeExObj('spe-ex-transfo-nom', 'spe-ex-transfo-effet', 'spe-ex-transfo-type', 'spe-ex-transfo-condition') : null,
+                echange: has('has-echange') ? createSpeExObj('spe-ex-echange-nom', 'spe-ex-echange-effet', 'spe-ex-echange-type', 'spe-ex-echange-condition') : null
+            } : null;
+
+            // --- GESTION STANDBY SKILL ---
+            let standbyJson = null;
+            if(has('has-standby')) {
+                const createFinish = (num) => {
+                    const nom = val(`standby-finish${num}-nom`);
+                    const cond = val(`standby-finish${num}-condition`);
+                    const effet = val(`standby-finish${num}-effet`);
+                    if(!nom && !effet) return null;
+                    return { nom: nom, condition: cond, effet: effet };
+                };
+
+                const createStandbySpe = (num) => {
+                    const nom = val(`standby-spe${num}-nom`);
+                    const effet = val(`standby-spe${num}-effet`);
+                    if(!nom && !effet) return null;
+                    return { nom: nom, effet: effet };
+                };
+
+                standbyJson = {
+                    activation: {
+                        nom: val('standby-nom'),
+                        condition: val('standby-condition'),
+                        effet: val('standby-effet')
+                    },
+                    form: {
+                        nom: val('standby-form-nom'),
+                        passif: val('standby-passif'),
+                        spe1: createStandbySpe(1),
+                        spe2: createStandbySpe(2)
+                    },
+                    finish1: createFinish(1),
+                    finish2: createFinish(2)
+                };
+            }
+
+            // --- GESTION STANDBY ZTUR ---
+            let standbyZturJson = null;
+            if (has('has-standby') && (has('has-ztur') || has('has-zlr'))) {
+                standbyZturJson = {
+                    effet: val('ztur-standby-effet'),
+                    finish1: { effet: val('ztur-standby-finish1-effet') },
+                    finish2: { effet: val('ztur-standby-finish2-effet') }
+                };
+            }
+
+            const sezaPassif = { base: createContentObj(val('seza-passif-nom'), val('seza-passif-effet')), transfo: has('has-transfo') ? createContentObj(null, val('seza-passif-transfo')) : null };
+            const sezaSpe = { base: { nom: val('seza-spe-nom'), effet: val('seza-spe-effet') }, transfo: has('has-transfo') ? { nom: null, effet: val('seza-spe-transfo') } : null };
+            let sezaActive = null; if(val('seza-active-nom')||val('seza-active-effet')) sezaActive = { base: {nom:val('seza-active-nom'), condition:val('seza-active-cond'), effet:val('seza-active-effet')}, transfo:null };
+
+            const getNum = (id) => parseInt(document.getElementById(id).value) || 0;
+            const statsJson = {
+                d0: { hp: getNum('hp-d0'), atk: getNum('atk-d0'), def: getNum('def-d0') },
+                d1: { hp: getNum('hp-d1'), atk: getNum('atk-d1'), def: getNum('def-d1') },
+                d2: { hp: getNum('hp-d2'), atk: getNum('atk-d2'), def: getNum('def-d2') },
+                d3: { hp: getNum('hp-d3'), atk: getNum('atk-d3'), def: getNum('def-d3') },
+                d4: { hp: getNum('hp-d4'), atk: getNum('atk-d4'), def: getNum('def-d4') }
+            };
+
+            const speJson = {
+                base: { nom: val('base-spe-nom'), effet: val('base-spe-effet'), ultime: isLR ? { nom: val('base-ult-nom'), effet: val('base-ult-effet') } : undefined },
+                transfo: has('has-transfo') ? { nom: val('transfo-spe-nom'), effet: val('transfo-spe-effet'), ultime: isLR ? { nom: val('transfo-ult-nom'), effet: val('transfo-ult-ult-effet') } : undefined } : null,
+                echange: has('has-echange') ? { nom: val('echange-spe-nom'), effet: val('echange-spe-effet'), ultime: isLR ? { nom: val('echange-ult-nom'), effet: val('echange-ult-effet') } : undefined } : null,
+                revival: has('has-revival') ? { 
+                    nom: val('revival-spe-nom'), 
+                    effet: val('revival-spe-effet'),
+                    ultime: isLR ? { nom: val('revival-ult-nom'), effet: val('revival-ult-effet') } : undefined
+                } : null,
+                fureur: has('has-fureur') ? { 
+                    nom: val('fureur-spe-nom'), 
+                    effet: val('fureur-spe-effet') 
+                } : null,
+                geant: has('has-geant') ? { 
+                    nom: val('geant-spe-nom'), 
+                    effet: val('geant-spe-effet'),
+                    ultime: isLR ? { nom: val('geant-ult-nom'), effet: val('geant-ult-effet') } : undefined
+                } : null
+            };
+
+            let activeJson = null; 
+            if (has('has-active')) {
+                activeJson = { 
+                    base: { 
+                        nom: val('active-nom'), 
+                        condition: val('active-cond'), 
+                        effet: val('active-effet') 
+                    }, 
+                    transfo: (has('has-transfo') && (val('active-transfo-nom') || val('active-transfo-effet'))) ? {
+                        nom: val('active-transfo-nom'),
+                        condition: val('active-transfo-cond'),
+                        effet: val('active-transfo-effet')
+                    } : null,
+                    echange: null 
+                };
+            }
+
+            const liensBase = tomSelectLinks.getValue();
+            let liensTransfo = null;
+            if(has('has-transfo')) {
+                const valTransfo = tomSelectTransfoLinks.getValue();
+                liensTransfo = valTransfo.length > 0 ? valTransfo : liensBase;
+            }
+
+            // --- CREATION DU PAYLOAD A ENVOYER A SUPABASE ---
+            const payload = {
+                id: idChar, type: val('char-type'), classe: val('char-class'), tag: rarity, 
+                
+                // NOUVEAUX CHAMPS
+                date_sortie_jap: dateSortieJap,
+                date_sortie_glo: dateSortieGlo,
+                portail: portailFinalUrl, // URL finale (uploadée ou texte)
+
+                transformation: has('has-transfo'), fureur: has('has-fureur'), 
+                geant: has('has-geant'), 
+                revival: has('has-revival'), echange: has('has-echange'),
+                ztur: has('has-ztur'), zlr: has('has-zlr'), seza: has('has-seza'),
+                standby: standbyJson,
+                standby_ztur: standbyZturJson,
+                leader_skill: val('char-leader'),
+                nom: nomJson, passif: passifJson, spe: speJson, active_skill: activeJson, 
+                spe_ex: speExJson,
+                stats: statsJson, 
+                liens: { 
+                    base: liensBase, 
+                    transfo: liensTransfo, 
+                    echange: has('has-echange') ? (tomSelectEchangeLinks.getValue().length > 0 ? tomSelectEchangeLinks.getValue() : liensBase) : null,
+                    standby: has('has-standby') ? (tomSelectStandbyLinks.getValue().length > 0 ? tomSelectStandbyLinks.getValue() : liensBase) : null
+                }, 
+                categories: tomSelectCats.getValue(), liens_externes: { wiki: val('ext-wiki'), youtube: val('ext-yt') },
+                leader_skill_ztur: val('ztur-leader'), passif_ztur: zturPassif, spe_ztur: zturSpe, active_skill_ztur: zturActive,
+                leader_skill_seza: val('seza-leader'), passif_seza: sezaPassif, spe_seza: sezaSpe, active_skill_seza: sezaActive
+            };
+
             let error;
             if (currentEditId) { 
                 const res = await supabase.from('characters').update(payload).eq('id', currentEditId); 
@@ -880,11 +930,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (err) { 
             console.error("Erreur : " + err.message); 
-            if (err.message.includes("duplicate key") || err.code === "23505") {
+            if (err.message && (err.message.includes("duplicate key") || err.code === "23505")) {
                 alert("⛔ ERREUR : L'ID " + idChar + " existe déjà !");
             } else {
                 alert("Erreur technique : " + err.message); 
             }
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = originalBtnText;
         }
     });
 

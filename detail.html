@@ -20,6 +20,20 @@
         
         .border-spe { border-color: #dc3545 !important; box-shadow: 0 0 10px rgba(220, 53, 69, 0.3) !important; }
         .border-ult { border-color: #ff5722 !important; box-shadow: 0 0 10px rgba(255, 87, 34, 0.3) !important; }
+
+        /* Style pour la bannière du portail */
+        .portail-banner {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #343a40;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .portail-banner:hover {
+            transform: scale(1.02);
+            border-color: #ffc107;
+        }
     </style>
 </head>
 <body class="bg-dark text-light">
@@ -98,17 +112,37 @@
                         </div>
                     </div>
 
+                    <div id="portail-section" class="mt-4 p-3 rounded text-center" style="background-color: rgba(255, 255, 255, 0.05); display: none;">
+                        <h6 class="section-title text-warning mb-3 border-bottom border-secondary pb-2">PORTAIL D'ORIGINE</h6>
+                        <div id="portail-content">
+                            </div>
+                    </div>
+
+                    <div id="dates-section" class="mt-4 p-3 rounded text-center" style="background-color: rgba(255, 255, 255, 0.05); display: none;">
+                        <h6 class="section-title text-warning mb-3 border-bottom border-secondary pb-2">DATES DE SORTIE</h6>
+                        <div class="row text-center" style="font-size: 0.9rem;">
+                            <div class="col-6 mb-2" id="date-jap-box" style="display: none;">
+                                <span class="d-block text-danger fw-bold">JAPON</span>
+                                <span id="date-jap" class="text-white">---</span>
+                            </div>
+                            <div class="col-6 mb-2" id="date-glo-box" style="display: none;">
+                                <span class="d-block text-primary fw-bold">GLOBALE</span>
+                                <span id="date-glo" class="text-white">---</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="external-links" class="mt-3 d-flex justify-content-center gap-2"></div>
 
                     <div class="mt-4 p-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="section-title text-warning mb-0">LIENS D'AMITIÉ</h6>
+                            <h6 class="section-title text-warning mb-0 border-0 pb-0">LIENS</h6>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="linkLevelSwitch" style="cursor: pointer;">
                                 <label class="form-check-label text-white small" for="linkLevelSwitch" id="linkLevelLabel">Niveau 1</label>
                             </div>
                         </div>
-                        <div id="detail-liens" class="d-flex flex-wrap justify-content-center gap-2"></div>
+                        <div id="detail-liens" class="d-flex flex-wrap justify-content-center gap-2 mt-2"></div>
                     </div>
 
                     <div class="mt-4 p-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
@@ -119,7 +153,7 @@
                     </div>
                     
                     <div class="mt-4 p-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
-                        <h6 id="same-name-title" class="section-title text-warning mb-3 border-bottom border-secondary pb-2">Personnages de même noms</h6>
+                        <h6 id="same-name-title" class="section-title text-warning mb-3 border-bottom border-secondary pb-2">Personnages de même nom</h6>
                         <div id="same-name-list" class="d-flex flex-wrap justify-content-center gap-3">
                             <span id="no-same-name" class="text-white small">Calcul en cours...</span>
                         </div>
@@ -137,16 +171,6 @@
                     <div class="mb-4">
                         <h6 class="section-title text-info border-bottom border-info pb-1 mb-2">CATÉGORIES</h6>
                         <div id="detail-cats" class="d-flex flex-wrap gap-2"></div>
-                    </div>
-
-                    <div class="mb-4 p-3 rounded bg-dark border border-secondary" id="dates-section" style="display: none;">
-                        <h6 class="section-title text-light border-bottom border-secondary pb-1 mb-3">DATES DE SORTIE</h6>
-                        <div class="row text-center" style="font-size: 0.9rem;">
-                            <div class="col-md-3 mb-2" id="date-jap-box" style="display: none;"><span class="d-block text-danger fw-bold">JAP</span><span id="date-jap" class="text-white">---</span></div>
-                            <div class="col-md-3 mb-2" id="date-glb-box" style="display: none;"><span class="d-block text-primary fw-bold">GLB</span><span id="date-glb" class="text-white">---</span></div>
-                            <div class="col-md-3 mb-2" id="date-z-box" style="display: none;"><span class="d-block text-warning fw-bold">Z-TUR / Z-LR</span><span id="date-z" class="text-white">---</span></div>
-                            <div class="col-md-3 mb-2" id="date-seza-box" style="display: none;"><span class="d-block text-info fw-bold">S-TUR / Z-LR+</span><span id="date-seza" class="text-white">---</span></div>
-                        </div>
                     </div>
 
                     <div class="row g-3">
