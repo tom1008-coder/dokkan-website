@@ -212,7 +212,6 @@ function updateUI() {
     toggle(showZ, els.secZtur);
     toggle(els.checkActive.checked, els.blockZturActive);
     
-    // NOUVELLE LOGIQUE POUR STANDBY Z-TUR
     const zturStandbyBlock = document.getElementById('ztur-standby-block');
     const showZStandby = els.checkStandby.checked && showZ;
     if (showZStandby && zturStandbyBlock) {
@@ -372,9 +371,10 @@ async function loadCharacterIntoForm(id) {
     setVal('char-class', data.classe);
 
     // NOUVEAUX CHAMPS (Dates et Portail)
-    // On coupe l'heure à 16 caractères (YYYY-MM-DDTHH:MM) pour que le HTML l'accepte
     if (data.date_sortie_jap) setVal('char-date-jap', data.date_sortie_jap.slice(0, 16));
     if (data.date_sortie_glo) setVal('char-date-glo', data.date_sortie_glo.slice(0, 16));
+    if (data.date_eveil_jap) setVal('char-date-eveil-jap', data.date_eveil_jap.slice(0, 16));
+    if (data.date_eveil_glo) setVal('char-date-eveil-glo', data.date_eveil_glo.slice(0, 16));
     
     setVal('char-portail-url', data.portail);
     if(document.getElementById('char-portail-file')) {
@@ -508,22 +508,19 @@ async function loadCharacterIntoForm(id) {
 
         // CHARGEMENT STANDBY (2 FINISH TYPE ACTIVE - VIOLET)
         if(data.standby) {
-            // Activation
             if(data.standby.activation) {
                 setVal('standby-nom', data.standby.activation.nom);
                 setVal('standby-condition', data.standby.activation.condition);
                 setVal('standby-effet', data.standby.activation.effet);
             }
-            // Forme Standby & Spé
             if(data.standby.form) {
                 setVal('standby-form-nom', data.standby.form.nom);
                 setVal('standby-passif', data.standby.form.passif);
                 
-                // Chargement des spés (rétrocompatible avec spe unique)
                 if(data.standby.form.spe1) {
                     setVal('standby-spe1-nom', data.standby.form.spe1.nom);
                     setVal('standby-spe1-effet', data.standby.form.spe1.effet);
-                } else if (data.standby.form.spe) { // Vieux format
+                } else if (data.standby.form.spe) {
                     setVal('standby-spe1-nom', data.standby.form.spe.nom);
                     setVal('standby-spe1-effet', data.standby.form.spe.effet);
                 }
@@ -533,24 +530,19 @@ async function loadCharacterIntoForm(id) {
                     setVal('standby-spe2-effet', data.standby.form.spe2.effet);
                 }
             }
-            // Liens Standby
             if(data.liens && data.liens.standby && tomSelectStandbyLinks) {
                  tomSelectStandbyLinks.setValue(data.liens.standby);
             }
 
-            // Finish 1
             if(data.standby.finish1) {
                 setVal('standby-finish1-nom', data.standby.finish1.nom);
                 setVal('standby-finish1-condition', data.standby.finish1.condition);
                 setVal('standby-finish1-effet', data.standby.finish1.effet);
-            } 
-            // Rétro-compatibilité
-            else if (data.standby.finish) {
+            } else if (data.standby.finish) {
                 setVal('standby-finish1-nom', data.standby.finish.nom);
                 setVal('standby-finish1-effet', data.standby.finish.effet);
             }
             
-            // Finish 2
             if(data.standby.finish2) {
                 setVal('standby-finish2-nom', data.standby.finish2.nom);
                 setVal('standby-finish2-condition', data.standby.finish2.condition);
@@ -558,7 +550,6 @@ async function loadCharacterIntoForm(id) {
             }
         }
 
-        // CHARGEMENT STANDBY ZTUR
         if(data.standby_ztur) {
             setVal('ztur-standby-effet', data.standby_ztur.effet);
             if(data.standby_ztur.finish1) setVal('ztur-standby-finish1-effet', data.standby_ztur.finish1.effet);
@@ -566,14 +557,12 @@ async function loadCharacterIntoForm(id) {
         }
 
         if(data.active_skill_ztur) {
-            // Base
-            let zActiveBase = data.active_skill_ztur.base || data.active_skill_ztur; // Rétro-compatibilité si c'était un objet simple avant
+            let zActiveBase = data.active_skill_ztur.base || data.active_skill_ztur;
             if(zActiveBase) {
                 setVal('ztur-active-nom', zActiveBase.nom);
                 setVal('ztur-active-cond', zActiveBase.condition);
                 setVal('ztur-active-effet', zActiveBase.effet);
             }
-            // Transfo
             if(data.active_skill_ztur.transfo) {
                 setVal('ztur-active-transfo-nom', data.active_skill_ztur.transfo.nom);
                 setVal('ztur-active-transfo-cond', data.active_skill_ztur.transfo.condition);
@@ -592,7 +581,6 @@ async function loadCharacterIntoForm(id) {
         }
         if(data.active_skill_seza && data.active_skill_seza.base) { setVal('seza-active-nom', data.active_skill_seza.base.nom); setVal('seza-active-cond', data.active_skill_seza.base.condition); setVal('seza-active-effet', data.active_skill_seza.base.effet); }
 
-        // GESTION ACTIVE SKILL (BASE ET TRANSFO)
         if(data.active_skill) {
             if(data.active_skill.base) {
                 setVal('active-nom', data.active_skill.base.nom);
@@ -643,7 +631,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         const has = (id) => document.getElementById(id).checked;
 
-        // --- SAUVEGARDE DES NOUVELLES CATÉGORIES DANS LA TABLE DÉDIÉE ---
         const selectedCats = tomSelectCats.getValue(); 
         if (selectedCats.length > 0) {
             const catsToInsert = selectedCats.map(catName => ({ nom: catName }));
@@ -655,29 +642,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rarity = val('char-rarity');
         const isLR = rarity === 'LR';
         
-        // --- GESTION DU PORTAIL (UPLOAD IMAGE) ET DATES ---
+        // RECUPERATION DES DATES ET DU PORTAIL
         const dateSortieJap = val('char-date-jap') || null;
         const dateSortieGlo = val('char-date-glo') || null;
+        const dateEveilJap = val('char-date-eveil-jap') || null;
+        const dateEveilGlo = val('char-date-eveil-glo') || null;
         
         const fileInputPortail = document.getElementById('char-portail-file');
-        let portailFinalUrl = val('char-portail-url');
+        let portailFinalUrl = val('char-portail-url'); 
 
-        // On met un petit effet de chargement sur le bouton le temps de l'upload
         const btnSubmit = document.getElementById('btn-submit');
         const originalBtnText = btnSubmit.innerText;
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '⏳ Envoi en cours...';
 
         try {
-            // Si un fichier image a été sélectionné pour le portail
             if (fileInputPortail && fileInputPortail.files.length > 0) {
                 const file = fileInputPortail.files[0];
                 const fileExt = file.name.split('.').pop();
                 const fileName = `portail_${idChar}_${Date.now()}.${fileExt}`;
                 
-                // Envoi de l'image dans le bucket 'portails'
                 const { error: uploadError } = await supabase.storage
-                    .from('Portails')
+                    .from('Portails') 
                     .upload(fileName, file);
 
                 if (uploadError) throw new Error("Erreur d'upload du portail : " + uploadError.message);
@@ -763,7 +749,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
             }
 
-            // --- GESTION SPE EX AVEC TYPE ET CONDITION ---
             const createSpeExObj = (idNom, idEffet, idType, idCond) => {
                 const nom = val(idNom);
                 const effet = val(idEffet);
@@ -781,7 +766,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 echange: has('has-echange') ? createSpeExObj('spe-ex-echange-nom', 'spe-ex-echange-effet', 'spe-ex-echange-type', 'spe-ex-echange-condition') : null
             } : null;
 
-            // --- GESTION STANDBY SKILL ---
             let standbyJson = null;
             if(has('has-standby')) {
                 const createFinish = (num) => {
@@ -816,7 +800,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
             }
 
-            // --- GESTION STANDBY ZTUR ---
             let standbyZturJson = null;
             if (has('has-standby') && (has('has-ztur') || has('has-zlr'))) {
                 standbyZturJson = {
@@ -883,14 +866,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 liensTransfo = valTransfo.length > 0 ? valTransfo : liensBase;
             }
 
-            // --- CREATION DU PAYLOAD A ENVOYER A SUPABASE ---
             const payload = {
                 id: idChar, type: val('char-type'), classe: val('char-class'), tag: rarity, 
                 
-                // NOUVEAUX CHAMPS
+                // NOUVEAUX CHAMPS (Dates et Portail)
                 date_sortie_jap: dateSortieJap,
                 date_sortie_glo: dateSortieGlo,
-                portail: portailFinalUrl, // URL finale (uploadée ou texte)
+                date_eveil_jap: dateEveilJap,
+                date_eveil_glo: dateEveilGlo,
+                portail: portailFinalUrl,
 
                 transformation: has('has-transfo'), fureur: has('has-fureur'), 
                 geant: has('has-geant'), 

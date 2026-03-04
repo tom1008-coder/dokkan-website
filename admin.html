@@ -41,14 +41,22 @@
                 
                 <div class="row g-3 mt-2 border-top border-secondary pt-3">
                     <div class="col-md-3">
-                        <label>Sortie (JAP)</label>
+                        <label class="text-info">Sortie Initiale (JAP)</label>
                         <input type="datetime-local" id="char-date-jap" class="form-control input-date-dark">
                     </div>
                     <div class="col-md-3">
-                        <label>Sortie (GLO)</label>
+                        <label class="text-info">Sortie Initiale (GLO)</label>
                         <input type="datetime-local" id="char-date-glo" class="form-control input-date-dark">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
+                        <label class="text-warning">Éveil (JAP)</label>
+                        <input type="datetime-local" id="char-date-eveil-jap" class="form-control input-date-dark border-warning">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="text-warning">Éveil (GLO)</label>
+                        <input type="datetime-local" id="char-date-eveil-glo" class="form-control input-date-dark border-warning">
+                    </div>
+                    <div class="col-12 mt-3">
                         <label>Image du Portail (Fichier ou URL)</label>
                         <div class="d-flex gap-2">
                             <input type="file" id="char-portail-file" class="form-control form-control-sm" accept="image/*">

@@ -177,19 +177,39 @@ async function chargerDetail() {
             }
         }
 
-        // --- AFFICHAGE DES DATES ---
+        // --- AFFICHAGE DES DATES ET DE L'ÉVEIL ---
         const dateJap = formatDateToLocal(currentPersoGlobal.date_sortie_jap);
         const dateGlo = formatDateToLocal(currentPersoGlobal.date_sortie_glo);
+        const dateEveilJap = formatDateToLocal(currentPersoGlobal.date_eveil_jap);
+        const dateEveilGlo = formatDateToLocal(currentPersoGlobal.date_eveil_glo);
         
-        if (dateJap || dateGlo) {
+        if (dateJap || dateGlo || dateEveilJap || dateEveilGlo) {
             document.getElementById("dates-section").style.display = "block";
-            if (dateJap) {
-                document.getElementById("date-jap-box").style.display = "block";
-                document.getElementById("date-jap").innerText = dateJap;
+            
+            // Colonne Japon (Rouge)
+            if (dateJap || dateEveilJap) {
+                document.getElementById("box-jap").style.display = "block";
+                if (dateJap) {
+                    document.getElementById("date-jap-container").style.display = "block";
+                    document.getElementById("date-jap").innerText = dateJap;
+                }
+                if (dateEveilJap) {
+                    document.getElementById("date-eveil-jap-container").style.display = "block";
+                    document.getElementById("date-eveil-jap").innerText = dateEveilJap;
+                }
             }
-            if (dateGlo) {
-                document.getElementById("date-glo-box").style.display = "block";
-                document.getElementById("date-glo").innerText = dateGlo;
+
+            // Colonne Globale (Bleu)
+            if (dateGlo || dateEveilGlo) {
+                document.getElementById("box-glo").style.display = "block";
+                if (dateGlo) {
+                    document.getElementById("date-glo-container").style.display = "block";
+                    document.getElementById("date-glo").innerText = dateGlo;
+                }
+                if (dateEveilGlo) {
+                    document.getElementById("date-eveil-glo-container").style.display = "block";
+                    document.getElementById("date-eveil-glo").innerText = dateEveilGlo;
+                }
             }
         }
 
@@ -199,11 +219,9 @@ async function chargerDetail() {
             document.getElementById("portail-section").style.display = "block";
             const portailContent = document.getElementById("portail-content");
             
-            // Vérifie si c'est une URL d'image (Supabase ou autre)
             if (portailRaw.startsWith("http") && (portailRaw.includes("/storage/") || portailRaw.match(/\.(jpeg|jpg|gif|png|webp)$/i))) {
                 portailContent.innerHTML = `<img src="${portailRaw}" class="portail-banner" alt="Bannière du portail">`;
             } else {
-                // Sinon on affiche le texte simple (ex: "Festival Dokkan")
                 portailContent.innerHTML = `<span class="badge bg-secondary fs-6 p-2 border border-light">${portailRaw}</span>`;
             }
         }
@@ -241,7 +259,6 @@ function changerForme(forme) {
     
     let finishData = null;
 
-    // --- GESTION Z-TUR / SEZA ---
     if (currentAwakeningGlobal === 'ztur') {
         leaderText = p.leader_skill_ztur || leaderText;
         sourceData = {
@@ -264,7 +281,6 @@ function changerForme(forme) {
         };
     }
 
-    // --- GESTION STANDBY SKILL ---
     if (forme === 'standby' && sourceData.standby) {
         const sb = sourceData.standby;
         let formPassif = sb.form?.passif || "Passif en cours...";
@@ -276,7 +292,6 @@ function changerForme(forme) {
         let sSpe1 = sb.form?.spe1 || sb.form?.spe || null;
         let sSpe2 = sb.form?.spe2 || null;
 
-        // LOGIQUE Z-LR STANDBY (Mise à jour des effets si éveil Z)
         if (currentAwakeningGlobal === 'ztur' && p.standby_ztur) {
             if (p.standby_ztur.effet) formPassif = p.standby_ztur.effet;
 
@@ -316,7 +331,6 @@ function changerForme(forme) {
         finishData = null;
     }
 
-    // --- SUITE DE L'AFFICHAGE STANDARD ---
 
     document.getElementById("detail-leader").innerHTML = formaterTexteDokkan(leaderText);
 

@@ -119,16 +119,33 @@
                     </div>
 
                     <div id="dates-section" class="mt-4 p-3 rounded text-center" style="background-color: rgba(255, 255, 255, 0.05); display: none;">
-                        <h6 class="section-title text-warning mb-3 border-bottom border-secondary pb-2">DATES DE SORTIE</h6>
-                        <div class="row text-center" style="font-size: 0.9rem;">
-                            <div class="col-6 mb-2" id="date-jap-box" style="display: none;">
-                                <span class="d-block text-danger fw-bold">JAPON</span>
-                                <span id="date-jap" class="text-white">---</span>
+                        <h6 class="section-title text-warning mb-3 border-bottom border-secondary pb-2">DATES DE SORTIE & ÉVEIL</h6>
+                        <div class="row text-center g-2" style="font-size: 0.85rem;">
+                            
+                            <div class="col-6 mb-2" id="box-jap" style="display: none;">
+                                <span class="d-block text-danger fw-bold mb-2" style="border-bottom: 1px solid #dc3545; padding-bottom: 5px;">JAPON</span>
+                                <div id="date-jap-container" style="display: none;">
+                                    <span class="text-white-50 small d-block">Sortie initiale</span>
+                                    <span id="date-jap" class="text-white d-block mb-2">---</span>
+                                </div>
+                                <div id="date-eveil-jap-container" style="display: none;">
+                                    <span class="text-warning small d-block">Éveil</span>
+                                    <span id="date-eveil-jap" class="text-white d-block">---</span>
+                                </div>
                             </div>
-                            <div class="col-6 mb-2" id="date-glo-box" style="display: none;">
-                                <span class="d-block text-primary fw-bold">GLOBALE</span>
-                                <span id="date-glo" class="text-white">---</span>
+                            
+                            <div class="col-6 mb-2" id="box-glo" style="display: none;">
+                                <span class="d-block text-primary fw-bold mb-2" style="border-bottom: 1px solid #0d6efd; padding-bottom: 5px;">GLOBALE</span>
+                                <div id="date-glo-container" style="display: none;">
+                                    <span class="text-white-50 small d-block">Sortie initiale</span>
+                                    <span id="date-glo" class="text-white d-block mb-2">---</span>
+                                </div>
+                                <div id="date-eveil-glo-container" style="display: none;">
+                                    <span class="text-warning small d-block">Éveil</span>
+                                    <span id="date-eveil-glo" class="text-white d-block">---</span>
+                                </div>
                             </div>
+
                         </div>
                     </div>
 
