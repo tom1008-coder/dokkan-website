@@ -165,10 +165,42 @@
     "L'étonnant sortilège": {
         "lv1": "ATT +15 %",
         "lv10": "ATT +15 %, DÉF -10 % pour tous les ennemis"
+    }, 
+
+
+"Cruel": {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT +15 %"
+    },
+
+    "Loyauté": {
+        "lv1": "Ki +1",
+        "lv10": "Ki +2, dégâts encaissés réduits de 5 %"
+}, 
+
+
+ "Résurrection du démon": {
+        "lv1": "Ki +2",
+        "lv10": "Ki +2, DÉF +20 %"
+},
+
+"Pouvoir démoniaque": {
+        "lv1": "ATT +20 %",
+        "lv10": "ATT +20 %, DÉF +10 %"
+
+}, 
+
+"Le pouvoir d'un dieu": {
+        "lv1": "ATT +5 % lors d'une attaque spéciale",
+        "lv10": "ATT +10 % lors d'une attaque spéciale"
+
+}, 
+
+"La puissance suprême": {
+        "lv1": "ATT et DÉF +5 %, effet \"Perforation\" activé",
+        "lv10": "ATT et DÉF +10 %, effet \"Perforation\" activé"
     }
 
-   
+
+
 }
-
-
-

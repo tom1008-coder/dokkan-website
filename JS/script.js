@@ -7,18 +7,21 @@ const container = document.getElementById('card-container');
 const searchInput = document.getElementById('search-input'); 
 const newsContainer = document.getElementById('news-container');
 
+// --- URL DE BASE DES IMAGES (SUPABASE STORAGE) ---
 const BASE_IMG_URL = "https://dpqxaevnarnhmxihkggk.supabase.co/storage/v1/object/public/images/";
 
+// --- GESTION DES TIMERS ET DONNÉES ---
 let activeIntervals = []; 
 let toutesLesCartes = [];
-let toutesLesNews = []; // Permet de stocker les news pour le Pop-up
+let toutesLesNews = [];
 
+// --- SÉCURITÉ ---
 if (!container) {
     throw new Error("Arrêt normal : Script.js ne doit pas s'exécuter sur cette page.");
 }
 
 // ============================================================
-// 2. CHARGEMENT DES DONNÉES CARTES & NEWS
+// 2. CHARGEMENT DES DONNÉES (CARTES & NEWS)
 // ============================================================
 async function chargerDonnees() {
     try {
@@ -29,16 +32,22 @@ async function chargerDonnees() {
         }
 
         // CHARGEMENT DES CARTES
-        const { data: cardsData, error: cardsError } = await supabase
+        const { data, error } = await supabase
             .from('characters')
             .select('*')
             .order('created_at', { ascending: true });
 
-        if (cardsError) throw cardsError;
+        if (error) throw error;
 
-        toutesLesCartes = cardsData;
+        toutesLesCartes = data;
         
-        // On affiche les 8 dernières sorties au max
+        // --- AFFICHAGE DU TOTAL DES CARTES ---
+        const totalElement = document.getElementById("total-cards-count");
+        if (totalElement) {
+            totalElement.innerText = toutesLesCartes.length;
+        }
+
+        // On affiche les 8 dernières sorties par défaut
         const dernieresSorties = toutesLesCartes.slice(-8).reverse();
         afficherCartes(dernieresSorties);
 
@@ -51,7 +60,9 @@ async function chargerDonnees() {
     }
 }
 
-// Fonction pour charger les News depuis Supabase
+// ============================================================
+// 3. CHARGEMENT DES NEWS (ET POP-UP)
+// ============================================================
 async function chargerNews() {
     if (!newsContainer) return;
 
@@ -64,14 +75,14 @@ async function chargerNews() {
 
         if (error) throw error;
 
-        newsContainer.innerHTML = ""; 
+        newsContainer.innerHTML = ""; // On vide le spinner
 
         if (!newsData || newsData.length === 0) {
             newsContainer.innerHTML = "<p class='text-secondary small fst-italic text-center mt-3'>Aucune news pour le moment.</p>";
             return;
         }
 
-        // On sauvegarde globalement
+        // On sauvegarde les news globalement pour pouvoir les afficher dans le pop-up
         toutesLesNews = newsData;
 
         newsData.forEach(news => {
@@ -118,9 +129,7 @@ async function chargerNews() {
     }
 }
 
-// ============================================================
-// 3. OUVERTURE DU POP-UP DES NEWS
-// ============================================================
+// Fonction pour ouvrir le Pop-up de la News
 function ouvrirModalNews(id) {
     const news = toutesLesNews.find(n => n.id === id);
     if (!news) return;
@@ -138,7 +147,6 @@ function ouvrirModalNews(id) {
     const isDarkText = news.badge_color === 'bg-warning' || news.badge_color === 'bg-info';
     const badgeTextColor = isDarkText ? 'text-dark' : 'text-white';
 
-    // Remplissage Modal
     document.getElementById("modalNewsTitle").className = `modal-title fw-bold ${titleColor}`;
     document.getElementById("modalNewsTitle").innerText = news.titre;
     
@@ -159,13 +167,12 @@ function ouvrirModalNews(id) {
 
     document.getElementById("modalNewsContent").innerHTML = news.contenu.replace(/\n/g, '<br>');
 
-    // Afficher
     const modal = new bootstrap.Modal(document.getElementById('newsModal'));
     modal.show();
 }
 
 // ============================================================
-// 4. AFFICHAGE DES CARTES
+// 4. AFFICHAGE DES CARTES (VERSION ICÔNES CARRÉES)
 // ============================================================
 function afficherCartes(liste) {
     nettoyerIntervalles();
@@ -180,9 +187,7 @@ function afficherCartes(liste) {
     liste.forEach(carte => {
         const cheminImage = `${BASE_IMG_URL}${carte.id}/${carte.id}.png`;
         let hexGlow = getGlowColor(carte.type);
-
         const nomAffiche = (typeof carte.nom === 'object' && carte.nom !== null) ? carte.nom.base : carte.nom;
-
         const isLR = (carte.tag === 'LR' || carte.rarity === 'LR');
         const lrClass = isLR ? 'is-lr' : '';
 
@@ -302,7 +307,7 @@ if (searchInput) {
 // 7. UTILITAIRES (COULEURS & CLASSES)
 // ============================================================
 function getGlowColor(type) {
-    if (!type) return '#ffd700';
+    if (!type) return '#ffd700'; 
     const t = type.toUpperCase();
     if (t === 'PUI' || t === 'STR') return '#dc3545'; 
     if (t === 'AGI' || t === 'AGL') return '#0d6efd'; 

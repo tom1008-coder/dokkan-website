@@ -1,0 +1,208 @@
+/* =========================================
+   BASES
+   ========================================= */
+body {
+    background-color: #080c16; 
+    color: #e0e0e0;
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.dokkan-section-title {
+    font-size: 1.15rem;
+    font-weight: normal;
+    color: #ffffff;
+    padding-bottom: 6px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #234b80; 
+}
+
+/* =========================================
+   PLATEAU DE JEU (BOARD)
+   ========================================= */
+.team-board {
+    position: relative;
+    width: 1000px;
+    min-width: 1000px;
+    height: 600px;
+    background-color: #121620;
+    border: 2px solid #232a35;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.team-links-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none; /* Laisse passer les clics vers le plateau */
+}
+
+.link-line {
+    stroke: #334155;
+    stroke-width: 8; /* Épais pour faciliter le survol */
+    transition: stroke 0.3s;
+    pointer-events: stroke; /* Rend la ligne détectable par la souris */
+    cursor: pointer;
+}
+
+.link-badge {
+    pointer-events: auto; /* Rend le rond détectable par la souris */
+    cursor: pointer;
+}
+
+.link-badge circle {
+    fill: #161b22;
+    stroke: #d97706;
+    stroke-width: 3;
+}
+
+.link-badge text {
+    fill: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+/* --- DESIGN DE L'INFOBULLE DES LIENS --- */
+.link-tooltip {
+    position: absolute;
+    background-color: rgba(17, 24, 39, 0.95);
+    border: 1px solid #d97706;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    pointer-events: none; /* La souris passe au travers */
+    z-index: 1050; /* Au-dessus de tout le reste */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    white-space: nowrap;
+}
+
+/* =========================================
+   CASES DU PLATEAU (SLOTS)
+   ========================================= */
+.team-slot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background-color: #1f2937;
+    border: 2px dashed #4b5563;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.2s;
+}
+
+.team-slot .badge-add {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.team-slot i {
+    font-size: 1.5rem;
+    color: #4b5563;
+}
+
+.team-slot:hover { border-color: #ffc107; background-color: #2a2a2a; }
+.team-slot.active { border: 2px solid #ffc107; box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); }
+
+/* =========================================
+   CARTE REMPLIE (Fiche détaillée allégée)
+   ========================================= */
+.team-slot.filled {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: auto;
+    overflow: visible; 
+}
+
+.char-portrait-wrapper {
+    position: relative;
+    width: 110px;
+    height: 110px;
+}
+
+.char-portrait-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+}
+
+.btn-remove-char {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border: 2px solid #121620;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.btn-calc-stats {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background-color: #fd7e14;
+    color: white;
+    border: 2px solid #121620;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Pastille "L" et "F" flottantes */
+.role-indicator {
+    position: absolute;
+    left: -15px;
+    bottom: 25px;
+    width: 26px;
+    height: 26px;
+    background-color: #121620;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    z-index: 5;
+}
+
+.role-indicator.leader-color { color: #d97706; border: 2px solid #d97706; }
+.role-indicator.friend-color { color: #0ea5e9; border: 2px solid #0ea5e9; }
+
+/* =========================================
+   ROSTER (MODAL)
+   ========================================= */
+.roster-char { cursor: pointer; transition: transform 0.2s, filter 0.2s; }
+.roster-char img { width: 100%; max-width: 90px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+.roster-char:hover img { transform: translateY(-3px); filter: brightness(1.2); }
+.roster-char.in-team img { filter: grayscale(100%) opacity(0.3); cursor: not-allowed; }
+.roster-char.in-team:hover img { transform: none; }
