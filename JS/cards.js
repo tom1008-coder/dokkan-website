@@ -18,30 +18,21 @@ const filterClass = document.getElementById('filter-class');
 const filterCharName = document.getElementById('filter-character-name');
 const filterCategory = document.getElementById('filter-category');
 const filterSearch = document.getElementById('filter-search');
+const filterAwakening = document.getElementById('filter-awakening');
 
 // ============================================================
 // 1. INITIALISATION
 // ============================================================
 async function initCardsPage() {
     try {
-        // Chargement parallèle (Cartes + Catégories)
         const [resCards, resCats] = await Promise.all([
-            supabase.from('characters').select('*').order('tag', {ascending:true}).order('id', {ascending:false}),
+            supabase.from('characters').select('*').order('id', {ascending:false}),
             supabase.from('categories').select('nom').order('nom', {ascending:true})
         ]);
 
         if (resCards.error) throw resCards.error;
-        if (resCats.error) console.error("Erreur categories", resCats.error);
-        
-        // Tri manuel plus robuste
-        let data = resCards.data;
-        data.sort((a, b) => {
-            if (a.tag === 'LR' && b.tag !== 'LR') return -1;
-            if (a.tag !== 'LR' && b.tag === 'LR') return 1;
-            return b.id - a.id;
-        });
 
-        allCardsData = data;
+        allCardsData = resCards.data;
 
         // Remplissage Filtre Catégories
         if (resCats.data) {
@@ -59,22 +50,21 @@ async function initCardsPage() {
         loadingDiv.classList.add('d-none');
     } catch (err) {
         console.error(err);
-        loadingDiv.innerHTML = "<p class='text-danger'>Erreur chargement.</p>";
+        loadingDiv.innerHTML = "<p class='text-danger'>Erreur de chargement.</p>";
     }
 }
 
 // ============================================================
-// 2. EXTRACTION DES FILTRES (Noms uniquement)
+// 2. EXTRACTION DES NOMS POUR LE DROPDOWN
 // ============================================================
 function extractFiltersData() {
     uniqueNames.clear();
-    
     allCardsData.forEach(card => {
         let fullName = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
         if(fullName) uniqueNames.add(fullName);
     });
 
-    filterCharName.innerHTML = '<option value="">Tous les personnages</option>';
+    filterCharName.innerHTML = '<option value="">Tous les noms</option>';
     Array.from(uniqueNames).sort().forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
@@ -88,7 +78,7 @@ function extractFiltersData() {
 // ============================================================
 function renderCards(cards) {
     gridContainer.innerHTML = '';
-    countLabel.textContent = `${cards.length} résultats`;
+    countLabel.textContent = cards.length;
 
     if (cards.length === 0) {
         noResultsDiv.classList.remove('d-none');
@@ -99,18 +89,16 @@ function renderCards(cards) {
 
     cards.forEach(card => {
         const displayNom = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
-        // URL AVEC SOUS-DOSSIER
         const displayUrl = `${BASE_IMG_URL}${card.id}/${card.id}.png`;
         
         const html = `
             <div class="col">
-                <div class="card-container" onclick="window.location.href='detail.html?id=${card.id}'" title="${displayNom}">
+                <a href="detail.html?id=${card.id}" class="card-container" title="${displayNom}">
                     <div class="card-icon-wrapper">
-                        <img src="${displayUrl}" class="card-img" 
-                             loading="lazy" onerror="this.src='https://placehold.co/90x90/000/fff?text=?'">
+                        <img src="${displayUrl}" class="card-img" loading="lazy" onerror="this.src='https://placehold.co/120x120/1f2937/fbbf24?text=?'">
                     </div>
                     <div class="card-name">${displayNom}</div>
-                </div>
+                </a>
             </div>
         `;
         gridContainer.innerHTML += html;
@@ -127,6 +115,7 @@ function applyFilters() {
     const classVal = filterClass.value;
     const charNameVal = filterCharName.value;
     const catVal = filterCategory.value;
+    const awakeningVal = filterAwakening.value; 
 
     const filtered = allCardsData.filter(card => {
         const cardName = (typeof card.nom === 'object' && card.nom !== null) ? card.nom.base : card.nom;
@@ -136,13 +125,20 @@ function applyFilters() {
         if (rarityVal && card.tag !== rarityVal) return false;
         if (typeVal && card.type !== typeVal) return false;
         if (classVal && card.classe !== classVal) return false;
+        if (charNameVal && cardName !== charNameVal) return false;
         
-        // Filtre Catégorie (Compatible tableau text[])
         if (catVal) {
             if (!Array.isArray(card.categories) || !card.categories.includes(catVal)) return false;
         }
-        
-        if (charNameVal && cardName !== charNameVal) return false;
+
+        // Filtre Éveil (SÉPARÉ)
+        if (awakeningVal === 'ztur') {
+            if (!card.ztur) return false;
+        } else if (awakeningVal === 'zlr') {
+            if (!card.zlr) return false;
+        } else if (awakeningVal === 'seza') {
+            if (!card.seza) return false;
+        }
 
         return true;
     });
@@ -150,11 +146,13 @@ function applyFilters() {
     renderCards(filtered);
 }
 
+// Écouteurs
 filterSearch.addEventListener('input', applyFilters);
 filterRarity.addEventListener('change', applyFilters);
 filterType.addEventListener('change', applyFilters);
 filterClass.addEventListener('change', applyFilters);
 filterCharName.addEventListener('change', applyFilters);
 filterCategory.addEventListener('change', applyFilters);
+filterAwakening.addEventListener('change', applyFilters);
 
 document.addEventListener('DOMContentLoaded', initCardsPage);

@@ -9,15 +9,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>
-        /* --- COULEURS DOKKAN --- */
+        /* --- COULEURS ET THÈME DOKKAN --- */
         :root {
-            --bg-dark: #050a14;
-            --bg-panel: #0b1221;
-            --bg-input: #151d2e;
-            --border: #1f2a40;
-            --text-main: #fff;
-            --text-muted: #aeb9cc;
-            --accent: #ffc107; /* Jaune Dokkan */
+            --bg-dark: #030712;
+            --bg-panel: #111827;
+            --bg-input: #1f2937;
+            --border: #374151;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --accent: #fbbf24; /* Jaune Dokkan */
             --primary: #3b82f6;
         }
 
@@ -26,14 +26,14 @@
             color: var(--text-main);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-x: hidden;
-            overflow-y: scroll; /* Évite les sauts de scrollbar */
+            overflow-y: scroll;
         }
 
         /* Scrollbar custom */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
         /* --- LAYOUT SIDEBAR + MAIN --- */
         .layout-wrapper {
@@ -43,193 +43,190 @@
 
         /* 1. SIDEBAR DES FILTRES */
         .sidebar-filters {
-            width: 300px;
-            background-color: var(--bg-panel);
+            width: 320px;
+            flex-shrink: 0; 
+            background-color: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
             border-right: 1px solid var(--border);
-            padding: 20px;
-            position: fixed;
+            padding: 25px;
+            
+            /* Sticky pour s'arrêter avant le footer */
+            position: sticky;
             top: 0;
-            bottom: 0;
-            left: 0;
+            height: 100vh;
+            
             overflow-y: auto;
             z-index: 1000;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.5);
         }
 
         .sidebar-title {
             color: var(--accent);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-            margin-top: 20px;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .sidebar-title:first-child { margin-top: 0; }
 
         /* 2. CONTENU PRINCIPAL */
         .main-content {
             flex: 1;
-            margin-left: 300px; /* Largeur de la sidebar */
-            padding: 20px 30px;
-            width: calc(100% - 300px);
+            padding: 30px 40px;
+            min-width: 0;
         }
 
         /* --- STYLES DES INPUTS --- */
         .dokkan-label {
             color: var(--text-muted);
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .dokkan-input {
             background-color: var(--bg-input);
             border: 1px solid var(--border);
             color: #fff;
-            font-size: 0.85rem;
-            border-radius: 6px;
+            font-size: 0.9rem;
+            border-radius: 8px;
             width: 100%;
-            padding: 8px 12px;
-            transition: all 0.2s;
+            padding: 10px 14px;
+            transition: all 0.2s ease;
+            appearance: none; 
         }
         .dokkan-input:focus {
-            background-color: #1a253a;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background-color: #273346;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
             outline: none;
         }
-        .dokkan-input:disabled {
-            background-color: #080c14;
-            color: #444;
-            cursor: not-allowed;
-        }
 
-        /* --- SEARCH BAR HERO --- */
+        /* --- SEARCH BAR HERO (Non-sticky pour éviter le chevauchement) --- */
         .hero-search-container {
-            background: linear-gradient(to right, var(--bg-panel), var(--bg-dark));
+            background: linear-gradient(145deg, var(--bg-panel), #1f2937);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 40px;
             display: flex;
             align-items: center;
             gap: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
         .hero-search-input {
             background-color: transparent;
             border: none;
-            border-bottom: 2px solid var(--border);
             color: #fff;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             width: 100%;
-            padding: 10px;
+            font-weight: 500;
         }
-        .hero-search-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
+        .hero-search-input::placeholder { color: #6b7280; }
+        .hero-search-input:focus { outline: none; }
 
-        /* --- GRILLE CSS GRID (CORRECTION ALIGNEMENT) --- */
+        /* --- GRILLE CSS GRID --- */
         #cards-grid {
             display: grid;
-            /* Cela crée autant de colonnes que possible.
-               Chaque carte fera au minimum 100px, et grandira pour remplir la ligne */
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 15px; /* Espacement fixe entre les cartes */
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 20px;
             width: 100%;
         }
 
         /* --- DESIGN DE LA CARTE --- */
         .card-container {
-            /* Plus de marges ici, c'est le gap de la grille qui gère */
             position: relative;
             cursor: pointer;
-            transition: transform 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden; /* Sécurité */
+            text-decoration: none;
         }
         
-        .card-container:hover {
-            transform: translateY(-5px);
-            z-index: 5;
+        .card-icon-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+            border: 2px solid #374151;
+            transition: transform 0.2s, border-color 0.2s;
+            background-color: #1f2937;
         }
 
         .card-img {
             width: 100%;
-            aspect-ratio: 1; /* Force un carré parfait */
-            object-fit: cover; /* Remplit le carré sans déformer l'image */
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            background-color: #0b1221;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-container:hover .card-icon-wrapper {
+            transform: translateY(-8px) scale(1.03);
+            border-color: var(--accent);
         }
 
         .card-name {
-            font-size: 0.7rem;
-            color: #e2e8f0;
-            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #e5e7eb;
+            margin-top: 10px;
             text-align: center;
-            line-height: 1.2;
+            background-color: rgba(31, 41, 55, 0.8);
+            padding: 4px 10px;
+            border-radius: 20px;
             width: 100%;
-            
-            /* Coupe le texte s'il est trop long pour garder l'alignement */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            border: 1px solid #374151;
+            font-weight: 600;
         }
 
         /* --- RESPONSIVE (MOBILE) --- */
         @media (max-width: 992px) {
             .sidebar-filters {
+                position: fixed;
+                top: 0; bottom: 0; left: 0;
+                height: 100%;
                 transform: translateX(-100%);
-                width: 280px;
-                box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+                width: 300px;
             }
-            .sidebar-filters.active {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 15px;
-            }
-            .mobile-filter-btn {
-                display: block;
-            }
+            .sidebar-filters.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; }
             .sidebar-overlay {
                 display: none;
                 position: fixed;
                 top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0,0,0,0.7);
+                background: rgba(0,0,0,0.8);
                 z-index: 999;
-                backdrop-filter: blur(2px);
+                backdrop-filter: blur(3px);
             }
             .sidebar-overlay.active { display: block; }
         }
 
-        /* BOUTON MOBILE */
         .mobile-filter-btn {
             display: none;
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px; right: 25px;
             z-index: 1050;
             border-radius: 50px;
-            padding: 12px 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            font-weight: bold;
+            padding: 14px 24px;
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+            font-weight: 800;
         }
         
-        #nav-placeholder {
-            position: relative;
-            z-index: 1001;
-        }
+        @media (max-width: 992px) { .mobile-filter-btn { display: flex; } }
     </style>
 </head>
 <body>
@@ -242,23 +239,22 @@
 
         <aside class="sidebar-filters" id="sidebar">
             <div class="d-flex justify-content-between align-items-center mb-4 d-lg-none">
-                <h5 class="text-warning m-0">Filtres</h5>
-                <button class="btn btn-sm btn-outline-light" onclick="toggleSidebar()">✕</button>
+                <h5 class="text-warning fw-bold m-0"><i class="bi bi-funnel-fill me-2"></i>Filtres</h5>
+                <button class="btn btn-sm btn-outline-light rounded-circle" onclick="toggleSidebar()"><i class="bi bi-x-lg"></i></button>
             </div>
 
-            <div class="sidebar-title">Général</div>
+            <div class="sidebar-title"><i class="bi bi-sliders"></i> Général</div>
             
-            <div class="mb-3">
-                <label class="dokkan-label">Rareté</label>
+            <div class="mb-4">
+                <label class="dokkan-label"><i class="bi bi-star-fill text-warning"></i> Rareté</label>
                 <select id="filter-rarity" class="dokkan-input">
-                    <option value="">Toutes</option>
-                    <option value="LR">LR</option>
-                    <option value="UR">UR</option>
-                    <option value="SSR">SSR</option>
+                    <option value="">Toutes les raretés</option>
+                    <option value="LR">LR (Légendaire)</option>
+                    <option value="UR">UR (Ultra Rare)</option>
                 </select>
             </div>
 
-            <div class="row g-2 mb-3">
+            <div class="row g-3 mb-4">
                 <div class="col-6">
                     <label class="dokkan-label">Type</label>
                     <select id="filter-type" class="dokkan-input">
@@ -280,90 +276,81 @@
                 </div>
             </div>
 
-            <div class="sidebar-title">Spécifique</div>
+            <div class="sidebar-title"><i class="bi bi-bookmark-star"></i> Spécifique</div>
 
-            <div class="mb-3">
+            <div class="mb-4">
                 <label class="dokkan-label">Catégorie</label>
                 <select id="filter-category" class="dokkan-input">
                     <option value="">Toutes les catégories</option>
                 </select>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-4">
                 <label class="dokkan-label">Personnage</label>
                 <select id="filter-character-name" class="dokkan-input">
-                    <option value="">Tous</option>
+                    <option value="">Tous les noms</option>
                 </select>
             </div>
 
-            <div class="sidebar-title">Éveil</div>
+            <div class="sidebar-title"><i class="bi bi-lightning-charge text-warning"></i> Éveil</div>
 
-            <div class="row g-2 mb-3">
-                <div class="col-12">
-                    <label class="dokkan-label text-warning">Z-TUR / Z-LR</label>
-                    <select class="dokkan-input" disabled style="border-color: #ffc107;">
-                        <option>Bientôt...</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <label class="dokkan-label text-info">Super Z-TUR</label>
-                    <select class="dokkan-input" disabled style="border-color: #0dcaf0;">
-                        <option>Bientôt...</option>
-                    </select>
-                </div>
+            <div class="mb-4">
+                <label class="dokkan-label text-warning">Niveau d'éveil</label>
+                <select id="filter-awakening" class="dokkan-input" style="border-color: #fbbf24;">
+                    <option value="">Tous</option>
+                    <option value="ztur">Z-TUR</option>
+                    <option value="zlr">Z-LR</option>
+                    <option value="seza">Super EZA (SEZA)</option>
+                </select>
             </div>
 
-            <div class="mt-4 text-center">
-                <small class="text-secondary" id="results-count">Chargement...</small>
+            <div class="mt-5 text-center p-3 rounded" style="background-color: rgba(255,255,255,0.02); border: 1px dashed var(--border);">
+                <span class="text-warning fw-bold fs-5 d-block mb-1" id="results-count">0</span>
+                <small class="text-secondary">Cartes correspondantes</small>
             </div>
         </aside>
 
         <main class="main-content">
             
             <div class="hero-search-container">
-                <i class="bi bi-search text-warning fs-4"></i>
+                <i class="bi bi-search text-warning fs-3"></i>
                 <input type="text" id="filter-search" class="hero-search-input" placeholder="Rechercher un personnage (ex: Goku, Broly...)">
             </div>
 
             <div class="container-fluid p-0">
-                <div id="loading-cards" class="text-center py-5">
-                    <div class="spinner-border text-warning" style="width: 3rem; height: 3rem;" role="status"></div>
-                    <p class="mt-2 text-muted">Chargement des données...</p>
+                <div id="loading-cards" class="text-center py-5 my-5">
+                    <div class="spinner-border text-warning" style="width: 4rem; height: 4rem;" role="status"></div>
+                    <h5 class="mt-4 text-white-50 fw-light">Récupération de la box...</h5>
                 </div>
 
-                <div id="cards-grid">
-                    </div>
+                <div id="cards-grid"></div>
 
-                <div id="no-results" class="text-center py-5 d-none">
-                    <div class="fs-1 mb-2">🤷‍♂️</div>
-                    <h5 class="text-muted">Aucun personnage trouvé avec ces filtres.</h5>
+                <div id="no-results" class="text-center py-5 my-5 d-none">
+                    <div class="display-1 mb-3 text-muted"><i class="bi bi-emoji-frown"></i></div>
+                    <h4 class="text-light fw-bold">Aucune carte trouvée</h4>
                 </div>
             </div>
 
         </main>
     </div>
 
-    <button class="btn btn-warning mobile-filter-btn d-lg-none" onclick="toggleSidebar()">
-        <i class="bi bi-funnel-fill me-1"></i> Filtres
+    <button class="btn btn-warning mobile-filter-btn" onclick="toggleSidebar()">
+        <i class="bi bi-funnel-fill"></i> Filtres
     </button>
 
     <div id="footer-placeholder"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    
     <script src="JS/config.js"></script>
     <script src="JS/navbar.js"></script>
-    
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
             document.querySelector('.sidebar-overlay').classList.toggle('active');
         }
-
         fetch("footer.html").then(r=>r.text()).then(h=>{document.getElementById("footer-placeholder").innerHTML=h;});
     </script>
-
     <script src="JS/cards.js"></script>
 
 </body>
