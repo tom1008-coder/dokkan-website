@@ -300,3 +300,46 @@ body {
 
 /* Couleur Type INT */
 .bg-int { background-color: #6f42c1 !important; color: white !important; }
+
+/* Style pour les mots-clés de pourcentages (Tooltips) */
+        .dokkan-keyword {
+            color: #ffc107; /* Texte en doré */
+            border-bottom: 1px dashed #ffc107;
+            cursor: help;
+            position: relative;
+            font-weight: bold;
+            transition: color 0.2s ease;
+        }
+        
+        .dokkan-keyword:hover {
+            color: #fff;
+        }
+
+        .dokkan-keyword:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8f9fa;
+            color: #212529;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 900;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            z-index: 100;
+        }
+        
+        .dokkan-keyword:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #f8f9fa transparent transparent transparent;
+            z-index: 100;
+        }

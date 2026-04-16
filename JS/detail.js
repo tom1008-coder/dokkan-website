@@ -17,6 +17,23 @@ let currentFormeGlobal = 'base';
 let currentStatLevelGlobal = 'd4';
 let currentAwakeningGlobal = 'base';
 
+// =========================================
+// DICTIONNAIRE DES PROBABILITÉS DOKKAN
+// =========================================
+const DOKKAN_PROBABILITIES = {
+    "chances rares": "15 %",
+    "rare chance": "15 %",
+    "parfois": "25 %",
+    "chances moyennes": "30 %",
+    "chance moyenne": "30 %",
+    "grandes chances": "50 %",
+    "grande chance": "50 %",
+    "fortes chances": "70 %",
+    "forte chance": "70 %",
+    "très grandes chances": "70 %",
+    "très grande chance": "70 %"
+};
+
 // Parseur JSON sécurisé
 function safeParse(data) {
     if (!data) return null;
@@ -702,20 +719,40 @@ function updateBtnStyles(forme) {
     }
 }
 
+// =========================================
+// FORMATAGE DU TEXTE & INJECTION TOOLTIPS
+// =========================================
 function formaterTexteDokkan(texte, titreAExclure) {
     if (!texte) return "";
     let content = texte;
+
     if (Array.isArray(content)) {
-        content = content.join("<br>");
+        content = content.join("\n");
     }
+
     if (titreAExclure && typeof content === 'string') {
         const safeTitre = titreAExclure.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const titrePattern = new RegExp(`(\\[)?${safeTitre}(\\])?\\s*(<br>|,)?\\s*`, 'i');
+        const titrePattern = new RegExp(`(\\[)?${safeTitre}(\\])?\\s*(\n|<br>|,)?\\s*`, 'i');
         content = content.replace(titrePattern, "").trim();
     }
-    if (typeof content === 'string' && !content.includes('<p>') && !content.includes('<span') && !content.includes('<div>')) {
-        content = content.replace(/\n/g, "<br>");
+
+    if (typeof content === 'string') {
+        if (!content.includes('<p>') && !content.includes('<div>')) {
+            content = content.replace(/\n/g, "<br>");
+        }
+
+        // --- NOUVEAU : Détection et remplacement des mots-clés ---
+        // On trie par longueur décroissante pour matcher "très grandes chances" avant "grandes chances"
+        const terms = Object.keys(DOKKAN_PROBABILITIES).sort((a, b) => b.length - a.length);
+        terms.forEach(term => {
+            // Regex 'gi' : g=global (remplace tout), i=case-insensitive (insensible aux majuscules/minuscules)
+            const regex = new RegExp(`\\b(${term})\\b`, 'gi');
+            content = content.replace(regex, (match) => {
+                return `<span class="dokkan-keyword" data-tooltip="${DOKKAN_PROBABILITIES[term.toLowerCase()]}">${match}</span>`;
+            });
+        });
     }
+
     return `<div class="dokkan-text">${content}</div>`;
 }
 

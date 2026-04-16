@@ -48,7 +48,7 @@ async function chargerDonnees() {
         }
 
         // On affiche les 8 dernières sorties par défaut
-        const dernieresSorties = toutesLesCartes.slice(-8).reverse();
+        const dernieresSorties = toutesLesCartes.slice(-12).reverse();
         afficherCartes(dernieresSorties);
 
         // CHARGEMENT DES NEWS
@@ -71,7 +71,7 @@ async function chargerNews() {
             .from('news')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(5);
+            .limit(2);
 
         if (error) throw error;
 
