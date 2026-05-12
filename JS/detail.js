@@ -667,9 +667,26 @@ function renderLiens(liste) {
         liste.forEach(nom => {
             const info = linksDataGlobal ? linksDataGlobal[nom] : null;
             let desc = info ? (isLevel10Global ? info.lv10 : info.lv1) : "Effet inconnu";
-            const cls = isLevel10Global ? "border-warning" : "";
-            const txt = isLevel10Global ? "Nv 10" : "Nv 1";
-            div.innerHTML += `<div class="link-container"><span class="badge-link ${cls}">${nom}</span><div class="link-tooltip"><strong class="text-warning">${txt}:</strong> ${desc}</div></div>`;
+            
+            // Nouvelles classes et variables pour coller au design in-game
+            const cls = isLevel10Global ? "level-10" : "level-1";
+            const num = isLevel10Global ? "10" : "1";
+
+            // Injection du HTML mis à jour avec la structure de cercle
+            div.innerHTML += `
+                <div class="link-container">
+                    <div class="badge-link ${cls}">
+                        <div class="link-level-circle">
+                            <span class="lv-txt">Lv</span>
+                            <span class="lv-num">${num}</span>
+                        </div>
+                        <span class="link-name">${nom}</span>
+                    </div>
+                    <div class="link-tooltip">
+                        <strong class="text-warning">Lv ${num}:</strong> ${desc}
+                    </div>
+                </div>
+            `;
         });
     } else {
         div.innerHTML = "<span class='text-white-50 small fst-italic'>Aucun lien actif sous cette forme.</span>";
@@ -795,6 +812,8 @@ function afficherMeilleursPartenaires(currentPerso, allPersos) {
     }
 
     const candidats = allPersos.filter((p) => p.id !== currentPerso.id && getNomBaseClean(p) !== nomBaseCurrent);
+    
+    // On garde en mémoire la liste exacte des liens communs
     const scores = candidats.map((candidat) => {
         const rawC = safeParse(candidat.liens);
         let liensC = [];
@@ -802,11 +821,11 @@ function afficherMeilleursPartenaires(currentPerso, allPersos) {
         else if (rawC && rawC.base) liensC = rawC.base;
 
         const liensCommuns = liensC.filter((l) => liensBasePerso.includes(l));
-        return { ...candidat, nbLiensCommuns: liensCommuns.length };
+        return { ...candidat, nbLiensCommuns: liensCommuns.length, listeLiens: liensCommuns };
     });
 
     scores.sort((a, b) => b.nbLiensCommuns - a.nbLiensCommuns);
-    const top6 = scores.slice(0, 6);
+    const top6 = scores.slice(0, 8);
 
     container.innerHTML = "";
     if (top6.length === 0 || top6[0].nbLiensCommuns === 0) {
@@ -816,7 +835,26 @@ function afficherMeilleursPartenaires(currentPerso, allPersos) {
 
     top6.forEach((p) => {
         const pNom = getContent(p.nom, 'base', 'nom');
-        container.innerHTML += `<div class="position-relative text-center" style="width: 60px; cursor: pointer; overflow: visible;" onclick="window.location.href='detail.html?id=${p.id}'" title="${pNom}"><img src="${BASE_IMG_URL}${p.id}/${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'"><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.7rem; z-index: 2;">${p.nbLiensCommuns}</span></div>`;
+        
+        // Formatage de la liste des liens pour l'infobulle
+        let liensHtml = p.listeLiens.map(l => `• <span class="text-warning">${l}</span>`).join('<br>');
+        
+        // Injection du HTML avec la nouvelle structure d'infobulle
+        container.innerHTML += `
+            <div class="partner-container mx-2" onclick="window.location.href='detail.html?id=${p.id}'">
+                <div class="position-relative text-center" style="width: 60px; overflow: visible;">
+                    <img src="${BASE_IMG_URL}${p.id}/${p.id}.png" class="rounded" style="width: 120%; height: 60px; object-fit: cover; margin-left: -10%;" onerror="this.src='https://placehold.co/60x60?text=?'">
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.7rem; z-index: 2;">${p.nbLiensCommuns}</span>
+                </div>
+                
+                <div class="partner-tooltip">
+                    <strong class="text-white d-block border-bottom border-secondary pb-1 mb-1">${pNom}</strong>
+                    <div class="text-start mt-2" style="line-height: 1.4;">
+                        ${liensHtml}
+                    </div>
+                </div>
+            </div>
+        `;
     });
 }
 

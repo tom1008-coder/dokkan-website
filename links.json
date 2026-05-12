@@ -199,6 +199,23 @@
 "La puissance suprême": {
         "lv1": "ATT et DÉF +5 %, effet \"Perforation\" activé",
         "lv10": "ATT et DÉF +10 %, effet \"Perforation\" activé"
+    }, 
+
+
+    "Gourmet": {
+        "lv1": "Restauration de 5 % des PV",
+        "lv10": "Restauration de 7 % des PV, DÉF +7 %"
+    },
+
+    "Génie": {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT +15 %"
+    },
+
+
+    "Pouvoir écrasant" : {
+        "lv1": "ATT +10 %",
+        "lv10": "ATT et DÉF +10 %"
     }
 
 

@@ -160,49 +160,86 @@ body {
 }
 
 /* =========================================
-   6. BADGES LIENS & CATÉGORIES
+   6. BADGES LIENS & CATÉGORIES (Design In-Game)
    ========================================= */
 
-/* Liens (Pillule Orange 3D) */
+/* Container global du lien (Bordure verte par défaut) */
 .badge-link {
-    background: linear-gradient(135deg, #ff9900 0%, #ff5500 100%);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(to bottom, #2a2a2a, #111111);
+    border: 2px solid #5db64b; /* Vert classique Dokkan */
+    border-radius: 8px;
+    height: 42px;
+    min-width: 220px;
+    padding: 0 15px 0 4px; /* Espace pour le cercle à gauche */
+    margin: 5px;
     cursor: help;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
-    margin: 3px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .badge-link:hover {
-    transform: translateY(-2px) scale(1.05);
+    transform: translateY(-2px);
     filter: brightness(1.15);
-    box-shadow: 0 6px 15px rgba(255, 102, 0, 0.5);
 }
 
-/* STYLE NIVEAU 10 (MAX) */
-.badge-link.border-warning {
-    border: 2px solid #ffd700 !important;
-    background: linear-gradient(135deg, #ffaa00 0%, #ff7700 100%);
-    box-shadow: 
-        0 0 15px rgba(255, 215, 0, 0.5), /* Glow externe */
-        inset 0 0 10px rgba(255, 215, 0, 0.3); /* Glow interne */
-    color: #fff;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-    animation: gold-pulse 2s infinite alternate;
+/* Le cercle de niveau à gauche */
+.link-level-circle {
+    background-color: #222222;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+    flex-shrink: 0;
 }
 
-@keyframes gold-pulse {
-    from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-    to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+.link-level-circle .lv-txt {
+    font-size: 0.6rem;
+    font-weight: 900;
+    font-style: italic;
+    color: #ffffff;
+    margin-bottom: -2px; /* Rapproche le "Lv" du chiffre */
+}
+
+.link-level-circle .lv-num {
+    font-size: 1.1rem;
+    font-weight: 900;
+    font-style: italic;
+    color: #ffffff;
+}
+
+/* Le nom du lien centré */
+.link-name {
+    flex-grow: 1;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-shadow: 1px 1px 2px #000;
+    padding-left: 5px;
+}
+
+/* STYLE NIVEAU 10 (MAX) - Bordure et texte dorés */
+.badge-link.level-10 {
+    border-color: #ffcc00; /* Or Dokkan */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4), 0 0 8px rgba(255, 204, 0, 0.3);
+}
+
+.badge-link.level-10 .link-level-circle .lv-txt,
+.badge-link.level-10 .link-level-circle .lv-num {
+    color: #ffcc00; /* Texte en Or */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.badge-link.level-10:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 204, 0, 0.6);
 }
 
 /* Catégories (Liens Bleus) */
@@ -302,44 +339,94 @@ body {
 .bg-int { background-color: #6f42c1 !important; color: white !important; }
 
 /* Style pour les mots-clés de pourcentages (Tooltips) */
-        .dokkan-keyword {
-            color: #ffc107; /* Texte en doré */
-            border-bottom: 1px dashed #ffc107;
-            cursor: help;
-            position: relative;
-            font-weight: bold;
-            transition: color 0.2s ease;
-        }
-        
-        .dokkan-keyword:hover {
-            color: #fff;
-        }
+.dokkan-keyword {
+    color: #ffc107; /* Texte en doré */
+    border-bottom: 1px dashed #ffc107;
+    cursor: help;
+    position: relative;
+    font-weight: bold;
+    transition: color 0.2s ease;
+}
 
-        .dokkan-keyword:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 120%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #f8f9fa;
-            color: #212529;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 900;
-            white-space: nowrap;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-            z-index: 100;
-        }
-        
-        .dokkan-keyword:hover::before {
-            content: "";
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 6px;
-            border-style: solid;
-            border-color: #f8f9fa transparent transparent transparent;
-            z-index: 100;
-        }
+.dokkan-keyword:hover {
+    color: #fff;
+}
+
+.dokkan-keyword:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f8f9fa;
+    color: #212529;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 900;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    z-index: 100;
+}
+
+.dokkan-keyword:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #f8f9fa transparent transparent transparent;
+    z-index: 100;
+}
+
+
+/* =========================================
+   8. TOOLTIP DES MEILLEURS PARTENAIRES
+   ========================================= */
+.partner-container { 
+    position: relative; 
+    display: inline-block; 
+    cursor: pointer; 
+}
+
+.partner-tooltip {
+    visibility: hidden;
+    width: max-content;
+    min-width: 160px;
+    background-color: rgba(15, 15, 25, 0.95);
+    backdrop-filter: blur(5px);
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1050;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    font-size: 0.8rem;
+    border: 1px solid #dc3545; /* Bordure rouge */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    pointer-events: none;
+}
+
+.partner-tooltip::after {
+    content: ""; 
+    position: absolute; 
+    top: 100%; 
+    left: 50%; 
+    margin-left: -6px;
+    border-width: 6px; 
+    border-style: solid; 
+    border-color: #dc3545 transparent transparent transparent;
+}
+
+.partner-container:hover .partner-tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+}
+
